@@ -501,3 +501,15 @@
 
 **Next upgrade**
 - Add the badge-unlock sparkle burst.
+
+## 2026-11-17 - Cellar expanded to 75 rooms
+
+**Milestone:** Turned the Cellar into a longer 75-room floor.
+
+**What changed**
+- Expanded THE CELLAR from 10 rooms to 75 rooms.
+- Kept the staircase exit, return progress, obstacles, and Gloom Crawler encounters working with the new total.
+- Updated the Cellar instructions and Cellar Clear badge description.
+
+**Next upgrade**
+- Add more variety between Cellar rooms.

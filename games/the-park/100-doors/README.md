@@ -31,7 +31,7 @@ Open all 100 doors.
 - Rocket gives you a 5-second countdown and moves slower, giving you time to hide.
 - Rocket looks like a melted human skull with glowing magma cracks and lava drips.
 - Door 40 has a hidden staircase in the middle of the room. Press `E` to enter THE CELLAR.
-- THE CELLAR is a separate 10-door floor with dark rooms, jumpable crates, and low beams to slide under.
+- THE CELLAR is a separate 75-door floor with dark rooms, jumpable crates, and low beams to slide under.
 - Cellar Doors 3-8 contain the Gloom Crawler. Its eyes glow in the dark, and a bright warning appears before it charges.
 - Jump over the Gloom Crawler's charge. Touching it costs 15 HP.
 - Use the flashlight in THE CELLAR. Finishing it returns you to Main Door 40.
@@ -80,7 +80,7 @@ Open all 100 doors.
 - **Mountain Runner:** survive the five Garden ground-chase doors.
 - **Touched Grass:** finish all 50 doors in THE GARDEN.
 - **Cellar Explorer:** find the hidden stairs at Main Door 40.
-- **Cellar Clear:** escape all 10 rooms in THE CELLAR.
+- **Cellar Clear:** escape all 75 rooms in THE CELLAR.
 - **Office Worker:** enter THE OFFICE.
 - **Storage Explorer:** find a storage sideroom.
 - **Teleporter Finder:** collect the rare Teleporter.
