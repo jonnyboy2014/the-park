@@ -552,3 +552,15 @@
 
 **Next upgrade**
 - Add a small sparkle burst when a badge is unlocked.
+
+## 2026-11-17 - Flashlight beam repair
+
+**Milestone:** Fixed the flashlight in the Main Floor and THE CELLAR.
+
+**What changed**
+- Moved the darkness and beam cutout onto a separate canvas so the room is not erased inside the light.
+- Added a full-strength cutout and a soft warm glow around the player.
+- Verified clear beam pixels in both Main Door 40 and Cellar Door 1.
+
+**Next upgrade**
+- Soften the edges of the flashlight beam.

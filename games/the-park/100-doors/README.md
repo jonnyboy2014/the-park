@@ -18,6 +18,7 @@ Open all 100 doors.
 - Door 75 brings back the Door 25 monster with faster charges, moving spikes, and extra beams.
 - The boss uses image ID `204734852`, with a hand-drawn fallback if the image cannot load.
 - Some later rooms are dark, so use the flashlight beam to find the key.
+- The flashlight reveals a clear cone around the player in dark Main Floor rooms and throughout THE CELLAR.
 - Every group of 10 doors has its own room theme and background details.
 - Calm rooms contain pixel furniture such as sofas, tables, shelves, beds, and desks.
 - The player is a pixel adventurer with idle, walk, jump, and crouch animations.

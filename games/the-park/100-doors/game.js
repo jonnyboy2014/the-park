@@ -5,6 +5,10 @@ const pixelCanvas = document.createElement('canvas');
 pixelCanvas.width = canvas.width / pixelScale;
 pixelCanvas.height = canvas.height / pixelScale;
 const context = pixelCanvas.getContext('2d');
+const lightingCanvas = document.createElement('canvas');
+lightingCanvas.width = canvas.width;
+lightingCanvas.height = canvas.height;
+const lightingContext = lightingCanvas.getContext('2d');
 
 const totalDoors = 100;
 const monsterStartDoor = 26;
@@ -2542,10 +2546,6 @@ function drawShadowPlayer() {
 function drawFlashlight() {
   if (!roomIsDark || !hasFlashlight) return;
 
-  context.globalCompositeOperation = 'source-over';
-  context.fillStyle = 'rgba(0,0,0,.82)';
-  context.fillRect(0, 0, canvas.width, canvas.height);
-
   const startX = player.x + player.width / 2;
   const startY = player.y + player.height / 2;
   const beamLength = 280;
@@ -2554,20 +2554,39 @@ function drawFlashlight() {
   const endTopY = startY - beamSpread / 2;
   const endBottomY = startY + beamSpread / 2;
 
-  context.globalCompositeOperation = 'destination-out';
-  context.fillStyle = 'rgba(255,255,255,1)';
+  lightingContext.globalCompositeOperation = 'source-over';
+  lightingContext.clearRect(0, 0, canvas.width, canvas.height);
+  lightingContext.fillStyle = 'rgba(0,0,0,.82)';
+  lightingContext.fillRect(0, 0, canvas.width, canvas.height);
+  lightingContext.globalCompositeOperation = 'destination-out';
+  lightingContext.fillStyle = 'rgba(255,255,255,1)';
+  lightingContext.beginPath();
+  lightingContext.arc(startX, startY, 42, 0, Math.PI * 2);
+  lightingContext.fill();
+  lightingContext.beginPath();
+  lightingContext.moveTo(startX, startY);
+  lightingContext.lineTo(endX, endTopY);
+  lightingContext.lineTo(endX, endBottomY);
+  lightingContext.closePath();
+  lightingContext.fill();
+  lightingContext.globalCompositeOperation = 'source-over';
+
+  context.drawImage(lightingCanvas, 0, 0);
+
+  const glow = context.createRadialGradient(startX, startY, 0, startX, startY, beamLength);
+  glow.addColorStop(0, 'rgba(255,241,178,.2)');
+  glow.addColorStop(.65, 'rgba(255,241,178,.07)');
+  glow.addColorStop(1, 'rgba(255,241,178,0)');
+  context.fillStyle = glow;
   context.beginPath();
   context.arc(startX, startY, 42, 0, Math.PI * 2);
   context.fill();
-
   context.beginPath();
   context.moveTo(startX, startY);
   context.lineTo(endX, endTopY);
   context.lineTo(endX, endBottomY);
   context.closePath();
   context.fill();
-
-  context.globalCompositeOperation = 'source-over';
 }
 
 function drawGardenRain() {
