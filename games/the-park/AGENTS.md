@@ -1,8 +1,8 @@
 # The Park Project Instructions
 
 ## Project Layout
+- Main active game: `games/the-park/100-doors/`
 - Original 3D Park prototype: `games/the-park/`
-- Main 100 Doors game: `games/the-park/100-doors/`
 - Keep Park assets, scripts, and docs inside this project folder.
 - Do not mix in browser-assistant, tools, caches, dependencies, or unrelated apps.
 
@@ -16,5 +16,5 @@
 ## Repository Standards
 - Remote: `https://github.com/jonnyboy2014/the-park.git`
 - Never commit secrets, dependencies, tools, or generated caches.
-- Push only after the local game works.
+- Commit each logical checkpoint, then push it after the local game works.
 - Follow the root `LICENSE`.

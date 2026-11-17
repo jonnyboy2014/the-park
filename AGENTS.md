@@ -18,16 +18,17 @@ Help Jonas design and build cool games in small, playable steps. Keep code clear
 - Avoid very large patches because they can trigger tool limits.
 
 ## Workspace
-- Each game lives in `games/<game-name>/`.
+- The active main game is 100 Doors at `games/the-park/100-doors/`.
 - Every game has a short `README.md` explaining how to play and what to change.
 - Use `GAME_LOG.md` as studio memory: what changed, what worked, and what to improve next.
+- Other prototypes are archived experiments unless Jonas asks to work on them.
 
 ## Repository Standards
 - The shared remote is `https://github.com/jonnyboy2014/the-park.git`.
 - Keep secrets, dependencies, caches, and downloaded tools out of Git.
-- Make small focused commits with clear names.
+- Commit at every logical checkpoint with a clear name instead of saving work for one big final commit.
 - Validate before pushing: check JavaScript, start the local server, and test the changed screen.
-- Push after each validated milestone.
+- Push each validated checkpoint so the remote stays in sync.
 - Respect `LICENSE`: people may download and try the game, but may not copy, redistribute, modify, sell, or reuse the code or art.
 
 ## Iteration Loop

@@ -2,7 +2,11 @@
 
 A simple workspace for designing and building games.
 
-## Play The Park 2D
+## Main Game
+
+The main game being worked on is **100 Doors**, located in `games/the-park/100-doors/`.
+
+## Play 100 Doors
 
 On Windows, double-click `Play-The-Park.bat`.
 
@@ -13,17 +17,20 @@ npm install
 npm start
 ```
 
-Then open `http://127.0.0.1:3000/`.
+Then open `http://127.0.0.1:3000/doors/`.
 
-The original 3D prototype is at `http://127.0.0.1:3000/3d/`.
+The older prototypes are:
+
+- The Park 2D: `http://127.0.0.1:3000/2d/`
+- The Park 3D: `http://127.0.0.1:3000/3d/`
 
 ## Folder Map
 
 - `AGENTS.md` - instructions for coding agents.
 - `GAME_LOG.md` - studio memory and next upgrades.
-- `games/the-park-2d/` - main top-down 2D prototype.
+- `games/the-park/100-doors/` - main 100 Doors side-view game.
+- `games/the-park-2d/` - older top-down 2D prototype.
 - `games/the-park/` - original 3D prototype.
-- `games/the-park/100-doors/` - 100 Doors side-view prototype.
 
 ## Make Another Game
 
