@@ -489,6 +489,19 @@
 **Next upgrade**
 - Add a small sparkle burst when a badge is unlocked.
 
+## 2026-11-17 - Player-matched badge poses
+
+**Milestone:** Made badge characters look like the real playable adventurer.
+
+**What changed**
+- Replaced the simple Chase Complete stick figure with a running pixel adventurer.
+- Added matching sliding and jumping poses to Slide Legend and Jump Machine.
+- Reused the real player's brown hair, blue jacket, dark trousers, brown boots, and brown backpack.
+- Checked all three poses inside their illustrated badge scenes.
+
+**Next upgrade**
+- Add a small sparkle burst when a badge is unlocked.
+
 ## 2026-11-17 - Gloom Crawler in the Cellar
 
 **Milestone:** Added a unique Cellar monster with a fair, readable attack.

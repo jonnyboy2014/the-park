@@ -67,6 +67,7 @@ Open all 100 doors.
 - Earned badges light up on colorful plaques. Missing badges stay gray and locked.
 - Every badge has an illustrated mini-scene with a gradient background, foreground details, colorful artwork, and bright line work.
 - Larger picture windows also have ribbon tails, metallic rings, and engraved name plaques.
+- Chase Complete, Slide Legend, and Jump Machine show the playable adventurer with the same brown hair, blue jacket, dark trousers, brown boots, and backpack.
 - Difficult badges have bright gold borders and gold medal rings.
 - Scroll the shelves with your mouse wheel. Press **BACK** to return to the lobby.
 - **Game Starter:** enter the game for the first time.
