@@ -2,6 +2,7 @@
 
 ## Mission
 Help Jonas design and build cool games in small, playable steps. Keep code clear, kid-friendly, and easy to change.
+- Jonas is 12. Keep explanations friendly, simple, and encouraging without talking down to him.
 
 ## Windows Environment
 - This workspace runs on Windows.
