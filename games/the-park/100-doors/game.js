@@ -154,6 +154,41 @@ const badgeIcons = {
   trophy: '<path d="M14 6h20v12c0 9-4 14-10 14s-10-5-10-14ZM24 32v8m-9 3h18M14 10H6v5c0 6 4 9 10 9m18-14h8v5c0 6-4 9-10 9"/>'
 };
 
+const badgeIconDetails = {
+  door: '<rect x="13" y="7" width="22" height="34" rx="2" fill="#8f4e2c"/><rect x="17" y="11" width="14" height="10" rx="1" fill="#d99b52"/><rect x="17" y="25" width="14" height="11" rx="1" fill="#c47b3d"/>',
+  key: '<circle cx="16" cy="18" r="6" fill="#ffe779"/><path d="M22 24 37 39" fill="none" stroke="#ffe779" stroke-width="5"/><circle cx="16" cy="18" r="2.5" fill="#fff7c2"/>',
+  run: '<circle cx="28" cy="8" r="3.5" fill="#ffd0a3"/><path d="m22 17 7 5-5 9-8-6Z" fill="#58b7e8"/><path d="m18 31 7 3-3 8-6-1Z" fill="#394f8f"/>',
+  boot: '<path d="M15 7v20l-7 6v8h30v-6l-13-8V7Z" fill="#5cc9e8"/><rect x="17" y="12" width="8" height="5" rx="1" fill="#ffd84d"/><path d="M9 34h28v6H9Z" fill="#337a9b"/>',
+  sword: '<path d="M13 34 35 12l3-5 1 1-4 6-22 22Z" fill="#d8f7ff"/><path d="m9 31 8 8-3 3-8-8Z" fill="#ffd84d"/>',
+  skull: '<path d="M10 23a14 14 0 0 1 28 0c0 7-4 9-7 11v7H17v-7c-3-2-7-4-7-11Z" fill="#f1e6c8"/><circle cx="18" cy="23" r="3" fill="#37424b"/><circle cx="30" cy="23" r="3" fill="#37424b"/><path d="m24 29-3 5h6Z" fill="#67707a"/>',
+  milkshake: '<path d="M13 15h22l-3 27H16Z" fill="#9be7ff"/><path d="M16 20h16l-2 18H18Z" fill="#f7a8c4"/><circle cx="19" cy="14" r="5" fill="#fff3d4"/><circle cx="27" cy="13" r="6" fill="#fff3d4"/>',
+  rocket: '<path d="M24 5c9 6 12 16 8 27l-8 7-8-7c-4-11-1-21 8-27Z" fill="#f4f0df"/><circle cx="24" cy="20" r="3.5" fill="#9be7ff"/><path d="m16 26-8 5 8 3Zm16 0 8 5-8 3Z" fill="#ef5b5b"/><path d="m20 39-2 6 6-5 6 5-2-6Z" fill="#ff9f43"/>',
+  clock: '<circle cx="24" cy="25" r="15" fill="#e3aa32"/><circle cx="24" cy="25" r="12" fill="#fffdf0"/><rect x="17" y="3" width="14" height="4" rx="2" fill="#9be7ff"/>',
+  hundred: '<rect x="6" y="6" width="36" height="36" rx="4" fill="#343d78"/><rect x="10" y="10" width="28" height="28" rx="2" fill="#4f5ca3"/><path d="m11 7 2 3 3 1-3 2-1 3-1-3-3-2 3-1Zm26 26 2 3 3 1-3 2-1 3-1-3-3-2 3-1Z" fill="#ffe779"/>',
+  tree: '<path d="M20 26h8v16h-8Z" fill="#8b5a2b"/><path d="M24 5 12 20h7L9 31h30l-10-11h7Z" fill="#4e9f50"/><path d="M24 8 16 19h6l-7 8h10Z" fill="#79c76a"/>',
+  submarine: '<path d="M6 27c0-7 8-11 19-11s19 4 19 11-8 10-19 10S6 34 6 27Z" fill="#f2c84b"/><path d="M20 16V9h10v7Z" fill="#e0a936"/><circle cx="19" cy="26" r="2.5" fill="#9be7ff"/><circle cx="31" cy="26" r="2.5" fill="#9be7ff"/><path d="M11 32c8 4 21 4 28-1-5 5-23 8-28 1Z" fill="#d89d28"/>',
+  mountain: '<path d="m4 39 14-25 8 12 6-9 12 22Z" fill="#718397"/><path d="m12 23 6-9 5 8-5-3-3 4Zm15 3 5-9 7 13-6-5-3 4Z" fill="#f4f0df"/><path d="M4 36c10-4 26 3 40-1v6H4Z" fill="#67a35b"/>',
+  flower: '<circle cx="24" cy="10" r="5.5" fill="#f7a8c4"/><circle cx="34" cy="20" r="5.5" fill="#ff8fb3"/><circle cx="24" cy="30" r="5.5" fill="#f7a8c4"/><circle cx="14" cy="20" r="5.5" fill="#ff8fb3"/><circle cx="24" cy="20" r="4.5" fill="#ffe779"/><path d="m16 34 8 4-8 3Zm16 0-8 4 8 3Z" fill="#67b66b"/>',
+  stairsDown: '<path d="M5 12h9v9h9v9h9v9H5Z" fill="#617d8c"/><path d="m32 31 3 5 3-5 3 5 3-5Z" fill="#9be7ff"/>',
+  stairsUp: '<path d="M5 36h9v-9h9v-9h9V8h9v34H5Z" fill="#617d8c"/><path d="m29 14 6-6 6 6-6-2Z" fill="#ffd84d"/>',
+  desk: '<path d="M6 20h36v8H6Z" fill="#a1663f"/><path d="M15 20V9h18v11Z" fill="#37424b"/><rect x="18" y="11" width="12" height="7" fill="#9be7ff"/><path d="M18 28h12v7H18Z" fill="#80502f"/>',
+  box: '<path d="m7 15 17-9 17 9v21l-17 8-17-8Z" fill="#c99558"/><path d="m7 15 17 9 17-9-17 5Z" fill="#e4b873"/><path d="m20 10 8-4 8 5-8 4Z" fill="#ffe0a0"/>',
+  teleport: '<circle cx="24" cy="24" r="8" fill="#8750a5"/><circle cx="24" cy="24" r="4" fill="#9be7ff"/><circle cx="8" cy="24" r="2" fill="#9be7ff"/><circle cx="40" cy="24" r="2" fill="#9be7ff"/>',
+  printer: '<path d="M7 18h34v16h-6v8H13v-8H7Z" fill="#b8c4cc"/><path d="M13 6h22v12H13Z" fill="#fff8df"/><path d="M16 30h16v11H16Z" fill="#fff8df"/><rect x="32" y="21" width="5" height="4" rx="1" fill="#67d06b"/>',
+  hundredFifty: '<rect x="6" y="6" width="36" height="36" rx="4" fill="#24556f"/><rect x="10" y="10" width="28" height="28" rx="2" fill="#357aa0"/><path d="m11 7 2 3 3 1-3 2-1 3-1-3-3-2 3-1Zm26 26 2 3 3 1-3 2-1 3-1-3-3-2 3-1Z" fill="#9be7ff"/>',
+  slide: '<circle cx="12" cy="14" r="4" fill="#ffd0a3"/><path d="m9 21 13 4 11-10 4 4-13 12-16-5Z" fill="#58b7e8"/><path d="M5 35h38v5H5Z" fill="#8750a5"/>',
+  jump: '<path d="M8 38h32v4H8Z" fill="#67d06b"/><path d="m18 18 6-9 6 9-6-4Z" fill="#b8f7c1"/><circle cx="11" cy="27" r="3" fill="#ffd0a3"/>',
+  closet: '<rect x="10" y="5" width="28" height="37" rx="1" fill="#9a6038"/><rect x="13" y="9" width="9" height="13" fill="#c58a4c"/><rect x="26" y="9" width="9" height="13" fill="#c58a4c"/><rect x="13" y="26" width="9" height="12" fill="#b87942"/><rect x="26" y="26" width="9" height="12" fill="#b87942"/>',
+  lightning: '<path d="m27 4-15 23h11l-3 17 16-24H25Z" fill="#ffe44d"/><path d="m29 8-9 15h7l-3 10 9-14h-8Z" fill="#fff7c2"/>',
+  crown: '<path d="m7 15 9 8 8-14 8 14 9-8-4 24H11Z" fill="#ffd84d"/><path d="M12 32h24v7H12Z" fill="#e4a92c"/><circle cx="24" cy="26" r="3" fill="#ef5b6c"/><circle cx="15" cy="28" r="2" fill="#9be7ff"/><circle cx="33" cy="28" r="2" fill="#9be7ff"/>',
+  heart: '<path d="M24 40S7 30 7 18c0-9 12-12 17-4 5-8 17-5 17 4 0 12-17 22-17 22Z" fill="#ef5b6c"/><path d="M12 17c1-5 6-6 9-3-6 0-7 4-9 3Z" fill="#ff9daf"/>',
+  paper: '<path d="M12 5h17l8 8v30H12Z" fill="#fff8df"/><path d="M29 5v9h8Z" fill="#b8d8e8"/><path d="M17 22h14v3H17Zm0 7h14v3H17Zm0 7h9v3h-9Z" fill="#68a9c7"/>',
+  rain: '<path d="M12 28a8 8 0 0 1 2-16 11 11 0 0 1 21 3 6 6 0 0 1 1 13Z" fill="#8ca7b8"/><path d="M15 15c5-7 14-5 17 1-7-3-12 1-17-1Z" fill="#c2d5df"/><path d="m15 34-3 7h4l2-7Zm11 0-3 7h4l2-7Zm11 0-3 7h4l2-7Z" fill="#9be7ff"/>',
+  medal: '<circle cx="24" cy="28" r="11" fill="#ffd84d"/><circle cx="24" cy="28" r="7" fill="#fff0a6"/><path d="m16 18-5-14 9 5 3 10Zm16 0 5-14-9 5-3 10Z" fill="#58b7e8"/>',
+  badges: '<circle cx="18" cy="20" r="9" fill="#ffd84d"/><circle cx="31" cy="28" r="9" fill="#9be7ff"/><path d="m12 29-2 14 8-5 7 4-2-13Z" fill="#ef5b6c"/><path d="m35 37 2 7 5-4 5 2-4-9Z" fill="#8750a5"/>',
+  trophy: '<path d="M14 6h20v12c0 9-4 14-10 14s-10-5-10-14Z" fill="#ffd84d"/><path d="M18 9h6v13c0 3 2 5 4 6-7 1-10-4-10-10Z" fill="#fff0a6"/><path d="M15 39h18v4H15Z" fill="#9a6038"/>'
+};
+
 let currentDoor = 1;
 let mainFloorResumeDoor = 1;
 let cutsceneActive = false;
@@ -234,7 +269,7 @@ function updateBadgeUi() {
     const state = `badge${earned ? ' earned' : ''}${badge.difficult ? ' difficult' : ''}`;
     const status = earned ? 'EARNED' : 'LOCKED';
     const description = `${badge.difficult ? 'Difficult badge: ' : ''}${badge.popup || badge.name}`;
-    return `<div class="${state}" data-section="${badge.section}" title="${description}"><span class="badge-medal" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${badgeIcons[badge.icon]}</svg></span><span class="badge-name">${badge.name}</span><span class="badge-status">${status}</span></div>`;
+    return `<div class="${state}" data-section="${badge.section}" title="${description}"><span class="badge-ribbon" aria-hidden="true"></span><span class="badge-medal" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><g stroke="none">${badgeIconDetails[badge.icon]}</g>${badgeIcons[badge.icon]}<g fill="#fff8d0" stroke="none"><circle cx="7" cy="9" r="1.3"/><circle cx="41" cy="36" r="1.2"/><path d="m39 6 1.2 2.8L43 10l-2.8 1.2L39 14l-1.2-2.8L35 10l2.8-1.2Z"/></g></svg></span><span class="badge-name">${badge.name}</span><span class="badge-status">${status}</span></div>`;
   };
   const renderSection = (sectionId, title) => {
     const sectionBadges = badges.filter(badge => badge.section === sectionId);

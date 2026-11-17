@@ -475,3 +475,16 @@
 
 **Next upgrade**
 - Add a short shine animation when a new badge is earned.
+
+## 2026-11-17 - Detailed badge medals
+
+**Milestone:** Upgraded the simple badge icons into detailed collectible medals.
+
+**What changed**
+- Layered colorful shapes and highlights underneath every badge's line art.
+- Added ribbon tails, metallic rings, engraved name plaques, and corner rivets.
+- Added diagonal plaque texture and brighter gold detail on difficult badges.
+- Enlarged the artwork and checked every shelf at desktop and phone sizes.
+
+**Next upgrade**
+- Add a small sparkle burst when a badge is unlocked.

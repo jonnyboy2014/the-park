@@ -320,12 +320,12 @@ button:hover { background: #7ee583; }
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  height: 166px;
+  height: 176px;
   min-width: 0;
   padding: 11px 8px 9px;
   border: 2px solid var(--badge-dark);
   border-radius: 5px 5px 2px 2px;
-  background: linear-gradient(90deg, var(--badge-dark), var(--badge-color) 12%, var(--badge-color) 86%, var(--badge-dark));
+  background: repeating-linear-gradient(135deg, rgba(255,255,255,.045) 0 2px, transparent 2px 12px), linear-gradient(90deg, var(--badge-dark), var(--badge-color) 12%, var(--badge-color) 86%, var(--badge-dark));
   color: #fff7db;
   font-size: 12px;
   font-weight: 800;
@@ -354,6 +354,8 @@ button:hover { background: #7ee583; }
   inset: 5px;
   border: 1px solid rgba(255,235,177,.28);
   border-radius: 2px;
+  background: radial-gradient(circle at 3px 3px, #fff0a6 0 1.5px, transparent 2px), radial-gradient(circle at calc(100% - 3px) 3px, #fff0a6 0 1.5px, transparent 2px), radial-gradient(circle at 3px calc(100% - 3px), #fff0a6 0 1.5px, transparent 2px), radial-gradient(circle at calc(100% - 3px) calc(100% - 3px), #fff0a6 0 1.5px, transparent 2px);
+  box-shadow: inset 0 0 10px rgba(0,0,0,.16);
   pointer-events: none;
 }
 
@@ -389,16 +391,17 @@ button:hover { background: #7ee583; }
 
 .badge-medal {
   position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 52px;
-  height: 52px;
+  width: 60px;
+  height: 60px;
   margin: 3px 0 2px;
   border: 3px solid #2b2118;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #67707a, #37424b 62%, #20282e);
-  box-shadow: 0 3px 8px rgba(0,0,0,.4);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.18), inset 0 -6px 10px rgba(0,0,0,.28), 0 4px 9px rgba(0,0,0,.42);
 }
 
 .badge-medal::before {
@@ -414,16 +417,40 @@ button:hover { background: #7ee583; }
 }
 
 .badge-medal svg {
-  width: 32px;
-  height: 32px;
+  position: relative;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
   color: #c2c9ce;
   filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
 }
 
+.badge-ribbon {
+  position: absolute;
+  z-index: 0;
+  top: 70px;
+  left: 50%;
+  width: 66px;
+  height: 29px;
+  background: linear-gradient(90deg, var(--badge-dark), var(--badge-color) 50%, var(--badge-dark));
+  clip-path: polygon(0 0, 100% 0, 87% 100%, 50% 76%, 13% 100%);
+  transform: translateX(-50%);
+  filter: drop-shadow(0 3px 2px rgba(0,0,0,.28));
+}
+
 .badge-name {
+  position: relative;
+  z-index: 2;
   display: grid;
   place-items: center;
-  min-height: 30px;
+  width: 100%;
+  min-height: 32px;
+  margin-top: 7px;
+  padding: 3px 5px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 3px;
+  background: rgba(0,0,0,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
   text-align: center;
   line-height: 1.15;
 }
@@ -451,8 +478,8 @@ button:hover { background: #7ee583; }
 
 .badge.earned .badge-medal {
   border-color: #4c3608;
-  background: radial-gradient(circle at 32% 30%, #fff8d0, #ffd84d 46%, #b57f00);
-  box-shadow: 0 0 18px rgba(255,216,77,.45), inset 0 0 8px rgba(255,255,255,.25);
+  background: radial-gradient(circle at 30% 25%, #fffde5 0 8%, #fff0a0 18%, #ffd84d 45%, #d69a1c 70%, #8b5a16 100%);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.34), inset 0 -6px 10px rgba(92,52,4,.28), 0 0 20px rgba(255,216,77,.48), 0 4px 9px rgba(0,0,0,.35);
 }
 
 .badge.earned .badge-medal svg {
@@ -490,6 +517,15 @@ button:hover { background: #7ee583; }
   border-color: #ffd84d;
 }
 
+.badge.difficult .badge-medal {
+  border-color: #7c4d08;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.28), 0 0 0 2px #ffd84d, 0 0 20px rgba(255,216,77,.48), 0 4px 9px rgba(0,0,0,.35);
+}
+
+.badge.difficult .badge-ribbon {
+  background: linear-gradient(90deg, #8b5a16, #ffd84d 50%, #8b5a16);
+}
+
 #back-button {
   background: #ffd84d;
   color: #4a2a0d;
@@ -513,19 +549,31 @@ button:hover { background: #7ee583; }
 
   .badge {
     gap: 4px;
-    height: 148px;
+    height: 158px;
     padding: 9px 4px 7px;
     font-size: 10px;
   }
 
   .badge-medal {
-    width: 42px;
-    height: 42px;
+    width: 46px;
+    height: 46px;
   }
 
   .badge-medal svg {
-    width: 25px;
-    height: 25px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .badge-ribbon {
+    top: 59px;
+    width: 52px;
+    height: 24px;
+  }
+
+  .badge-name {
+    min-height: 28px;
+    margin-top: 6px;
+    padding: 2px 3px;
   }
 
   .badge-status {
