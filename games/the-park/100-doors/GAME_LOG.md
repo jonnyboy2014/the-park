@@ -605,3 +605,17 @@
 
 **Next upgrade**
 - Add a soft sound when the RIFT stores or returns an item.
+
+## 2026-11-17 - Door 99 item test room
+
+**Milestone:** Added a fast lobby shortcut for testing every RIFT item.
+
+**What changed**
+- Added a purple DOOR 99 button that starts a fresh run at Door 99.
+- Stocked the calm, unlocked test room with a Milkshake, Rare Backpack, and Teleporter.
+- Added labeled wooden display tables for all three items.
+- Reset the items on each visit so every RIFT test can be repeated.
+- Verified the lobby shortcut, every pickup, and all three RIFT round-trips on desktop and phone layouts.
+
+**Next upgrade**
+- Add a soft sound when the RIFT stores or returns an item.

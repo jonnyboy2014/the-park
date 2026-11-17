@@ -61,6 +61,8 @@ Open all 100 doors.
 - Collect the Teleporter with `E`. Select it in the hotbar and press `Q` to warp straight to Office Door 150.
 - The rare Backpack has a 1.3% chance to appear in calm rooms, either on the ground or on a small table.
 - Door 100 is a special starry room with a glowing blue RIFT.
+- Press **DOOR 99** in the lobby for a fresh test run with a Milkshake, Rare Backpack, and Teleporter on labeled tables.
+- Door 99 is calm and unlocked, so you can grab an item and walk right to test the RIFT.
 - Stand near the RIFT and press `E` to store your selected hotbar item or stack. Press `E` again to take it back out.
 - The RIFT holds one item or stack at a time and remembers it in browser storage after a refresh or a new run.
 - If your hotbar is full, make room before taking the item out. It stays safe inside the RIFT.

@@ -103,6 +103,16 @@ button:hover { background: #7ee583; }
 
 #floors-button:hover { background: #b8f0ff; }
 
+#door-99-button {
+  display: block;
+  width: min(260px, 100%);
+  margin: 12px auto 0;
+  background: #8b5cf6;
+  color: #fff;
+}
+
+#door-99-button:hover { background: #a78bfa; }
+
 .lobby-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
