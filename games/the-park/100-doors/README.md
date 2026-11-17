@@ -32,6 +32,8 @@ Open all 100 doors.
 - Rocket looks like a melted human skull with glowing magma cracks and lava drips.
 - Door 40 has a hidden staircase in the middle of the room. Press `E` to enter THE CELLAR.
 - THE CELLAR is a separate 10-door floor with dark rooms, jumpable crates, and low beams to slide under.
+- Cellar Doors 3-8 contain the Gloom Crawler. Its eyes glow in the dark, and a bright warning appears before it charges.
+- Jump over the Gloom Crawler's charge. Touching it costs 15 HP.
 - Use the flashlight in THE CELLAR. Finishing it returns you to Main Door 40.
 - Door 65 has an optional garden door in the middle of the room. Press `E` to enter THE GARDEN.
 - Press **FLOORS** in the lobby to open the floor picker. Press **THE GARDEN** to teleport straight to Garden Door 1.

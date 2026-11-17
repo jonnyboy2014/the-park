@@ -48,6 +48,7 @@ let mountainChaseActive = false;
 let officeSideRoomActive = false;
 let officeSideRoomReturnDoor = 1;
 let officeChaseActive = false;
+let cellarMonsterActive = false;
 
 const lobby = document.querySelector('#lobby');
 const startButton = document.querySelector('#start-button');
@@ -667,6 +668,16 @@ const cellarExit = {
   kind: 'cellar-exit'
 };
 
+const cellarMonster = {
+  x: 720,
+  y: 510,
+  width: 64,
+  height: 50,
+  direction: -1,
+  state: 'patrol',
+  timer: 1.6
+};
+
 const officeMonster = {
   x: -140,
   y: 450,
@@ -796,6 +807,11 @@ function startRoom() {
     && !officeSideRoomActive
     && currentDoor >= officeChaseStartDoor
     && currentDoor <= officeChaseEndDoor;
+  cellarMonsterActive = isCellarFloor && currentDoor >= 3 && currentDoor <= 8;
+  cellarMonster.x = 720;
+  cellarMonster.direction = -1;
+  cellarMonster.state = 'patrol';
+  cellarMonster.timer = 1.6;
   const isChaseActive = monsterActive || gardenChaseActive || officeChaseActive;
   if (isChaseActive && !wasChaseActive) activeChaseDamageFree = true;
   officeMonster.x = -140;
@@ -972,7 +988,9 @@ function startRoom() {
   }
 
   if (isCellarFloor) {
-    showMessage(`THE CELLAR · Dark room ${currentDoor}/${totalCellarDoors}`);
+    showMessage(cellarMonsterActive
+      ? `THE CELLAR · Gloom Crawler ahead! Jump when it charges.`
+      : `THE CELLAR · Dark room ${currentDoor}/${totalCellarDoors}`);
   }
 
   if (isMainFloor && isRewardRoom && !rewardClaimed) {
@@ -1012,6 +1030,8 @@ function updateHud() {
     doorNumber.textContent = `THE CELLAR · ${currentDoor}/${totalCellarDoors}`;
     modeText.textContent = currentDoor === totalCellarDoors
       ? 'Cellar exit · climb the stairs'
+      : cellarMonsterActive
+      ? 'Gloom Crawler · jump over its charge'
       : 'Dark cellar · use the flashlight';
     return;
   }
@@ -1556,6 +1576,43 @@ function updateOfficeMonster(delta) {
   officeMonster.x += officeMonster.speed * delta;
   if (rect(playerBox(), officeMonster)) {
     damagePlayer(20, 'The printing machine caught you!');
+  }
+}
+
+function updateCellarMonster(delta) {
+  if (!cellarMonsterActive) return;
+
+  const monster = cellarMonster;
+  monster.timer -= delta;
+
+  if (monster.state === 'patrol') {
+    monster.x += monster.direction * 65 * delta;
+    if (monster.x <= 140 || monster.x >= 760) {
+      monster.x = Math.max(140, Math.min(760, monster.x));
+      monster.direction *= -1;
+    }
+    if (monster.timer <= 0) {
+      monster.state = 'warning';
+      monster.timer = .65;
+      showMessage('Gloom Crawler is about to charge! Jump!');
+    }
+  } else if (monster.state === 'warning') {
+    if (monster.timer <= 0) {
+      monster.state = 'charge';
+      monster.timer = .85;
+      monster.direction = player.x + player.width / 2 < monster.x + monster.width / 2 ? -1 : 1;
+    }
+  } else {
+    monster.x += monster.direction * 310 * delta;
+    if (monster.timer <= 0 || monster.x <= 100 || monster.x >= 800) {
+      monster.x = Math.max(100, Math.min(800, monster.x));
+      monster.state = 'patrol';
+      monster.timer = 1.8;
+    }
+  }
+
+  if (!player.hidden && rect(playerBox(), monster)) {
+    damagePlayer(15, 'The Gloom Crawler hit you! Jump over its charge!');
   }
 }
 
@@ -2645,6 +2702,71 @@ function drawMonster() {
   drawRect(monster.x + 20, monster.y + 14, 8, 8, '#ffdc4a');
 }
 
+function drawCellarMonster() {
+  if (!cellarMonsterActive) return;
+
+  const monster = cellarMonster;
+  const shake = monster.state === 'warning' ? Math.sin(performance.now() / 45) * 2 : 0;
+  const bob = Math.sin(performance.now() / 180) * 1.5;
+  const x = monster.x + shake;
+  const y = monster.y + bob;
+  const headX = monster.direction < 0 ? x - 7 : x + 43;
+  const eyeColor = monster.state === 'charge' ? '#ff4d5e' : '#7ee7ff';
+
+  drawRect(x + 3, monster.y + 43, 60, 8, 'rgba(0,0,0,.35)');
+  for (let leg = 0; leg < 3; leg++) {
+    drawOutlinedRect(x + 8 + leg * 18, y + 34, 10, 15, '#251b38', '#0c0912');
+  }
+  drawRect(monster.direction < 0 ? x + 54 : x - 7, y + 23, 17, 8, '#3d2b59');
+  drawOutlinedRect(x + 4, y + 10, 56, 30, '#3d2b59', '#120f1c');
+  for (let spike = 0; spike < 4; spike++) {
+    drawRect(x + 12 + spike * 12, y + 4, 7, 8, spike % 2 === 0 ? '#8c68ad' : '#6e4b91');
+  }
+  drawOutlinedRect(headX, y + 17, 28, 25, '#573b78', '#120f1c');
+  drawRect(headX + 5, y + 23, 6, 6, eyeColor);
+  drawRect(headX + 17, y + 23, 6, 6, eyeColor);
+  drawRect(headX + 8, y + 34, 13, 4, '#1a1025');
+  drawRect(headX + 10, y + 34, 3, 4, '#f4f0df');
+  drawRect(headX + 16, y + 34, 3, 4, '#f4f0df');
+
+  if (monster.state === 'warning') {
+    const blink = Math.floor(performance.now() / 120) % 2 === 0;
+    drawRect(x + 28, monster.y - 22, 9, 17, blink ? '#ff4d5e' : '#ffd84d');
+    drawRect(x + 28, monster.y - 1, 9, 7, blink ? '#ff4d5e' : '#ffd84d');
+  }
+
+  if (monster.state === 'charge') {
+    const trailX = monster.direction < 0 ? x + 70 : x - 30;
+    drawRect(trailX, y + 18, 24, 4, 'rgba(126,231,255,.45)');
+    drawRect(trailX + 8, y + 30, 18, 3, 'rgba(126,231,255,.25)');
+  }
+}
+
+function drawCellarMonsterGlow() {
+  if (!cellarMonsterActive) return;
+
+  const monster = cellarMonster;
+  const shake = monster.state === 'warning' ? Math.sin(performance.now() / 45) * 2 : 0;
+  const bob = Math.sin(performance.now() / 180) * 1.5;
+  const x = monster.x + shake;
+  const y = monster.y + bob;
+  const headX = monster.direction < 0 ? x - 7 : x + 43;
+  const eyeColor = monster.state === 'charge' ? '#ff4d5e' : '#7ee7ff';
+
+  context.save();
+  context.shadowColor = eyeColor;
+  context.shadowBlur = 14;
+  drawRect(headX + 5, y + 23, 6, 6, eyeColor);
+  drawRect(headX + 17, y + 23, 6, 6, eyeColor);
+  if (monster.state === 'warning') {
+    const warningColor = Math.floor(performance.now() / 120) % 2 === 0 ? '#ff4d5e' : '#ffd84d';
+    context.shadowColor = warningColor;
+    drawRect(x + 28, monster.y - 22, 9, 17, warningColor);
+    drawRect(x + 28, monster.y - 1, 9, 7, warningColor);
+  }
+  context.restore();
+}
+
 function drawBoss() {
   if (!bossActive) return;
 
@@ -3036,12 +3158,14 @@ function drawRoom() {
   if (currentFloor === 'cellar' && currentDoor === totalCellarDoors) drawCellarExit();
   if (currentFloor === 'office' && !officeSideRoomActive && currentDoor % 15 === 0) drawStorageDoor();
   drawMonster();
+  drawCellarMonster();
   drawBoss();
   drawRush();
   drawVineMonster();
   drawOfficeMonster();
   if (!player.hidden) drawPlayer();
   drawFlashlight();
+  drawCellarMonsterGlow();
   drawGardenRain();
 
   context.restore();
@@ -3260,6 +3384,7 @@ function animate(now) {
     updateMonster(delta);
     updateVineMonster(delta);
     updateOfficeMonster(delta);
+    updateCellarMonster(delta);
     updateRush(delta);
     updateBoss(delta);
     updateObstacles(delta);

@@ -488,3 +488,16 @@
 
 **Next upgrade**
 - Add a small sparkle burst when a badge is unlocked.
+
+## 2026-11-17 - Gloom Crawler in the Cellar
+
+**Milestone:** Added a unique Cellar monster with a fair, readable attack.
+
+**What changed**
+- Added the purple pixel Gloom Crawler to Cellar Doors 3-8.
+- Added patrol, warning, and charge states with a 0.65-second warning before each charge.
+- Added glowing eyes and warning symbols that remain visible in the dark.
+- Added 15 HP contact damage and verified that jumping avoids the crawler.
+
+**Next upgrade**
+- Add the badge-unlock sparkle burst.
