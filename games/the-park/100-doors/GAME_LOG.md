@@ -577,3 +577,15 @@
 
 **Next upgrade**
 - Add a small sparkle burst when a badge is unlocked.
+
+## 2026-11-17 - Rainbow rings on badge artwork
+
+**Milestone:** Moved the rainbow borders onto the actual badge medals.
+
+**What changed**
+- Moved all 16 rainbow borders from the card edges to the circular badge artwork.
+- Kept the gold card trim and medal rims around the colorful rings.
+- Adjusted the circular rings for desktop and phone screens.
+
+**Next upgrade**
+- Add a small sparkle burst when a badge is unlocked.

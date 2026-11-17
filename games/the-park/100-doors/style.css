@@ -539,9 +539,9 @@ button:hover { background: #7ee583; }
 .badge-rainbow {
   position: absolute;
   z-index: 6;
-  inset: -5px;
+  inset: 0;
   padding: 4px;
-  border-radius: 9px;
+  border-radius: 50%;
   background: conic-gradient(from 45deg, #ff4d5e, #ff9f43, #ffd84d, #67d06b, #9be7ff, #8b5cf6, #ff7aa8, #ff4d5e);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
@@ -604,7 +604,6 @@ button:hover { background: #7ee583; }
   }
 
   .badge-rainbow {
-    inset: -3px;
     padding: 3px;
   }
 
