@@ -16,7 +16,7 @@ const bossReturnDoor = 75;
 const bossImageId = 204734852;
 const totalGardenDoors = 50;
 const totalOfficeDoors = 150;
-const totalCellarDoors = 75;
+const totalCellarDoors = 70;
 const cellarEntranceDoor = 40;
 const officeChaseStartDoor = 25;
 const officeChaseEndDoor = 32;
@@ -63,6 +63,7 @@ let floorsButton;
 let floorScreen;
 let mainFloorButton;
 let gardenFloorButton;
+let cellarFloorButton;
 let officeFloorButton;
 let floorBackButton;
 const gameElement = document.querySelector('#game');
@@ -3213,6 +3214,22 @@ function startGardenFloor() {
   gameElement.classList.remove('hidden');
 }
 
+function startCellarFloor() {
+  initMusic();
+  if (currentFloor === 'main') mainFloorResumeDoor = currentDoor;
+  currentFloor = 'cellar';
+  currentDoor = 1;
+  currentFloorDamageFree = true;
+  hasFlashlight = true;
+  won = false;
+  startRoom();
+  awardBadge('cellar-explorer');
+  paused = false;
+  floorScreen.classList.add('hidden');
+  lobby.classList.add('hidden');
+  gameElement.classList.remove('hidden');
+}
+
 function startOfficeFloor() {
   initMusic();
   if (currentFloor === 'main') mainFloorResumeDoor = currentDoor;
@@ -3310,6 +3327,7 @@ document.addEventListener('DOMContentLoaded', () => {
   floorScreen = document.querySelector('#floor-screen');
   mainFloorButton = document.querySelector('#main-floor-button');
   gardenFloorButton = document.querySelector('#garden-floor-button');
+  cellarFloorButton = document.querySelector('#cellar-floor-button');
   floorBackButton = document.querySelector('#floor-back-button');
 
   const actionRow = document.createElement('div');
@@ -3329,6 +3347,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   mainFloorButton.addEventListener('click', resumeMainFloor);
   gardenFloorButton.addEventListener('click', startGardenFloor);
+  cellarFloorButton.addEventListener('click', startCellarFloor);
   officeFloorButton = document.querySelector('#office-floor-button');
   officeFloorButton.addEventListener('click', startOfficeFloor);
   cutsceneContinue.addEventListener('click', finishCutscene);

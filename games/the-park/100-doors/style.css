@@ -171,6 +171,13 @@ button:hover { background: #7ee583; }
 
 .garden-floor span { color: #b8f7c1; }
 
+.cellar-floor {
+  border-color: #a98bd8;
+  background: rgba(137,99,184,.18);
+}
+
+.cellar-floor span { color: #e0ccff; }
+
 .office-floor {
   border-color: #9be7ff;
   background: rgba(155,231,255,.14);

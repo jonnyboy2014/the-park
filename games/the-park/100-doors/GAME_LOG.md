@@ -513,3 +513,16 @@
 
 **Next upgrade**
 - Add more variety between Cellar rooms.
+
+## 2026-11-17 - Cellar floor picker and 70-room total
+
+**Milestone:** Added THE CELLAR to FLOORS and confirmed its final room count.
+
+**What changed**
+- Added a purple THE CELLAR card to the floor picker.
+- The shortcut starts at Cellar Door 1 with a flashlight and awards Cellar Explorer.
+- Set THE CELLAR to 70 rooms, entered from Main Door 40.
+- Updated the exit logic, instructions, and badge description for 70 rooms.
+
+**Next upgrade**
+- Show the current room number on each floor card.
