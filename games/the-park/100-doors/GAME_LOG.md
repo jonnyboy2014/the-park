@@ -564,3 +564,16 @@
 
 **Next upgrade**
 - Soften the edges of the flashlight beam.
+
+## 2026-11-17 - Rainbow hard-badge borders
+
+**Milestone:** Made difficult badges stand out with animated rainbow frames.
+
+**What changed**
+- Added a colorful conic-gradient border around all 16 difficult badges.
+- Kept the gold inner trim and medal rings for a layered reward look.
+- Added reduced-motion support and a smaller frame for phone screens.
+- Verified all 35 badges on desktop and mobile with no horizontal overflow.
+
+**Next upgrade**
+- Add a small sparkle burst when a badge is unlocked.

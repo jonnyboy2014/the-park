@@ -536,6 +536,29 @@ button:hover { background: #7ee583; }
   background: linear-gradient(90deg, #8b5a16, #ffd84d 50%, #8b5a16);
 }
 
+.badge-rainbow {
+  position: absolute;
+  z-index: 6;
+  inset: -5px;
+  padding: 4px;
+  border-radius: 9px;
+  background: conic-gradient(from 45deg, #ff4d5e, #ff9f43, #ffd84d, #67d06b, #9be7ff, #8b5cf6, #ff7aa8, #ff4d5e);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: badge-rainbow-shift 5s linear infinite;
+}
+
+@keyframes badge-rainbow-shift {
+  to { filter: hue-rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-rainbow { animation: none; }
+}
+
 #back-button {
   background: #ffd84d;
   color: #4a2a0d;
@@ -578,6 +601,11 @@ button:hover { background: #7ee583; }
     top: 64px;
     width: 58px;
     height: 26px;
+  }
+
+  .badge-rainbow {
+    inset: -3px;
+    padding: 3px;
   }
 
   .badge-name {
