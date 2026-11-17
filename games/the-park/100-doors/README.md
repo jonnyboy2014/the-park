@@ -65,7 +65,8 @@ Open all 100 doors.
 ## Badges
 - Press **BADGES** in the lobby to open the wooden Badge Wall.
 - Earned badges light up on colorful plaques. Missing badges stay gray and locked.
-- Every badge has a matching picture with layered colors, ribbon tails, a metallic ring, and an engraved name plaque.
+- Every badge has an illustrated mini-scene with a gradient background, foreground details, colorful artwork, and bright line work.
+- Larger picture windows also have ribbon tails, metallic rings, and engraved name plaques.
 - Difficult badges have bright gold borders and gold medal rings.
 - Scroll the shelves with your mouse wheel. Press **BACK** to return to the lobby.
 - **Game Starter:** enter the game for the first time.

@@ -191,6 +191,49 @@ const badgeIconDetails = {
   trophy: '<path d="M14 6h20v12c0 9-4 14-10 14s-10-5-10-14Z" fill="#ffd84d"/><path d="M18 9h6v13c0 3 2 5 4 6-7 1-10-4-10-10Z" fill="#fff0a6"/><path d="M15 39h18v4H15Z" fill="#9a6038"/>'
 };
 
+const badgeScenePalettes = {
+  main: ['#582c3f', '#d4784f'],
+  cellar: ['#101a2d', '#35566b'],
+  garden: ['#163b45', '#4f8b64'],
+  office: ['#1b324a', '#607f98'],
+  fun: ['#3a2556', '#9b5b91']
+};
+
+const badgeIconScenes = {
+  door: '<rect x="3" y="34" width="42" height="12" fill="#4b2c28"/><rect x="5" y="5" width="38" height="4" fill="#f0b76b" opacity=".25"/><circle cx="38" cy="12" r="2" fill="#fff0a6"/>',
+  key: '<rect x="3" y="32" width="42" height="14" fill="#6b4229"/><rect x="6" y="34" width="36" height="4" fill="#a1663f"/><circle cx="38" cy="10" r="2" fill="#fff0a6"/><circle cx="33" cy="7" r="1" fill="#fff0a6"/>',
+  run: '<rect x="2" y="4" width="10" height="29" fill="#2a3340"/><rect x="36" y="4" width="10" height="29" fill="#2a3340"/><rect x="0" y="37" width="48" height="11" fill="#333d47"/><path d="M2 18h12v3H2Zm0 8h9v2H2Z" fill="#fff0a6" opacity=".45"/>',
+  boot: '<path d="M2 12h16v3H2Zm0 9h11v3H2Zm0 18h17v3H2Z" fill="#d8f7ff" opacity=".45"/><ellipse cx="25" cy="43" rx="20" ry="3" fill="#1c2c38" opacity=".35"/>',
+  sword: '<circle cx="36" cy="15" r="10" fill="#361a2d"/><path d="M0 40h48v8H0Z" fill="#3c2732"/><path d="m35 7 2 4 4 1-3 3-1 4-2-3-4-1 3-3Z" fill="#ff8d66" opacity=".7"/>',
+  skull: '<circle cx="9" cy="36" r="8" fill="#684a7f" opacity=".45"/><circle cx="39" cy="34" r="10" fill="#684a7f" opacity=".45"/><path d="M3 42h42v4H3Z" fill="#211a31"/>',
+  milkshake: '<rect x="0" y="32" width="48" height="16" fill="#7d4936"/><path d="M0 32h48v4H0Z" fill="#f4f0df"/><path d="M4 38h8v8H4Zm16 0h8v8h-8Zm16 0h8v8h-8Z" fill="#f7a8c4" opacity=".5"/>',
+  rocket: '<circle cx="7" cy="8" r="1.5" fill="#fff8d0"/><circle cx="38" cy="7" r="1.2" fill="#fff8d0"/><circle cx="42" cy="22" r="1.5" fill="#fff8d0"/><path d="M0 40c10-8 17 2 26-3s15-1 22 2v9H0Z" fill="#d8f7ff" opacity=".6"/>',
+  clock: '<rect x="4" y="5" width="14" height="17" fill="#24354b"/><circle cx="10" cy="10" r="4" fill="#fff3c4"/><path d="M11 5v17h2V5ZM4 13h14v2H4Z" fill="#8295a8"/>',
+  hundred: '<path d="M2 5h8v12H2Zm12 0h8v12h-8Zm24 0h8v12h-8ZM2 32h8v12H2Zm36 0h8v12h-8Z" fill="#1d264e" opacity=".65"/>',
+  tree: '<circle cx="38" cy="10" r="6" fill="#fff3c4" opacity=".7"/><path d="M0 35c12-4 30 3 48-2v15H0Z" fill="#315c3c"/>',
+  submarine: '<path d="M0 0h48v48H0Z" fill="#1b5570" opacity=".35"/><circle cx="7" cy="11" r="2" fill="#9be7ff" opacity=".6"/><circle cx="40" cy="15" r="3" fill="#9be7ff" opacity=".45"/><circle cx="9" cy="24" r="1.2" fill="#9be7ff"/><path d="M4 48 8 33l4 15Zm32 0 4-17 5 17Z" fill="#2c6b55"/>',
+  mountain: '<circle cx="38" cy="9" r="4" fill="#fff3c4"/><path d="m0 34 10-14 8 12 8-9 10 12 12-8v21H0Z" fill="#263c56" opacity=".5"/>',
+  flower: '<path d="M0 36c12-5 30 2 48-3v15H0Z" fill="#3a7445"/><circle cx="8" cy="35" r="2" fill="#ffe779"/><circle cx="40" cy="33" r="2" fill="#f7a8c4"/>',
+  stairsDown: '<path d="M0 6h48v5H0Zm0 12h48v3H0Zm0 12h48v3H0Z" fill="#a9c0cc" opacity=".14"/><path d="M11 0h2v48h-2Zm24 0h2v48h-2Z" fill="#a9c0cc" opacity=".1"/>',
+  stairsUp: '<path d="M0 6h48v5H0Zm0 12h48v3H0Zm0 12h48v3H0Z" fill="#a9c0cc" opacity=".14"/><path d="M11 0h2v48h-2Zm24 0h2v48h-2Z" fill="#a9c0cc" opacity=".1"/>',
+  desk: '<rect x="0" y="35" width="48" height="13" fill="#293d4c"/><path d="M3 6h12v8H3Zm30 2h11v7H33Z" fill="#fff8df" opacity=".5"/>',
+  box: '<path d="M2 6h10v32H2Zm34 0h10v32H36Z" fill="#3e2b24" opacity=".5"/><path d="M0 16h48v4H0Zm0 22h48v4H0Z" fill="#6b4229"/>',
+  teleport: '<circle cx="24" cy="24" r="21" fill="#241c46" opacity=".45"/><circle cx="24" cy="24" r="18" fill="none" stroke="#9be7ff" stroke-width="1" opacity=".5"/><circle cx="7" cy="8" r="1.5" fill="#fff8d0"/><circle cx="41" cy="39" r="1.5" fill="#fff8d0"/>',
+  printer: '<path d="m4 4 9 2-2 8-9-2Zm32 1 9-2 2 8-9 2ZM3 28l8 2-2 7-8-2Z" fill="#fff8df" opacity=".75"/>',
+  hundredFifty: '<path d="M2 5h8v12H2Zm12 0h8v12h-8Zm24 0h8v12h-8ZM2 32h8v12H2Zm36 0h8v12h-8Z" fill="#172c3c" opacity=".65"/>',
+  slide: '<path d="M0 34h48v14H0Z" fill="#2d2743"/><path d="M2 39h14v3H2Zm24-27h16v3H26Zm4 7h12v3H30Z" fill="#e0ccff" opacity=".4"/>',
+  jump: '<path d="M0 40h48v8H0Z" fill="#284635"/><circle cx="8" cy="9" r="2" fill="#fff0a6"/><circle cx="39" cy="15" r="1.5" fill="#fff0a6"/><circle cx="12" cy="24" r="1.2" fill="#fff0a6"/>',
+  closet: '<rect x="2" y="3" width="44" height="42" fill="#39291f" opacity=".35"/><path d="M3 5h42v4H3Zm0 35h42v5H3Z" fill="#d3a064" opacity=".35"/>',
+  lightning: '<circle cx="10" cy="12" r="9" fill="#364461"/><circle cx="35" cy="10" r="12" fill="#364461"/><path d="M0 36h48v12H0Z" fill="#1c2c42"/>',
+  crown: '<path d="M0 0h48v48H0Z" fill="#4b1f33" opacity=".3"/><path d="M4 4h7v34H4Zm33 0h7v34h-7Z" fill="#2a1826" opacity=".5"/><circle cx="24" cy="8" r="4" fill="#ff8d66" opacity=".6"/>',
+  heart: '<circle cx="24" cy="23" r="20" fill="#7c334c" opacity=".35"/><path d="M4 40h40v6H4Z" fill="#3b2438"/>',
+  paper: '<path d="m2 9 10-3 3 9-10 3Zm31 24 11-2 2 10-11 2ZM3 33l8-2 2 7-8 2Z" fill="#fff8df" opacity=".45"/>',
+  rain: '<path d="M0 38c12-4 31 4 48-1v11H0Z" fill="#24445c"/><ellipse cx="13" cy="42" rx="9" ry="2" fill="#9be7ff" opacity=".4"/><ellipse cx="36" cy="45" rx="8" ry="1.5" fill="#9be7ff" opacity=".35"/>',
+  medal: '<path d="M7 35h34v9H7Z" fill="#3f3555"/><path d="M13 30h22v7H13Z" fill="#5a4b70"/><circle cx="7" cy="8" r="2" fill="#ffe779"/><circle cx="40" cy="14" r="2" fill="#f7a8c4"/>',
+  badges: '<path d="m5 5 2 4 4 1-3 3-1 4-2-3-4-1 3-3Zm34 27 2 4 4 1-3 3-1 4-2-3-4-1 3-3Z" fill="#ffe779" opacity=".6"/><circle cx="39" cy="8" r="2" fill="#9be7ff"/><circle cx="8" cy="29" r="2" fill="#f7a8c4"/>',
+  trophy: '<path d="M4 0h10L8 48H0Zm30 0h10l6 48h-8Z" fill="#fff0a6" opacity=".18"/><path d="M5 40h38v8H5Z" fill="#4c3156"/><circle cx="7" cy="18" r="2" fill="#f7a8c4"/><circle cx="40" cy="24" r="2" fill="#9be7ff"/><path d="m9 4 2 4 4 1-3 3-1 4-2-3-4-1 3-3Z" fill="#ffe779"/>'
+};
+
 let currentDoor = 1;
 let mainFloorResumeDoor = 1;
 let cutsceneActive = false;
@@ -271,7 +314,9 @@ function updateBadgeUi() {
     const state = `badge${earned ? ' earned' : ''}${badge.difficult ? ' difficult' : ''}`;
     const status = earned ? 'EARNED' : 'LOCKED';
     const description = `${badge.difficult ? 'Difficult badge: ' : ''}${badge.popup || badge.name}`;
-    return `<div class="${state}" data-section="${badge.section}" title="${description}"><span class="badge-ribbon" aria-hidden="true"></span><span class="badge-medal" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><g stroke="none">${badgeIconDetails[badge.icon]}</g>${badgeIcons[badge.icon]}<g fill="#fff8d0" stroke="none"><circle cx="7" cy="9" r="1.3"/><circle cx="41" cy="36" r="1.2"/><path d="m39 6 1.2 2.8L43 10l-2.8 1.2L39 14l-1.2-2.8L35 10l2.8-1.2Z"/></g></svg></span><span class="badge-name">${badge.name}</span><span class="badge-status">${status}</span></div>`;
+    const [sceneTop, sceneBottom] = badgeScenePalettes[badge.section];
+    const gradientId = `badge-scene-${badge.id}`;
+    return `<div class="${state}" data-section="${badge.section}" title="${description}"><span class="badge-ribbon" aria-hidden="true"></span><span class="badge-medal" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sceneTop}"/><stop offset="1" stop-color="${sceneBottom}"/></linearGradient></defs><rect width="48" height="48" fill="url(#${gradientId})" stroke="none"/><g stroke="none">${badgeIconScenes[badge.icon]}</g><path d="M2 3h44v8C30 7 18 8 2 18Z" fill="#fff" opacity=".08" stroke="none"/><g stroke="none">${badgeIconDetails[badge.icon]}</g>${badgeIcons[badge.icon]}<g fill="#fff8d0" stroke="none"><circle cx="7" cy="9" r="1.3"/><circle cx="41" cy="36" r="1.2"/><path d="m39 6 1.2 2.8L43 10l-2.8 1.2L39 14l-1.2-2.8L35 10l2.8-1.2Z"/></g></svg></span><span class="badge-name">${badge.name}</span><span class="badge-status">${status}</span></div>`;
   };
   const renderSection = (sectionId, title) => {
     const sectionBadges = badges.filter(badge => badge.section === sectionId);

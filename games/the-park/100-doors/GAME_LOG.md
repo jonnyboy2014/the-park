@@ -526,3 +526,16 @@
 
 **Next upgrade**
 - Show the current room number on each floor card.
+
+## 2026-11-17 - Illustrated badge scenes
+
+**Milestone:** Turned every badge picture into a detailed mini-scene.
+
+**What changed**
+- Added unique scene artwork behind all 35 badges, including underwater bubbles, office papers, stairs, mountains, rain, and confetti.
+- Added section-colored gradient backgrounds and glass highlights.
+- Enlarged the picture windows and brightened the detailed line art.
+- Verified that every scene fits on desktop and phone without overflow.
+
+**Next upgrade**
+- Add a small sparkle burst when a badge is unlocked.

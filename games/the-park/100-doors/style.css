@@ -327,7 +327,7 @@ button:hover { background: #7ee583; }
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  height: 176px;
+  height: 198px;
   min-width: 0;
   padding: 11px 8px 9px;
   border: 2px solid var(--badge-dark);
@@ -402,9 +402,10 @@ button:hover { background: #7ee583; }
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 60px;
-  height: 60px;
+  width: 74px;
+  height: 74px;
   margin: 3px 0 2px;
+  overflow: hidden;
   border: 3px solid #2b2118;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #67707a, #37424b 62%, #20282e);
@@ -416,8 +417,9 @@ button:hover { background: #7ee583; }
   position: absolute;
   top: 6px;
   left: 9px;
-  width: 14px;
-  height: 7px;
+  z-index: 2;
+  width: 20px;
+  height: 9px;
   border-radius: 50%;
   background: rgba(255,255,255,.36);
   transform: rotate(-35deg);
@@ -426,8 +428,8 @@ button:hover { background: #7ee583; }
 .badge-medal svg {
   position: relative;
   z-index: 1;
-  width: 38px;
-  height: 38px;
+  width: 56px;
+  height: 56px;
   color: #c2c9ce;
   filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
 }
@@ -435,10 +437,10 @@ button:hover { background: #7ee583; }
 .badge-ribbon {
   position: absolute;
   z-index: 0;
-  top: 70px;
+  top: 82px;
   left: 50%;
-  width: 66px;
-  height: 29px;
+  width: 76px;
+  height: 34px;
   background: linear-gradient(90deg, var(--badge-dark), var(--badge-color) 50%, var(--badge-dark));
   clip-path: polygon(0 0, 100% 0, 87% 100%, 50% 76%, 13% 100%);
   transform: translateX(-50%);
@@ -451,8 +453,8 @@ button:hover { background: #7ee583; }
   display: grid;
   place-items: center;
   width: 100%;
-  min-height: 32px;
-  margin-top: 7px;
+  min-height: 34px;
+  margin-top: 9px;
   padding: 3px 5px;
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 3px;
@@ -490,7 +492,8 @@ button:hover { background: #7ee583; }
 }
 
 .badge.earned .badge-medal svg {
-  color: #654006;
+  color: #fff3c4;
+  filter: drop-shadow(0 2px 1px rgba(0,0,0,.55));
 }
 
 .badge.earned .badge-status {
@@ -556,30 +559,30 @@ button:hover { background: #7ee583; }
 
   .badge {
     gap: 4px;
-    height: 158px;
+    height: 174px;
     padding: 9px 4px 7px;
     font-size: 10px;
   }
 
   .badge-medal {
-    width: 46px;
-    height: 46px;
+    width: 54px;
+    height: 54px;
   }
 
   .badge-medal svg {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
   }
 
   .badge-ribbon {
-    top: 59px;
-    width: 52px;
-    height: 24px;
+    top: 64px;
+    width: 58px;
+    height: 26px;
   }
 
   .badge-name {
-    min-height: 28px;
-    margin-top: 6px;
+    min-height: 30px;
+    margin-top: 7px;
     padding: 2px 3px;
   }
 
