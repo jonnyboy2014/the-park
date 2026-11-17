@@ -1026,3 +1026,58 @@ canvas {
   width: 14px;
   height: 18px;
 }
+
+@media (max-width: 700px) {
+  #hud {
+    top: 8px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 5px 8px;
+    box-sizing: border-box;
+    width: calc(100vw - 16px);
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  #door-number, #badge-count { white-space: nowrap; }
+  #badge-count { grid-column: 3; grid-row: 1; }
+  #mode {
+    min-width: 0;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #health-wrap {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: center;
+  }
+
+  #health-bar { width: min(110px, 36vw); }
+
+  #message {
+    top: 72px;
+    box-sizing: border-box;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    text-align: center;
+    font-size: 12px;
+  }
+
+  #prompt {
+    bottom: 80px;
+    box-sizing: border-box;
+    width: max-content;
+    max-width: calc(100vw - 24px);
+    text-align: center;
+    font-size: 12px;
+  }
+
+  #hotbar {
+    right: 50%;
+    bottom: 12px;
+    transform: translateX(50%);
+  }
+}

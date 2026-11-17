@@ -589,3 +589,19 @@
 
 **Next upgrade**
 - Add a small sparkle burst when a badge is unlocked.
+
+## 2026-11-17 - The blue RIFT at Door 100
+
+**Milestone:** Built a two-way item RIFT that remembers what you store.
+
+**What changed**
+- Turned Door 100 into a special starry room with a glowing blue portal.
+- Added deposit and take-back controls for any hotbar item or stack.
+- Saved the RIFT item in browser storage so it survives refreshes and new runs.
+- Added a floating picture and name for the stored item.
+- Kept items safe when saving fails or the hotbar is full.
+- Tested Milkshakes, the Teleporter, and the Backpack, including a full browser refresh.
+- Adjusted the game HUD and prompts for phone screens.
+
+**Next upgrade**
+- Add a soft sound when the RIFT stores or returns an item.

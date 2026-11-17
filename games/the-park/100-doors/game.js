@@ -34,6 +34,12 @@ const rareRoomChance = .015;
 const backpackSpawnChance = .013;
 const teleporterSpawnChance = .015;
 const rushChance = .12;
+const riftStorageKey = '100-doors-rift-item';
+const riftItemNames = {
+  milkshake: 'Milkshake',
+  backpack: 'Rare Backpack',
+  teleporter: 'Teleporter'
+};
 let unlockedDoors = new Set();
 let rareRoomActive = false;
 let backpackActive = false;
@@ -261,6 +267,7 @@ let hotbarSlots = new Array(5).fill(null);
 let selectedHotbarSlot = 0;
 let backpackStorageSlots = new Array(4).fill(null);
 let hasBackpack = false;
+let riftItem = loadRiftItem();
 let earnedBadges = new Set(loadBadges());
 const funStats = {
   jumps: 0,
@@ -309,6 +316,28 @@ function saveBadges() {
   try {
     localStorage.setItem('100-doors-badges', JSON.stringify([...earnedBadges]));
   } catch {
+  }
+}
+
+function loadRiftItem() {
+  try {
+    const item = JSON.parse(localStorage.getItem(riftStorageKey) || 'null');
+    if (!item || !Object.hasOwn(riftItemNames, item.id)) return null;
+    const count = Math.floor(Number(item.count));
+    if (!Number.isFinite(count) || count < 1) return null;
+    return { id: item.id, name: riftItemNames[item.id], count };
+  } catch {
+    return null;
+  }
+}
+
+function saveRiftItem() {
+  try {
+    if (riftItem) localStorage.setItem(riftStorageKey, JSON.stringify(riftItem));
+    else localStorage.removeItem(riftStorageKey);
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -551,6 +580,55 @@ function selectHotbarSlot(index) {
   updateHotbarUi();
 }
 
+function useRift() {
+  if (riftItem) {
+    const existingItem = hotbarSlots.find(item => item && item.id === riftItem.id);
+    const emptySlot = hotbarSlots.findIndex(item => item === null);
+    if (!existingItem && emptySlot === -1) {
+      showMessage('Your hotbar is full! Make room for the RIFT item.');
+      return;
+    }
+
+    const returnedItem = riftItem;
+    riftItem = null;
+    if (!saveRiftItem()) {
+      riftItem = returnedItem;
+      showMessage('The RIFT could not save that change. Your item is still safe inside.');
+      return;
+    }
+
+    if (existingItem) existingItem.count += returnedItem.count;
+    else hotbarSlots[emptySlot] = returnedItem;
+    if (returnedItem.id === 'backpack') {
+      hasBackpack = true;
+      updateBackpackUi();
+    }
+    updateHotbarUi();
+    updateHud();
+    showMessage(`The blue RIFT tossed your ${returnedItem.name} back out!`);
+    return;
+  }
+
+  const selectedItem = hotbarSlots[selectedHotbarSlot];
+  if (!selectedItem) {
+    showMessage('Select a hotbar item first, then press E at the blue RIFT.');
+    return;
+  }
+
+  riftItem = { ...selectedItem };
+  if (!saveRiftItem()) {
+    riftItem = null;
+    showMessage('The RIFT could not save your item. It is still in your hotbar.');
+    return;
+  }
+
+  hotbarSlots[selectedHotbarSlot] = null;
+  if (riftItem.id === 'backpack') hasBackpack = false;
+  updateHotbarUi();
+  updateHud();
+  showMessage(`${riftItem.name} is safe inside the blue RIFT.`);
+}
+
 function useSelectedHotbarItem() {
   const item = hotbarSlots[selectedHotbarSlot];
   if (!item) return;
@@ -773,6 +851,14 @@ const teleporter = {
   taken: false
 };
 
+const rift = {
+  x: 420,
+  y: 380,
+  width: 120,
+  height: 180,
+  kind: 'rift'
+};
+
 const closet = {
   x: 640,
   y: 440,
@@ -815,20 +901,22 @@ function startRoom() {
   bossActive = isMainFloor && (currentDoor === bossDoor || bossIsReturn);
   monsterActive = isMainFloor && currentDoor >= monsterStartDoor && currentDoor <= monsterEndDoor;
   const isRewardRoom = isMainFloor && currentDoor === rewardDoor;
-  const isSpecialRoom = isMainFloor && (currentDoor === 1 || monsterActive || isRewardRoom || bossActive);
+  const isRiftRoom = isMainFloor && currentDoor === totalDoors;
+  const isSpecialRoom = isMainFloor && (currentDoor === 1 || monsterActive || isRewardRoom || bossActive || isRiftRoom);
   rareRoomActive = isMainFloor && !isSpecialRoom && Math.random() < rareRoomChance;
-  closetVisible = isMainFloor && currentDoor !== 1 && !rareRoomActive && currentDoor !== rewardDoor && !bossActive;
+  closetVisible = isMainFloor && currentDoor !== 1 && !rareRoomActive && currentDoor !== rewardDoor && !bossActive && !isRiftRoom;
   rushActive = isMainFloor && currentDoor > rewardDoor && !isSpecialRoom && !rareRoomActive && Math.random() < rushChance;
   rushWarningTimer = rushActive ? 5 : 0;
   if (isMainFloor && !isSpecialRoom && !unlockedDoors.has(currentDoor) && Math.random() < unlockedDoorChance) {
     unlockedDoors.add(currentDoor);
   }
-  const isUnlockedDoor = isSubFloor || unlockedDoors.has(currentDoor) || rareRoomActive;
+  const isUnlockedDoor = isSubFloor || isRiftRoom || unlockedDoors.has(currentDoor) || rareRoomActive;
   roomIsDark = (isCellarFloor || (isMainFloor && currentDoor > rewardDoor
     && currentDoor % 5 === 0
     && currentDoor !== bossDoor
     && currentDoor !== bossReturnDoor
     && currentDoor !== 95
+    && !isRiftRoom
     && !rareRoomActive));
   monster.x = -80;
   monster.speed = 135 + (currentDoor - monsterStartDoor) * 6;
@@ -1058,8 +1146,14 @@ function startRoom() {
   if (isMainFloor && rareRoomActive) {
     awardBadge('restaurant-finder');
     showMessage('Rare Restaurant Room! Grab the milkshake.');
-  } else if (isMainFloor && isUnlockedDoor) {
+  } else if (isMainFloor && isUnlockedDoor && !isRiftRoom) {
     showMessage('This door is already unlocked. Walk right.');
+  }
+
+  if (isRiftRoom) {
+    showMessage(riftItem
+      ? `The blue RIFT is keeping your ${riftItem.name} safe. Press E to take it back.`
+      : 'You found the blue RIFT! Select an item and press E to store it.');
   }
 
   if (rushActive) showMessage('Rocket is coming in 5 seconds! Hide in the closet!');
@@ -1128,6 +1222,8 @@ function updateHud() {
       : `Boss fight · ${boss.health} hits left`;
   } else if (currentDoor === rewardDoor) {
     modeText.textContent = rewardClaimed ? 'Reward room · Speed Boots active' : 'Reward room · open the chest';
+  } else if (currentDoor === totalDoors) {
+    modeText.textContent = riftItem ? `RIFT: ${riftItem.name}` : 'RIFT: empty';
   } else if (roomIsDark) {
     modeText.textContent = 'Dark room · flashlight on';
   } else if (rareRoomActive) {
@@ -1223,6 +1319,7 @@ function updateTarget() {
   } else {
     if (currentFloor === 'main' && currentDoor === 65) targets.push(gardenDoor);
     if (currentFloor === 'main' && currentDoor === 95) targets.push(officeDoor);
+    if (currentFloor === 'main' && currentDoor === totalDoors) targets.push(rift);
     if (currentFloor === 'main' && currentDoor === cellarEntranceDoor) targets.push(cellarStaircase);
     if (currentFloor === 'cellar' && currentDoor === totalCellarDoors) targets.push(cellarExit);
     if (currentFloor === 'office' && !officeSideRoomActive && currentDoor % 15 === 0) targets.push(storageDoor);
@@ -1272,6 +1369,13 @@ function updateTarget() {
     promptElement.textContent = 'E: Enter THE GARDEN';
   } else if (currentTarget === officeDoor) {
     promptElement.textContent = 'E: Enter THE OFFICE';
+  } else if (currentTarget === rift) {
+    const selectedItem = hotbarSlots[selectedHotbarSlot];
+    promptElement.textContent = riftItem
+      ? `E: Take ${riftItem.name}`
+      : selectedItem
+      ? `E: Store ${selectedItem.name}`
+      : 'Select a hotbar item for the RIFT';
   } else if (currentTarget === cellarStaircase) {
     promptElement.textContent = 'E: Climb down to THE CELLAR';
   } else if (currentTarget === cellarExit) {
@@ -1350,6 +1454,11 @@ function interact() {
     awardBadge('office-worker');
     startRoom();
     showMessage('Entering THE OFFICE! 150 ruined workstations ahead.');
+    return;
+  }
+
+  if (currentTarget === rift) {
+    useRift();
     return;
   }
 
@@ -2210,6 +2319,117 @@ function drawTeleporter() {
   drawRect(teleporter.x + 28, teleporter.y + 2, 4, 4, '#9be7ff');
 }
 
+function drawRiftItem(x, y) {
+  if (!riftItem) {
+    drawRect(x - 3, y - 14, 6, 28, '#d8f7ff');
+    drawRect(x - 14, y - 3, 28, 6, '#d8f7ff');
+    drawRect(x - 7, y - 7, 14, 14, '#7ee7ff');
+    return;
+  }
+
+  if (riftItem.id === 'milkshake') {
+    drawRect(x + 5, y - 24, 4, 14, '#ff5252');
+    drawOutlinedRect(x - 12, y - 12, 24, 30, '#ff9ec4', '#6b2b45');
+    drawRect(x - 9, y - 7, 18, 18, '#ffd0e5');
+    drawRect(x - 10, y - 17, 20, 7, '#fff2f8');
+  } else if (riftItem.id === 'backpack') {
+    drawOutlinedRect(x - 15, y - 15, 30, 34, '#7a4a24', '#2e1a0d');
+    drawRect(x - 10, y - 9, 20, 9, '#a1662f');
+    drawRect(x - 9, y + 7, 18, 7, '#a1662f');
+    drawRect(x - 5, y - 21, 10, 7, '#5c3a1d');
+    drawRect(x - 3, y - 9, 6, 6, '#ffd84d');
+  } else if (riftItem.id === 'teleporter') {
+    drawOutlinedRect(x - 17, y - 13, 34, 28, '#7c8792', '#20262e');
+    drawRect(x - 12, y - 8, 24, 8, '#9fb6c6');
+    drawRect(x - 8, y - 23, 16, 12, '#7ee7ff');
+    drawRect(x - 4, y - 20, 8, 6, '#d8f7ff');
+    drawRect(x - 11, y + 7, 22, 4, '#9be7ff');
+  }
+}
+
+function drawRift() {
+  if (currentFloor !== 'main' || currentDoor !== totalDoors) return;
+  const centerX = rift.x + rift.width / 2;
+  const centerY = rift.y + 85;
+  const time = performance.now() / 1000;
+  const pulse = Math.sin(time * 3) * 3;
+
+  drawOutlinedRect(rift.x - 16, groundY - 14, rift.width + 32, 14, '#243a59', '#091427');
+  drawOutlinedRect(rift.x + 4, groundY - 27, rift.width - 8, 13, '#315b80', '#0b1d36');
+
+  context.save();
+  context.globalAlpha = .16 + Math.sin(time * 2) * .03;
+  context.fillStyle = '#38b6ff';
+  context.beginPath();
+  context.ellipse(centerX, centerY, 72 + pulse, 96 + pulse, 0, 0, Math.PI * 2);
+  context.fill();
+
+  context.globalAlpha = 1;
+  const portalGlow = context.createRadialGradient(centerX - 10, centerY - 18, 4, centerX, centerY, 72);
+  portalGlow.addColorStop(0, '#c7f7ff');
+  portalGlow.addColorStop(.25, '#53d8ff');
+  portalGlow.addColorStop(.62, '#176fd1');
+  portalGlow.addColorStop(1, '#071d55');
+  context.fillStyle = portalGlow;
+  context.beginPath();
+  context.ellipse(centerX, centerY, 53, 80, 0, 0, Math.PI * 2);
+  context.fill();
+
+  context.lineWidth = 8;
+  context.strokeStyle = '#123c8f';
+  context.beginPath();
+  context.ellipse(centerX, centerY, 56, 83, 0, 0, Math.PI * 2);
+  context.stroke();
+  context.lineWidth = 4;
+  context.strokeStyle = '#72e3ff';
+  context.beginPath();
+  context.ellipse(centerX, centerY, 49 + pulse * .3, 75 + pulse * .3, 0, 0, Math.PI * 2);
+  context.stroke();
+
+  for (let index = 0; index < 4; index++) {
+    const angle = time * .7 + index * Math.PI / 2;
+    context.lineWidth = 3;
+    context.strokeStyle = index % 2 === 0 ? '#9be7ff' : '#2b8fff';
+    context.beginPath();
+    context.ellipse(centerX, centerY, 23 + index * 6, 46 + index * 5, angle * .22, angle, angle + Math.PI * 1.15);
+    context.stroke();
+    drawRect(centerX + Math.cos(angle) * 36 - 2, centerY + Math.sin(angle) * 57 - 2, 4, 4, '#e5fbff');
+  }
+  context.restore();
+
+  drawRiftItem(centerX, centerY + Math.sin(time * 2) * 6);
+
+  context.save();
+  context.textAlign = 'center';
+  context.font = 'bold 16px monospace';
+  context.fillStyle = '#9be7ff';
+  context.fillText('R I F T', centerX, rift.y - 18);
+  context.font = 'bold 13px monospace';
+  context.fillStyle = '#d8f7ff';
+  const itemLabel = riftItem ? `${riftItem.name}${riftItem.count > 1 ? ` x${riftItem.count}` : ''}` : 'EMPTY - READY FOR AN ITEM';
+  context.fillText(itemLabel, centerX, groundY + 30);
+  context.restore();
+}
+
+function drawRiftRoomDetails() {
+  for (let index = 0; index < 48; index++) {
+    const x = 25 + (index * 173 + 47) % 900;
+    const y = 28 + (index * 67 + 31) % 300;
+    const size = index % 7 === 0 ? 4 : 2;
+    drawRect(x, y, size, size, index % 3 === 0 ? '#9be7ff' : '#4f83c7');
+  }
+
+  for (const x of [62, 866]) {
+    drawOutlinedRect(x, 220, 32, 340, '#142c4d', '#071328');
+    drawRect(x + 8, 238, 16, 290, '#1e426b');
+    drawRect(x + 4, 250, 24, 8, '#2e6292');
+    drawRect(x + 4, 476, 24, 8, '#2e6292');
+  }
+
+  drawRect(345, 322, 270, 6, '#173b68');
+  drawRect(375, 337, 210, 3, '#275d92');
+}
+
 function drawCloset() {
   if (!closetVisible) return;
 
@@ -2341,7 +2561,7 @@ function drawVineMonster() {
 function drawFurniture() {
   if (currentFloor !== 'main') return;
   if (rareRoomActive) return;
-  if (monsterActive || bossActive || currentDoor === rewardDoor) return;
+  if (monsterActive || bossActive || currentDoor === rewardDoor || currentDoor === totalDoors) return;
 
   const variant = Math.floor((currentDoor - 1) / 10) % 5;
   const offsetX = ((currentDoor * 17) % 3) * 35;
@@ -2985,11 +3205,25 @@ function currentRoomTheme() {
   }
   if (monsterActive) return roomThemes[2];
   if (currentDoor === rewardDoor) return roomThemes[9];
-  if (currentDoor === totalDoors) return roomThemes[9];
+  if (currentDoor === totalDoors) {
+    return {
+      wallTop: '#05091c',
+      wallMiddle: '#0b1838',
+      wallLower: '#122852',
+      floor: '#172a43',
+      floorLine: '#28527a',
+      detail: 'rift'
+    };
+  }
   return roomThemes[Math.floor((currentDoor - 1) / 10) % roomThemes.length];
 }
 
 function drawRoomDetails(theme) {
+  if (theme.detail === 'rift') {
+    drawRiftRoomDetails();
+    return;
+  }
+
   if (theme.detail === 'office') {
     drawOfficeRoomDetails();
     return;
@@ -3213,9 +3447,10 @@ function drawRoom() {
   drawMilkshake();
   drawBackpack();
   drawTeleporter();
+  drawRift();
 
   if (currentFloor === 'main' && currentDoor === rewardDoor) drawRewardChest();
-  else if (currentFloor === 'main' && !rareRoomActive && currentDoor !== bossDoor && currentDoor !== bossReturnDoor) drawCabinet();
+  else if (currentFloor === 'main' && !rareRoomActive && currentDoor !== bossDoor && currentDoor !== bossReturnDoor && currentDoor !== totalDoors) drawCabinet();
   for (const obstacle of obstacles) drawObstacle(obstacle);
   drawDoor();
   if (currentFloor === 'main' && currentDoor === 65) drawGardenDoor();

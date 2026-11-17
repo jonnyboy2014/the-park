@@ -60,6 +60,10 @@ Open all 100 doors.
 - The rare Teleporter has a 1.5% chance to appear in THE OFFICE, on a desk or storage box.
 - Collect the Teleporter with `E`. Select it in the hotbar and press `Q` to warp straight to Office Door 150.
 - The rare Backpack has a 1.3% chance to appear in calm rooms, either on the ground or on a small table.
+- Door 100 is a special starry room with a glowing blue RIFT.
+- Stand near the RIFT and press `E` to store your selected hotbar item or stack. Press `E` again to take it back out.
+- The RIFT holds one item or stack at a time and remembers it in browser storage after a refresh or a new run.
+- If your hotbar is full, make room before taking the item out. It stays safe inside the RIFT.
 - Each eligible calm room has a 70% chance to start unlocked.
 - Door 1 stays locked, and chase, reward, and boss rooms keep their special rules.
 
@@ -113,7 +117,7 @@ The Badge Wall has separate MAIN FLOOR, THE CELLAR, THE GARDEN, THE OFFICE, and 
 - A/D or left/right arrow: run
 - W, Space, or up arrow: jump
 - S or down arrow: slide, and drop through boss-room platforms
-- E: search drawers, pick up keys, and open doors
+- E: search drawers, pick up keys, open doors, and use the blue RIFT
 - Q: use the selected milkshake
 - 1-5: select a hotbar slot
 
@@ -136,5 +140,6 @@ The Badge Wall has separate MAIN FLOOR, THE CELLAR, THE GARDEN, THE OFFICE, and 
 - Rare Restaurant Room chance: `rareRoomChance`
 - Backpack spawn chance: `backpackSpawnChance`
 - Backpack storage slots: `backpackStorageSlots`
+- RIFT browser save key: `riftStorageKey`
 - The boss room is Door 50.
 - The monster return fight is Door 75.
