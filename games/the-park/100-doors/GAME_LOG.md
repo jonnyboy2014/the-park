@@ -462,3 +462,16 @@
 
 **Next upgrade**
 - Give each badge its own CSS-drawn icon.
+
+## 2026-11-17 - Badge pictures and difficulty borders
+
+**Milestone:** Made every badge show its own matching picture.
+
+**What changed**
+- Added 32 reusable SVG pictures for all 35 badges, including keys, rockets, trees, submarines, printers, and trophies.
+- Added bright double-gold borders to 16 difficult badges, including locked ones.
+- Added difficult-badge descriptions to the hover labels.
+- Checked every picture and gold border at desktop and phone sizes.
+
+**Next upgrade**
+- Add a short shine animation when a new badge is earned.

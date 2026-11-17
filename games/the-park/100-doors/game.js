@@ -82,42 +82,77 @@ const healthFill = document.querySelector('#health-fill');
 const bossBouncerProgress = document.querySelector('#boss-bouncer-progress');
 
 const badges = [
-  { id: 'game-starter', name: 'Game Starter', popup: 'You entered the game!', section: 'main' },
-  { id: 'first-key', name: 'First Key', section: 'main' },
-  { id: 'chase-survivor', name: 'Chase Complete', popup: 'You completed the chase!', section: 'main' },
-  { id: 'speed-boots', name: 'Speed Boots', section: 'main' },
-  { id: 'demon-slayer', name: 'Demon Slayer', section: 'main' },
-  { id: 'monster-slayer', name: 'Monster Slayer', section: 'main' },
-  { id: 'restaurant-finder', name: 'Restaurant Finder', popup: 'You found the rare Restaurant Room!', section: 'main' },
-  { id: 'rocket-survivor', name: 'Rocket Survivor', popup: 'You survived Rocket!', section: 'main' },
-  { id: 'maximum-ragebaiter', name: 'Maximum Ragebaiter', popup: 'You hid from Rocket at the last second!', section: 'main' },
-  { id: 'all-doors', name: '100 Doors', section: 'main' },
-  { id: 'outside-person', name: 'Outside Person', popup: 'You entered THE GARDEN!', section: 'garden' },
-  { id: 'submarine-pilot', name: 'Submarine Pilot', popup: 'You survived the submarine chase!', section: 'garden' },
-  { id: 'mountain-runner', name: 'Mountain Runner', popup: 'You survived the 5-door ground chase!', section: 'garden' },
-  { id: 'touched-grass', name: 'Touched Grass', popup: 'You beat THE GARDEN!', section: 'garden' },
-  { id: 'cellar-explorer', name: 'Cellar Explorer', popup: 'You found the hidden stairs!', section: 'cellar' },
-  { id: 'cellar-clear', name: 'Cellar Clear', popup: 'You escaped the dark cellar!', section: 'cellar' },
-  { id: 'office-worker', name: 'Office Worker', popup: 'You entered THE OFFICE!', section: 'office' },
-  { id: 'storage-explorer', name: 'Storage Explorer', popup: 'You found a storage sideroom!', section: 'office' },
-  { id: 'teleporter-finder', name: 'Teleporter Finder', popup: 'You found the rare Teleporter!', section: 'office' },
-  { id: 'office-chase-survivor', name: 'Office Chase Survivor', popup: 'You escaped the printing machine!', section: 'office' },
-  { id: 'overtime-champion', name: 'Overtime Champion', popup: 'You cleared all 150 Office doors!', section: 'office' },
-  { id: 'slide-legend', name: 'Slide Legend', popup: 'You slid 25 times!', section: 'fun' },
-  { id: 'jump-machine', name: 'Jump Machine', popup: 'You jumped 50 times!', section: 'fun' },
-  { id: 'closet-camper', name: 'Closet Camper', popup: 'You hid 5 times!', section: 'fun' },
-  { id: 'snack-time', name: 'Snack Time', popup: 'Milkshake power activated!', section: 'fun' },
-  { id: 'shortcut-specialist', name: 'Shortcut Specialist', popup: 'You used the Teleporter!', section: 'fun' },
-  { id: 'boss-bouncer', name: 'Boss Bouncer', popup: 'You bounced on 10 boss heads!', section: 'fun' },
-  { id: 'no-hit-wonder', name: 'No Hit Wonder', popup: 'You finished a floor without damage!', section: 'fun' },
-  { id: 'paper-chaser', name: 'Paper Chaser', popup: 'You explored 3 storage siderooms!', section: 'fun' },
-  { id: 'rain-dancer', name: 'Rain Dancer', popup: 'You danced in the Garden rain!', section: 'fun' },
-  { id: 'submarine-surfer', name: 'Submarine Surfer', popup: 'Underwater chase, zero hits!', section: 'fun' },
-  { id: 'mountain-goat', name: 'Mountain Goat', popup: 'Mountain chase, zero hits!', section: 'fun' },
-  { id: 'office-olympian', name: 'Office Olympian', popup: 'Office chase, zero hits!', section: 'fun' },
-  { id: 'badge-collector', name: 'Badge Collector', popup: 'You earned 10 badges!', section: 'fun' },
-  { id: 'completionist', name: 'Completionist', popup: 'You earned every other badge!', section: 'fun' }
+  { id: 'game-starter', name: 'Game Starter', popup: 'You entered the game!', section: 'main', icon: 'door' },
+  { id: 'first-key', name: 'First Key', section: 'main', icon: 'key' },
+  { id: 'chase-survivor', name: 'Chase Complete', popup: 'You completed the chase!', section: 'main', icon: 'run', difficult: true },
+  { id: 'speed-boots', name: 'Speed Boots', section: 'main', icon: 'boot' },
+  { id: 'demon-slayer', name: 'Demon Slayer', section: 'main', icon: 'sword', difficult: true },
+  { id: 'monster-slayer', name: 'Monster Slayer', section: 'main', icon: 'skull', difficult: true },
+  { id: 'restaurant-finder', name: 'Restaurant Finder', popup: 'You found the rare Restaurant Room!', section: 'main', icon: 'milkshake' },
+  { id: 'rocket-survivor', name: 'Rocket Survivor', popup: 'You survived Rocket!', section: 'main', icon: 'rocket' },
+  { id: 'maximum-ragebaiter', name: 'Maximum Ragebaiter', popup: 'You hid from Rocket at the last second!', section: 'main', icon: 'clock', difficult: true },
+  { id: 'all-doors', name: '100 Doors', section: 'main', icon: 'hundred', difficult: true },
+  { id: 'outside-person', name: 'Outside Person', popup: 'You entered THE GARDEN!', section: 'garden', icon: 'tree' },
+  { id: 'submarine-pilot', name: 'Submarine Pilot', popup: 'You survived the submarine chase!', section: 'garden', icon: 'submarine', difficult: true },
+  { id: 'mountain-runner', name: 'Mountain Runner', popup: 'You survived the 5-door ground chase!', section: 'garden', icon: 'mountain', difficult: true },
+  { id: 'touched-grass', name: 'Touched Grass', popup: 'You beat THE GARDEN!', section: 'garden', icon: 'flower', difficult: true },
+  { id: 'cellar-explorer', name: 'Cellar Explorer', popup: 'You found the hidden stairs!', section: 'cellar', icon: 'stairsDown' },
+  { id: 'cellar-clear', name: 'Cellar Clear', popup: 'You escaped the dark cellar!', section: 'cellar', icon: 'stairsUp' },
+  { id: 'office-worker', name: 'Office Worker', popup: 'You entered THE OFFICE!', section: 'office', icon: 'desk' },
+  { id: 'storage-explorer', name: 'Storage Explorer', popup: 'You found a storage sideroom!', section: 'office', icon: 'box' },
+  { id: 'teleporter-finder', name: 'Teleporter Finder', popup: 'You found the rare Teleporter!', section: 'office', icon: 'teleport' },
+  { id: 'office-chase-survivor', name: 'Office Chase Survivor', popup: 'You escaped the printing machine!', section: 'office', icon: 'printer', difficult: true },
+  { id: 'overtime-champion', name: 'Overtime Champion', popup: 'You cleared all 150 Office doors!', section: 'office', icon: 'hundredFifty', difficult: true },
+  { id: 'slide-legend', name: 'Slide Legend', popup: 'You slid 25 times!', section: 'fun', icon: 'slide' },
+  { id: 'jump-machine', name: 'Jump Machine', popup: 'You jumped 50 times!', section: 'fun', icon: 'jump' },
+  { id: 'closet-camper', name: 'Closet Camper', popup: 'You hid 5 times!', section: 'fun', icon: 'closet' },
+  { id: 'snack-time', name: 'Snack Time', popup: 'Milkshake power activated!', section: 'fun', icon: 'milkshake' },
+  { id: 'shortcut-specialist', name: 'Shortcut Specialist', popup: 'You used the Teleporter!', section: 'fun', icon: 'lightning' },
+  { id: 'boss-bouncer', name: 'Boss Bouncer', popup: 'You bounced on 10 boss heads!', section: 'fun', icon: 'crown', difficult: true },
+  { id: 'no-hit-wonder', name: 'No Hit Wonder', popup: 'You finished a floor without damage!', section: 'fun', icon: 'heart', difficult: true },
+  { id: 'paper-chaser', name: 'Paper Chaser', popup: 'You explored 3 storage siderooms!', section: 'fun', icon: 'paper' },
+  { id: 'rain-dancer', name: 'Rain Dancer', popup: 'You danced in the Garden rain!', section: 'fun', icon: 'rain' },
+  { id: 'submarine-surfer', name: 'Submarine Surfer', popup: 'Underwater chase, zero hits!', section: 'fun', icon: 'submarine', difficult: true },
+  { id: 'mountain-goat', name: 'Mountain Goat', popup: 'Mountain chase, zero hits!', section: 'fun', icon: 'mountain', difficult: true },
+  { id: 'office-olympian', name: 'Office Olympian', popup: 'Office chase, zero hits!', section: 'fun', icon: 'medal', difficult: true },
+  { id: 'badge-collector', name: 'Badge Collector', popup: 'You earned 10 badges!', section: 'fun', icon: 'badges' },
+  { id: 'completionist', name: 'Completionist', popup: 'You earned every other badge!', section: 'fun', icon: 'trophy', difficult: true }
 ];
+
+const badgeIcons = {
+  door: '<rect x="13" y="7" width="22" height="34" rx="2"/><circle cx="29" cy="25" r="1.5" fill="currentColor" stroke="none"/><path d="M9 41h30"/>',
+  key: '<circle cx="16" cy="18" r="7"/><path d="m21 23 17 17m-6-6 4-4m-9 9 4-4"/>',
+  run: '<circle cx="28" cy="8" r="4"/><path d="m24 16-6 9 8 5-4 11m2-25 9 7 7-2M18 25l-8 7m16-2 8 10"/>',
+  boot: '<path d="M15 7v20l-7 6v8h30v-6l-13-8V7Z"/><path d="M9 33h16"/>',
+  sword: '<path d="m12 36 24-24m-2-4 6-2-2 6M10 30l8 8m-11 3 5-5m-3 8 5-5"/>',
+  skull: '<path d="M10 23a14 14 0 0 1 28 0c0 7-4 9-7 11v7H17v-7c-3-2-7-4-7-11Z"/><circle cx="18" cy="23" r="3"/><circle cx="30" cy="23" r="3"/><path d="m24 29-3 5h6ZM20 41v-5m8 5v-5"/>',
+  milkshake: '<path d="M13 15h22l-3 27H16ZM11 15h26M19 10h14M29 10l5-7"/><path d="M17 24c4-3 10 3 15 0"/>',
+  rocket: '<path d="M24 5c9 6 12 16 8 27l-8 7-8-7c-4-11-1-21 8-27Z"/><circle cx="24" cy="20" r="4"/><path d="m16 26-8 5 8 3m16-8 8 5-8 3M20 39l-2 5m12-5 2 5m-8-6v7"/>',
+  clock: '<circle cx="24" cy="25" r="16"/><path d="M24 15v11l8 5M17 4h14m-7 0v5"/>',
+  hundred: '<rect x="6" y="6" width="36" height="36" rx="4"/><text x="24" y="30" text-anchor="middle" font-size="15" font-weight="900" fill="currentColor" stroke="none">100</text>',
+  tree: '<path d="M24 41V27m-7 14h14"/><path d="M24 5 12 20h7L9 31h30l-10-11h7Z"/>',
+  submarine: '<path d="M6 27c0-7 8-11 19-11s19 4 19 11-8 10-19 10S6 34 6 27Z"/><path d="M20 16V9h10v7M9 27H3m42 0h-6"/><circle cx="19" cy="26" r="3"/><circle cx="31" cy="26" r="3"/>',
+  mountain: '<path d="m4 39 14-25 8 12 6-9 12 22Z"/><path d="m13 23 5 4 4-5m5 4 5 3 3-4"/>',
+  flower: '<circle cx="24" cy="20" r="5"/><circle cx="24" cy="10" r="6"/><circle cx="34" cy="20" r="6"/><circle cx="24" cy="30" r="6"/><circle cx="14" cy="20" r="6"/><path d="M24 36v7m0-5-7-4m7 6 7-4"/>',
+  stairsDown: '<path d="M5 12h9v9h9v9h9"/><path d="M35 8v28m-6-6 6 6 6-6"/>',
+  stairsUp: '<path d="M5 36h9v-9h9v-9h9"/><path d="M35 40V12m-6 6 6-6 6 6"/>',
+  desk: '<path d="M6 20h36v8H6ZM10 28v13m28-13v13M18 28v7h12v-7M15 20V9h18v11"/>',
+  box: '<path d="m7 15 17-9 17 9v21l-17 8-17-8Z"/><path d="m7 15 17 9 17-9M24 24v20m-7-33 17 9"/>',
+  teleport: '<ellipse cx="24" cy="24" rx="17" ry="9"/><ellipse cx="24" cy="24" rx="9" ry="17" transform="rotate(45 24 24)"/><path d="m24 13 4 7-4 4-4-4Z"/>',
+  printer: '<path d="M13 18V6h22v12M13 34H7V18h34v16h-6M13 28h22v14H13Z"/><path d="M18 34h12m-12 4h9"/><circle cx="35" cy="23" r="1.5" fill="currentColor" stroke="none"/>',
+  hundredFifty: '<rect x="6" y="6" width="36" height="36" rx="4"/><text x="24" y="30" text-anchor="middle" font-size="15" font-weight="900" fill="currentColor" stroke="none">150</text>',
+  slide: '<path d="M5 35h38M9 29l22-13m-5-4 8-1-1 8M9 20h12"/><path d="m30 30 8 5-8 5"/>',
+  jump: '<path d="M8 39h32M24 36V9m-9 9 9-9 9 9"/><path d="M9 31h7m16 0h7"/>',
+  closet: '<rect x="10" y="5" width="28" height="37" rx="1"/><path d="M24 5v37M19 24h2m6 0h2M7 42h34"/>',
+  lightning: '<path d="m27 4-15 23h11l-3 17 16-24H25Z"/>',
+  crown: '<path d="m7 15 9 8 8-14 8 14 9-8-4 24H11Z"/><path d="M12 33h24"/>',
+  heart: '<path d="M24 40S7 30 7 18c0-9 12-12 17-4 5-8 17-5 17 4 0 12-17 22-17 22Z"/><path d="M13 25h7l4-9 5 16 4-7h7"/>',
+  paper: '<path d="M12 5h17l8 8v30H12Z"/><path d="M29 5v9h8M18 23h13m-13 7h13m-13 7h8"/>',
+  rain: '<path d="M12 28a8 8 0 0 1 2-16 11 11 0 0 1 21 3 6 6 0 0 1 1 13Z"/><path d="m15 34-3 7m14-7-3 7m14-7-3 7"/>',
+  medal: '<circle cx="24" cy="28" r="12"/><path d="m16 18-5-14 9 5m12 9 5-14-9 5M24 22v7m-4-3h8"/>',
+  badges: '<circle cx="18" cy="20" r="10"/><circle cx="31" cy="28" r="10"/><path d="m12 29-2 14 8-5 7 4-2-13m12 8 2 7 5-4 5 2-4-9"/>',
+  trophy: '<path d="M14 6h20v12c0 9-4 14-10 14s-10-5-10-14ZM24 32v8m-9 3h18M14 10H6v5c0 6 4 9 10 9m18-14h8v5c0 6-4 9-10 9"/>'
+};
 
 let currentDoor = 1;
 let mainFloorResumeDoor = 1;
@@ -196,9 +231,10 @@ function saveBadges() {
 function updateBadgeUi() {
   const renderBadge = badge => {
     const earned = earnedBadges.has(badge.id);
-    const state = earned ? 'badge earned' : 'badge';
+    const state = `badge${earned ? ' earned' : ''}${badge.difficult ? ' difficult' : ''}`;
     const status = earned ? 'EARNED' : 'LOCKED';
-    return `<div class="${state}" data-section="${badge.section}" title="${badge.popup || badge.name}"><span class="badge-medal" aria-hidden="true"></span><span class="badge-name">${badge.name}</span><span class="badge-status">${status}</span></div>`;
+    const description = `${badge.difficult ? 'Difficult badge: ' : ''}${badge.popup || badge.name}`;
+    return `<div class="${state}" data-section="${badge.section}" title="${description}"><span class="badge-medal" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${badgeIcons[badge.icon]}</svg></span><span class="badge-name">${badge.name}</span><span class="badge-status">${status}</span></div>`;
   };
   const renderSection = (sectionId, title) => {
     const sectionBadges = badges.filter(badge => badge.section === sectionId);

@@ -62,6 +62,7 @@ Open all 100 doors.
 ## Badges
 - Press **BADGES** in the lobby to open the wooden Badge Wall.
 - Earned badges light up on colorful plaques. Missing badges stay gray and locked.
+- Every badge has a matching code-drawn picture. Difficult badges have bright gold borders.
 - Scroll the shelves with your mouse wheel. Press **BACK** to return to the lobby.
 - **Game Starter:** enter the game for the first time.
 - **First Key:** find the Door 1 key.
