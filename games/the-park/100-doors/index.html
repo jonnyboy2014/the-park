@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>THE PARK</title>
+  <link rel="stylesheet" href="/doors/style.css">
+</head>
+<body>
+  <div id="lobby" class="screen">
+    <h1>THE PARK</h1>
+    <p id='boss-bouncer-progress'>Boss Bouncer: 0/10</p>
+    <div class="card">
+      <p>Door 1 is a normal room. Find the key in the drawer.</p>
+      <p>A monster appears at Door 26 and chases you for 8 doors.</p>
+      <p>After the chase, you get Speed Boots and a flashlight.</p>
+      <p>A boss appears at Door 50. Jump on its head 3 times.</p>
+      <p>The Door 25 monster returns at Door 75 with harder obstacles.</p>
+      <p>Later, some rooms are dark. Use the flashlight to find the key.</p>
+      <p>Door 65 has an optional garden door leading to THE GARDEN.</p>
+  <p>Door 95 has an optional office door leading to THE OFFICE.</p>
+      <button id='floors-button'>FLOORS</button>
+      <p class="rare-note">Rare Restaurant Room: 1.5% chance in calm rooms.</p>
+      <p class="rare-note">Rare Backpack: 1.3% chance, on the ground or a table.</p>
+      <button id="start-button">Open Door 1</button>
+      <button id="badges-button" aria-expanded="false" aria-controls="badge-screen">BADGES</button>
+      <p class="controls">A/D run · W/Space jump · S slide · E interact</p>
+    </div>
+  </div>
+
+  <div id="badge-screen" class="screen hidden">
+    <div class="card badge-index-card">
+      <p class="eyebrow">Collection</p>
+      <h2>BADGE INDEX</h2>
+      <p id="badge-index-count">0/11 badges</p>
+      <div id="badge-list" aria-label="Game badges"></div>
+      <button id="back-button">BACK</button>
+    </div>
+  </div>
+
+  <div id="game" class="hidden">
+    <canvas id="doors" width="960" height="640"></canvas>
+    <div id="hud">
+      <span id="door-number">Door 1 / 100</span>
+      <span id="mode">Normal room</span>
+      <div id="health-wrap">
+        <span id="health-number">100/100 HP</span>
+        <div id="health-bar"><div id="health-fill"></div></div>
+      </div>
+      <span id="badge-count">0/8 badges</span>
+    </div>
+    <div id="prompt"></div>
+    <div id="message"></div>
+    <div id="badge-toast"></div>
+    <div id="hotbar" aria-label="Item hotbar"></div>
+    <div id="backpack-storage" class="hidden" aria-label="Backpack storage"></div>
+  </div>
+
+  <div id="win-screen" class="hidden">
+    <p class="eyebrow">Door 100 opened</p>
+    <h1>YOU ESCAPED!</h1>
+    <div id="win-badges" aria-label="Earned badges"></div>
+    <button id="again-button">Play again</button>
+  </div>
+
+  <script src="/doors/game.js"></script>
+  <div id='floor-screen' class='screen hidden'>
+    <div class='card floor-index-card'>
+      <p class='eyebrow'>Explore</p>
+      <h2>FLOORS</h2>
+      <div id='floor-list'>
+        <button id='main-floor-button' class='floor-choice'>
+          <span>MAIN FLOOR</span>
+          <small>100 doors · monsters · bosses</small>
+        </button>
+        <button id='office-floor-button' class='floor-choice office-floor'>
+          <span>THE OFFICE</span>
+          <small>150 doors · cubicles · office quests</small>
+        </button>
+        <button id='garden-floor-button' class='floor-choice garden-floor'>
+          <span>THE GARDEN</span>
+          <small>50 doors · rain · vine flowers</small>
+        </button>
+      </div>
+      <button id='floor-back-button'>BACK</button>
+    </div>
+  </div>
+
+  <div id='garden-cutscene' class='cutscene-screen'>
+    <div class='cutscene-stage'>
+      <div class='cutscene-sky'></div>
+      <div class='cutscene-ground'></div>
+      <div class='cutscene-tree'>
+        <div class='tree-trunk'></div>
+        <div class='tree-canopy'></div>
+        <div class='tree-crack'></div>
+        <div class='meat-leg leg-1'></div>
+        <div class='meat-leg leg-2'></div>
+        <div class='meat-leg leg-3'></div>
+      </div>
+      <div class='cutscene-submarine'></div>
+      <p id='cutscene-caption'>You walk past the old tree...</p>
+      <button id='cutscene-continue' class='hidden'>Board the submarine</button>
+    </div>
+  </div>
+
+</body>
+</html>

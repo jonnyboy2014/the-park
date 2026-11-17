@@ -1,0 +1,16 @@
+# Local machine files
+.env
+.gitconfig
+.npm-cache/
+.openai-docs-cache/
+.tmp/
+tools/
+verify-clone/
+
+# Dependencies
+node_modules/
+app/node_modules/
+
+# Unrelated workspace projects
+app/
+games/browser-assistant/

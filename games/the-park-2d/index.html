@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Park - 2D</title>
+  <link rel="stylesheet" href="/2d/style.css">
+</head>
+<body>
+  <div id="lobby">
+    <h1>THE PARK</h1>
+    <div class="card">
+      <p>Run and jump through the park, hide from the keeper, find 4 keys, then unlock the gate.</p>
+      <button id="play-button">Enter Park</button>
+      <p class="controls">A/D or arrows run · W/Space jump · E interact · M map · Esc pause</p>
+    </div>
+  </div>
+
+  <div id="game" class="hidden">
+    <canvas id="park" width="960" height="640"></canvas>
+    <div id="hud">
+      <span>Find 4 keys</span>
+      <span id="keys">0 / 4</span>
+      <span id="status">Visible</span>
+      <span id="caught">Caught 0</span>
+    </div>
+    <div id="prompt"></div>
+    <div id="message"></div>
+  </div>
+
+  <div id="win-screen" class="hidden">
+    <p class="eyebrow">Gate unlocked</p>
+    <h1>YOU ESCAPED!</h1>
+    <button id="again-button">Play again</button>
+  </div>
+
+  <script src="/2d/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Park</title>
+  <link rel="stylesheet" href="/3d/style.css">
+  <script type="importmap">
+    {"imports": {"three": "/node_modules/three/build/three.module.js"}}
+  </script>
+</head>
+<body>
+  <div id="lobby">
+    <h1>THE PARK</h1>
+    <div class="lobby-card">
+      <p>Explore a blocky little park. Open doors, search cabinets, find 3 keys, and unlock the gate.</p>
+      <button id="play-button">Enter Park</button>
+      <p class="controls">WASD move · Mouse look · Space jump · E interact · Esc pause</p>
+    </div>
+  </div>
+
+  <div id="hud" class="hidden">
+    <div id="top-bar">
+      <span id="objective">Find 3 keys</span>
+      <span id="keys">0 / 3</span>
+    </div>
+    <div id="crosshair"></div>
+    <div id="prompt"></div>
+    <div id="message"></div>
+  </div>
+
+  <div id="win-screen" class="hidden">
+    <p class="eyebrow">Gate unlocked</p>
+    <h1>YOU ESCAPED!</h1>
+    <p>Nice searching! Next version can add a park keeper to hide from.</p>
+    <button id="again-button">Play again</button>
+  </div>
+
+  <script type="module" src="/3d/game.js"></script>
+</body>
+</html>
