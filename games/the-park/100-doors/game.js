@@ -42,7 +42,6 @@ const riftItemNames = {
 };
 let unlockedDoors = new Set();
 let rareRoomActive = false;
-let itemTestRoomActive = false;
 let backpackActive = false;
 let backpackOnTable = false;
 let teleporterActive = false;
@@ -63,7 +62,6 @@ let cellarMonsterActive = false;
 
 const lobby = document.querySelector('#lobby');
 const startButton = document.querySelector('#start-button');
-const door99Button = document.querySelector('#door-99-button');
 const badgesButton = document.querySelector('#badges-button');
 const badgeScreen = document.querySelector('#badge-screen');
 const backButton = document.querySelector('#back-button');
@@ -903,23 +901,21 @@ function startRoom() {
   bossActive = isMainFloor && (currentDoor === bossDoor || bossIsReturn);
   monsterActive = isMainFloor && currentDoor >= monsterStartDoor && currentDoor <= monsterEndDoor;
   const isRewardRoom = isMainFloor && currentDoor === rewardDoor;
-  itemTestRoomActive = isMainFloor && currentDoor === totalDoors - 1;
   const isRiftRoom = isMainFloor && currentDoor === totalDoors;
-  const isSpecialRoom = isMainFloor && (currentDoor === 1 || monsterActive || isRewardRoom || bossActive || itemTestRoomActive || isRiftRoom);
+  const isSpecialRoom = isMainFloor && (currentDoor === 1 || monsterActive || isRewardRoom || bossActive || isRiftRoom);
   rareRoomActive = isMainFloor && !isSpecialRoom && Math.random() < rareRoomChance;
-  closetVisible = isMainFloor && currentDoor !== 1 && !rareRoomActive && currentDoor !== rewardDoor && !bossActive && !itemTestRoomActive && !isRiftRoom;
+  closetVisible = isMainFloor && currentDoor !== 1 && !rareRoomActive && currentDoor !== rewardDoor && !bossActive && !isRiftRoom;
   rushActive = isMainFloor && currentDoor > rewardDoor && !isSpecialRoom && !rareRoomActive && Math.random() < rushChance;
   rushWarningTimer = rushActive ? 5 : 0;
   if (isMainFloor && !isSpecialRoom && !unlockedDoors.has(currentDoor) && Math.random() < unlockedDoorChance) {
     unlockedDoors.add(currentDoor);
   }
-  const isUnlockedDoor = isSubFloor || itemTestRoomActive || isRiftRoom || unlockedDoors.has(currentDoor) || rareRoomActive;
+  const isUnlockedDoor = isSubFloor || isRiftRoom || unlockedDoors.has(currentDoor) || rareRoomActive;
   roomIsDark = (isCellarFloor || (isMainFloor && currentDoor > rewardDoor
     && currentDoor % 5 === 0
     && currentDoor !== bossDoor
     && currentDoor !== bossReturnDoor
     && currentDoor !== 95
-    && !itemTestRoomActive
     && !isRiftRoom
     && !rareRoomActive));
   monster.x = -80;
@@ -962,16 +958,14 @@ function startRoom() {
   milkshake.taken = false;
   backpack.taken = false;
   teleporter.taken = false;
-  milkshake.x = itemTestRoomActive ? 300 : 406;
-  milkshake.y = itemTestRoomActive ? 490 : 468;
-  backpackActive = itemTestRoomActive || (isMainFloor && !isSpecialRoom && !hasBackpack && Math.random() < backpackSpawnChance);
-  backpackOnTable = !itemTestRoomActive && backpackActive && Math.random() < .5;
-  backpack.x = itemTestRoomActive ? 450 : backpackOnTable ? 410 : 420;
-  backpack.y = itemTestRoomActive ? 482 : backpackOnTable ? 450 : 500;
-  teleporterActive = itemTestRoomActive || (isOfficeFloor && !officeChaseActive && Math.random() < teleporterSpawnChance);
-  teleporterOnDesk = !itemTestRoomActive && teleporterActive && !officeSideRoomActive;
-  teleporter.x = itemTestRoomActive ? 600 : officeSideRoomActive ? 350 : 340;
-  teleporter.y = itemTestRoomActive ? 488 : officeSideRoomActive ? 452 : 470;
+  backpackActive = isMainFloor && !isSpecialRoom && !hasBackpack && Math.random() < backpackSpawnChance;
+  backpackOnTable = backpackActive && Math.random() < .5;
+  backpack.x = backpackOnTable ? 410 : 420;
+  backpack.y = backpackOnTable ? 450 : 500;
+  teleporterActive = isOfficeFloor && !officeChaseActive && Math.random() < teleporterSpawnChance;
+  teleporterOnDesk = teleporterActive && !officeSideRoomActive;
+  teleporter.x = officeSideRoomActive ? 350 : 340;
+  teleporter.y = officeSideRoomActive ? 452 : 470;
 
   boss.x = 520;
   boss.height = bossIsReturn ? 140 : 112;
@@ -1152,12 +1146,8 @@ function startRoom() {
   if (isMainFloor && rareRoomActive) {
     awardBadge('restaurant-finder');
     showMessage('Rare Restaurant Room! Grab the milkshake.');
-  } else if (isMainFloor && isUnlockedDoor && !itemTestRoomActive && !isRiftRoom) {
+  } else if (isMainFloor && isUnlockedDoor && !isRiftRoom) {
     showMessage('This door is already unlocked. Walk right.');
-  }
-
-  if (itemTestRoomActive) {
-    showMessage('TEST ROOM: grab every item, then take it to the blue RIFT at Door 100!');
   }
 
   if (isRiftRoom) {
@@ -1232,8 +1222,6 @@ function updateHud() {
       : `Boss fight · ${boss.health} hits left`;
   } else if (currentDoor === rewardDoor) {
     modeText.textContent = rewardClaimed ? 'Reward room · Speed Boots active' : 'Reward room · open the chest';
-  } else if (itemTestRoomActive) {
-    modeText.textContent = 'TEST ROOM: all items';
   } else if (currentDoor === totalDoors) {
     modeText.textContent = riftItem ? `RIFT: ${riftItem.name}` : 'RIFT: empty';
   } else if (roomIsDark) {
@@ -1335,7 +1323,7 @@ function updateTarget() {
     if (currentFloor === 'main' && currentDoor === cellarEntranceDoor) targets.push(cellarStaircase);
     if (currentFloor === 'cellar' && currentDoor === totalCellarDoors) targets.push(cellarExit);
     if (currentFloor === 'office' && !officeSideRoomActive && currentDoor % 15 === 0) targets.push(storageDoor);
-    if ((rareRoomActive || itemTestRoomActive) && !milkshake.taken) targets.push(milkshake);
+    if (rareRoomActive && !milkshake.taken) targets.push(milkshake);
     if (backpackActive && !backpack.taken) targets.push(backpack);
     if (teleporterActive && !teleporter.taken) targets.push(teleporter);
     if (closetVisible) targets.push(closet);
@@ -2290,30 +2278,8 @@ function drawPlatforms() {
   }
 }
 
-function drawItemTestStations() {
-  if (!itemTestRoomActive) return;
-  const stations = [
-    { item: milkshake, label: 'MILKSHAKE' },
-    { item: backpack, label: 'BACKPACK' },
-    { item: teleporter, label: 'TELEPORTER' }
-  ];
-
-  context.save();
-  context.font = 'bold 10px monospace';
-  context.textAlign = 'center';
-  for (const station of stations) {
-    const item = station.item;
-    drawOutlinedRect(item.x - 18, 520, item.width + 36, 12, '#8a6238', '#3d240d');
-    drawRect(item.x - 10, 532, 8, 28, '#5c4028');
-    drawRect(item.x + item.width + 2, 532, 8, 28, '#5c4028');
-    context.fillStyle = '#d8f7ff';
-    context.fillText(station.label, item.x + item.width / 2, 552);
-  }
-  context.restore();
-}
-
 function drawMilkshake() {
-  if ((!rareRoomActive && !itemTestRoomActive) || milkshake.taken) return;
+  if (!rareRoomActive || milkshake.taken) return;
   drawRect(milkshake.x + 14, milkshake.y - 14, 4, 20, '#ff5252');
   drawOutlinedRect(milkshake.x, milkshake.y, milkshake.width, milkshake.height, '#ff9ec4', '#6b2b45');
   drawRect(milkshake.x + 2, milkshake.y + 6, 18, 18, '#ffd0e5');
@@ -2338,12 +2304,10 @@ function drawBackpack() {
 function drawTeleporter() {
   if (!teleporterActive || teleporter.taken) return;
 
-  if (!itemTestRoomActive) {
-    if (teleporterOnDesk) {
-      drawOutlinedRect(teleporter.x - 12, teleporter.y + teleporter.height, teleporter.width + 24, 12, '#8a6238', '#3d240d');
-    } else {
-      drawOutlinedRect(teleporter.x - 12, teleporter.y + teleporter.height, teleporter.width + 24, 16, '#a97446', '#3d240d');
-    }
+  if (teleporterOnDesk) {
+    drawOutlinedRect(teleporter.x - 12, teleporter.y + teleporter.height, teleporter.width + 24, 12, '#8a6238', '#3d240d');
+  } else {
+    drawOutlinedRect(teleporter.x - 12, teleporter.y + teleporter.height, teleporter.width + 24, 16, '#a97446', '#3d240d');
   }
 
   drawOutlinedRect(teleporter.x + 3, teleporter.y + 18, teleporter.width - 6, 12, '#7c8792', '#20262e');
@@ -2597,7 +2561,7 @@ function drawVineMonster() {
 function drawFurniture() {
   if (currentFloor !== 'main') return;
   if (rareRoomActive) return;
-  if (monsterActive || bossActive || currentDoor === rewardDoor || itemTestRoomActive || currentDoor === totalDoors) return;
+  if (monsterActive || bossActive || currentDoor === rewardDoor || currentDoor === totalDoors) return;
 
   const variant = Math.floor((currentDoor - 1) / 10) % 5;
   const offsetX = ((currentDoor * 17) % 3) * 35;
@@ -3480,14 +3444,13 @@ function drawRoom() {
   drawFurniture();
   drawCloset();
   drawPlatforms();
-  drawItemTestStations();
   drawMilkshake();
   drawBackpack();
   drawTeleporter();
   drawRift();
 
   if (currentFloor === 'main' && currentDoor === rewardDoor) drawRewardChest();
-  else if (currentFloor === 'main' && !rareRoomActive && !itemTestRoomActive && currentDoor !== bossDoor && currentDoor !== bossReturnDoor && currentDoor !== totalDoors) drawCabinet();
+  else if (currentFloor === 'main' && !rareRoomActive && currentDoor !== bossDoor && currentDoor !== bossReturnDoor && currentDoor !== totalDoors) drawCabinet();
   for (const obstacle of obstacles) drawObstacle(obstacle);
   drawDoor();
   if (currentFloor === 'main' && currentDoor === 65) drawGardenDoor();
@@ -3509,10 +3472,10 @@ function drawRoom() {
   context.restore();
 }
 
-function startGame(startDoor = 1) {
+function startGame() {
   initMusic();
   currentFloor = 'main';
-  currentDoor = startDoor;
+  currentDoor = 1;
   currentFloorDamageFree = true;
   officeSideRoomActive = false;
   officeSideRoomReturnDoor = 1;
@@ -3641,8 +3604,7 @@ function resumeMainFloor() {
   startGame();
 }
 
-startButton.addEventListener('click', () => startGame());
-door99Button.addEventListener('click', () => startGame(totalDoors - 1));
+startButton.addEventListener('click', startGame);
 againButton.addEventListener('click', () => window.location.reload());
 
 badgesButton.addEventListener('click', () => {

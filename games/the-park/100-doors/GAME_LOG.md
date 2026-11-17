@@ -619,3 +619,17 @@
 
 **Next upgrade**
 - Add a soft sound when the RIFT stores or returns an item.
+
+## 2026-11-17 - Door 99 test setup removed
+
+**Milestone:** Removed the temporary item-testing shortcut after it passed testing.
+
+**What changed**
+- Removed the DOOR 99 lobby button and its special test-room rules.
+- Removed the guaranteed Milkshake, Rare Backpack, Teleporter, and display tables from Door 99.
+- Returned Door 99 to normal room generation.
+- Kept the persistent blue RIFT at Door 100 unchanged.
+- Verified normal Door 99 generation and another successful RIFT save-and-return cycle.
+
+**Next upgrade**
+- Add a soft sound when the RIFT stores or returns an item.
