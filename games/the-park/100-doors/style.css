@@ -179,12 +179,19 @@ button:hover { background: #7ee583; }
 .office-floor span { color: #d8f7ff; }
 
 .badge-index-card {
-  width: min(680px, 92vw);
-  max-height: 86vh;
+  width: min(860px, 94vw);
+  max-width: none;
+  max-height: 88vh;
   overflow-y: scroll;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
-  scrollbar-color: #ffd84d #22303d;
+  scrollbar-color: #ffd84d #6b3b17;
+  border: 7px solid #6b3b17;
+  border-radius: 12px;
+  background:
+    repeating-linear-gradient(0deg, rgba(92,45,12,.08) 0 2px, transparent 2px 9px),
+    linear-gradient(90deg, #a9652c, #d79b53 18%, #c1843f 50%, #d79b53 82%, #a9652c);
+  box-shadow: inset 0 0 0 3px #e2ad67, inset 0 0 42px rgba(72,34,8,.38), 0 24px 60px rgba(0,0,0,.5);
 }
 
 .badge-index-card::-webkit-scrollbar {
@@ -192,25 +199,42 @@ button:hover { background: #7ee583; }
 }
 
 .badge-index-card::-webkit-scrollbar-track {
-  background: #22303d;
+  background: #6b3b17;
 }
 
 .badge-index-card::-webkit-scrollbar-thumb {
-  border: 2px solid #22303d;
+  border: 2px solid #6b3b17;
   border-radius: 8px;
   background: #ffd84d;
 }
 
+#badge-screen .eyebrow {
+  margin-bottom: 4px;
+  color: #563111;
+  font-weight: 900;
+}
+
 .badge-index-card h2 {
-  margin: 4px 0 8px;
-  color: #ffd84d;
-  font-size: clamp(34px, 7vw, 54px);
+  display: table;
+  margin: 4px auto 10px;
+  padding: 6px 24px;
+  border: 3px solid #6b430b;
+  border-radius: 6px;
+  background: linear-gradient(#fff0a6, #e3aa32 55%, #a96c12);
+  color: #4b2c08;
+  font-size: clamp(28px, 6vw, 44px);
   letter-spacing: 4px;
+  text-shadow: 0 1px 0 rgba(255,255,255,.55);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.55), 0 5px 0 #57320e, 0 9px 16px rgba(61,29,6,.35);
 }
 
 #badge-index-count {
-  margin: 0 0 14px;
-  color: #9fb6c6;
+  display: table;
+  margin: 0 auto 18px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(255,238,187,.58);
+  color: #4d2c0e;
   font-weight: 800;
 }
 
@@ -221,50 +245,279 @@ button:hover { background: #7ee583; }
 .hidden { display: none !important; }
 
 #win-badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 16px;
+  width: min(860px, 92vw);
+  max-height: 55vh;
+  margin: 16px auto 0;
+  padding: 14px;
+  overflow-y: auto;
+  border: 5px solid #6b3b17;
+  border-radius: 10px;
+  background: #bd7c39;
 }
 
 .badge-section {
-  margin-top: 18px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255,255,255,.12);
+  margin: 0 0 22px;
 }
 
 .badge-section h3 {
-  margin: 0 0 8px;
-  color: #9be7ff;
-  font-size: 15px;
+  display: table;
+  margin: 0 auto 12px;
+  padding: 5px 18px;
+  border: 2px solid #e3ad5c;
+  border-radius: 4px;
+  background: linear-gradient(#7c471e, #4e290f);
+  color: #ffe6a3;
+  font-size: 14px;
   letter-spacing: 2px;
+  text-shadow: 0 2px 2px rgba(0,0,0,.5);
+  box-shadow: 0 3px 5px rgba(66,31,7,.35);
+}
+
+.badge-shelf {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 0 14px 20px;
+}
+
+.badge-shelf::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 18px;
+  background: rgba(84,41,10,.1);
+  box-shadow: inset 0 -14px 18px rgba(70,32,7,.22);
+  pointer-events: none;
+}
+
+.badge-shelf::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 18px;
+  border: 2px solid #633813;
+  border-radius: 2px;
+  background: linear-gradient(#efbd78 0 18%, #b87536 22% 48%, #83501f 52% 72%, #543012 76%);
+  box-shadow: 0 9px 12px rgba(57,27,6,.4), inset 0 2px 0 rgba(255,237,188,.55);
 }
 
 .badge-grid {
-  display: flex;
-  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 142px));
   justify-content: center;
-  gap: 8px;
+  align-items: end;
+  gap: 14px;
 }
 
 .badge {
-  padding: 6px 10px;
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: 999px;
-  background: rgba(255,255,255,.06);
-  color: #8fa5b5;
+  --badge-color: #9a6038;
+  --badge-dark: #4e2c1b;
+  --badge-accent: #ffd84d;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 166px;
+  min-width: 0;
+  padding: 11px 8px 9px;
+  border: 2px solid var(--badge-dark);
+  border-radius: 5px 5px 2px 2px;
+  background: linear-gradient(90deg, var(--badge-dark), var(--badge-color) 12%, var(--badge-color) 86%, var(--badge-dark));
+  color: #fff7db;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
+  text-shadow: 0 2px 2px rgba(0,0,0,.48);
+  box-shadow: inset 3px 0 0 rgba(255,255,255,.12), inset -3px 0 0 rgba(0,0,0,.16), 0 7px 8px rgba(48,22,5,.38);
+  transition: transform .16s ease, filter .16s ease;
+}
+
+.badge:hover {
+  transform: translateY(-5px);
+}
+
+.badge::before {
+  content: '';
+  width: 72%;
+  height: 4px;
+  margin-bottom: 1px;
+  border-radius: 2px;
+  background: var(--badge-accent);
+  box-shadow: 0 1px 0 rgba(255,255,255,.28);
+}
+
+.badge::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(255,235,177,.28);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.badge[data-section='main'] {
+  --badge-color: #c94b38;
+  --badge-dark: #632b27;
+  --badge-accent: #ffd166;
+}
+
+.badge[data-section='cellar'] {
+  --badge-color: #3d6170;
+  --badge-dark: #203640;
+  --badge-accent: #9be7ff;
+}
+
+.badge[data-section='garden'] {
+  --badge-color: #3d874c;
+  --badge-dark: #214a2b;
+  --badge-accent: #b8f7c1;
+}
+
+.badge[data-section='office'] {
+  --badge-color: #357aa0;
+  --badge-dark: #1e4058;
+  --badge-accent: #9be7ff;
+}
+
+.badge[data-section='fun'] {
+  --badge-color: #8750a5;
+  --badge-dark: #49265f;
+  --badge-accent: #ffd84d;
+}
+
+.badge-medal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  margin: 3px 0 2px;
+  border: 3px solid #2b2118;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #67707a, #37424b 62%, #20282e);
+  box-shadow: 0 3px 8px rgba(0,0,0,.4);
+}
+
+.badge-medal::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 9px;
+  width: 14px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.36);
+  transform: rotate(-35deg);
+}
+
+.badge-medal::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 24px;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  background: #a9b0b5;
+}
+
+.badge-name {
+  display: grid;
+  place-items: center;
+  min-height: 30px;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.badge-status {
+  margin-top: auto;
+  padding: 3px 6px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 3px;
+  background: rgba(0,0,0,.25);
+  color: #d2cabb;
+  font-size: 9px;
+  letter-spacing: 1.5px;
 }
 
 .badge.earned {
   border-color: #ffd84d;
-  background: rgba(255,216,77,.18);
   color: #ffe58a;
+  box-shadow: inset 3px 0 0 rgba(255,255,255,.16), inset -3px 0 0 rgba(0,0,0,.14), 0 0 18px rgba(255,216,77,.32), 0 8px 10px rgba(48,22,5,.4);
 }
 
-#win-badges .badge { font-size: 14px; }
+.badge.earned::after {
+  border-color: rgba(255,216,77,.42);
+}
+
+.badge.earned .badge-medal {
+  border-color: #4c3608;
+  background: radial-gradient(circle at 32% 30%, #fff8d0, #ffd84d 46%, #b57f00);
+  box-shadow: 0 0 18px rgba(255,216,77,.45), inset 0 0 8px rgba(255,255,255,.25);
+}
+
+.badge.earned .badge-medal::after {
+  background: #fff8d0;
+}
+
+.badge.earned .badge-status {
+  border-color: rgba(255,216,77,.55);
+  color: #fff2a8;
+}
+
+.badge:not(.earned) {
+  --badge-color: #686157;
+  --badge-dark: #38342f;
+  --badge-accent: #9a927f;
+  color: #d1c6b3;
+  filter: saturate(.45) brightness(.82);
+}
+
+#back-button {
+  background: #ffd84d;
+  color: #4a2a0d;
+  box-shadow: 0 4px 0 #8b5a16;
+}
+
+#back-button:hover { background: #ffe78d; }
+
+@media (max-width: 620px) {
+  .badge-index-card {
+    padding: 18px 10px;
+    border-width: 5px;
+  }
+
+  .badge-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .badge-shelf { padding: 0 5px 18px; }
+
+  .badge {
+    gap: 4px;
+    height: 148px;
+    padding: 9px 4px 7px;
+    font-size: 10px;
+  }
+
+  .badge-medal {
+    width: 42px;
+    height: 42px;
+  }
+
+  .badge-medal::after {
+    width: 20px;
+    height: 20px;
+  }
+
+  .badge-status {
+    padding: 2px 4px;
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+}
 
 #game { position: relative; }
 canvas {

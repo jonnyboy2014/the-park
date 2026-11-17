@@ -30,6 +30,9 @@ Open all 100 doors.
 - After the reward room, Rocket can appear in calm rooms. Hide in a closet when the warning appears.
 - Rocket gives you a 5-second countdown and moves slower, giving you time to hide.
 - Rocket looks like a melted human skull with glowing magma cracks and lava drips.
+- Door 40 has a hidden staircase in the middle of the room. Press `E` to enter THE CELLAR.
+- THE CELLAR is a separate 10-door floor with dark rooms, jumpable crates, and low beams to slide under.
+- Use the flashlight in THE CELLAR. Finishing it returns you to Main Door 40.
 - Door 65 has an optional garden door in the middle of the room. Press `E` to enter THE GARDEN.
 - Press **FLOORS** in the lobby to open the floor picker. Press **THE GARDEN** to teleport straight to Garden Door 1.
 - Door 95 has an optional office door in the middle of the room. Press `E` to enter THE OFFICE.
@@ -57,8 +60,9 @@ Open all 100 doors.
 - Door 1 stays locked, and chase, reward, and boss rooms keep their special rules.
 
 ## Badges
-- Press **BADGES** in the lobby to open a separate Badge Index screen. It lists every earned and missing badge.
-- The Badge Index scrolls with your mouse wheel. Press **BACK** to return to the lobby.
+- Press **BADGES** in the lobby to open the wooden Badge Wall.
+- Earned badges light up on colorful plaques. Missing badges stay gray and locked.
+- Scroll the shelves with your mouse wheel. Press **BACK** to return to the lobby.
 - **Game Starter:** enter the game for the first time.
 - **First Key:** find the Door 1 key.
 - **Chase Complete:** reach the reward room after Door 33.
@@ -71,6 +75,8 @@ Open all 100 doors.
 - **Outside Person:** enter THE GARDEN.
 - **Mountain Runner:** survive the five Garden ground-chase doors.
 - **Touched Grass:** finish all 50 doors in THE GARDEN.
+- **Cellar Explorer:** find the hidden stairs at Main Door 40.
+- **Cellar Clear:** escape all 10 rooms in THE CELLAR.
 - **Office Worker:** enter THE OFFICE.
 - **Storage Explorer:** find a storage sideroom.
 - **Teleporter Finder:** collect the rare Teleporter.
@@ -93,7 +99,7 @@ Open all 100 doors.
 - **Completionist:** earn every other badge.
 
 Badges save in your browser, so they stay after you refresh the page.
-The Badge Index has separate MAIN FLOOR, THE GARDEN, THE OFFICE, and FUN & RANDOM sections.
+The Badge Wall has separate MAIN FLOOR, THE CELLAR, THE GARDEN, THE OFFICE, and FUN & RANDOM shelves.
 
 ## Controls
 - A/D or left/right arrow: run

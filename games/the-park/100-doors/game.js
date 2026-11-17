@@ -16,6 +16,8 @@ const bossReturnDoor = 75;
 const bossImageId = 204734852;
 const totalGardenDoors = 50;
 const totalOfficeDoors = 150;
+const totalCellarDoors = 10;
+const cellarEntranceDoor = 40;
 const officeChaseStartDoor = 25;
 const officeChaseEndDoor = 32;
 const gardenChaseStartDoor = 25;
@@ -94,6 +96,8 @@ const badges = [
   { id: 'submarine-pilot', name: 'Submarine Pilot', popup: 'You survived the submarine chase!', section: 'garden' },
   { id: 'mountain-runner', name: 'Mountain Runner', popup: 'You survived the 5-door ground chase!', section: 'garden' },
   { id: 'touched-grass', name: 'Touched Grass', popup: 'You beat THE GARDEN!', section: 'garden' },
+  { id: 'cellar-explorer', name: 'Cellar Explorer', popup: 'You found the hidden stairs!', section: 'cellar' },
+  { id: 'cellar-clear', name: 'Cellar Clear', popup: 'You escaped the dark cellar!', section: 'cellar' },
   { id: 'office-worker', name: 'Office Worker', popup: 'You entered THE OFFICE!', section: 'office' },
   { id: 'storage-explorer', name: 'Storage Explorer', popup: 'You found a storage sideroom!', section: 'office' },
   { id: 'teleporter-finder', name: 'Teleporter Finder', popup: 'You found the rare Teleporter!', section: 'office' },
@@ -191,14 +195,22 @@ function saveBadges() {
 
 function updateBadgeUi() {
   const renderBadge = badge => {
-    const state = earnedBadges.has(badge.id) ? 'badge earned' : 'badge';
-    return `<span class="${state}">${badge.name}</span>`;
+    const earned = earnedBadges.has(badge.id);
+    const state = earned ? 'badge earned' : 'badge';
+    const status = earned ? 'EARNED' : 'LOCKED';
+    return `<div class="${state}" data-section="${badge.section}" title="${badge.popup || badge.name}"><span class="badge-medal" aria-hidden="true"></span><span class="badge-name">${badge.name}</span><span class="badge-status">${status}</span></div>`;
   };
   const renderSection = (sectionId, title) => {
     const sectionBadges = badges.filter(badge => badge.section === sectionId);
-    return `<div class="badge-section"><h3>${title}</h3><div class="badge-grid">${sectionBadges.map(renderBadge).join('')}</div></div>`;
+    const shelves = [];
+    for (let index = 0; index < sectionBadges.length; index += 4) {
+      const shelfBadges = sectionBadges.slice(index, index + 4);
+      shelves.push(`<div class="badge-shelf"><div class="badge-grid">${shelfBadges.map(renderBadge).join('')}</div></div>`);
+    }
+    return `<section class="badge-section"><h3>${title}</h3>${shelves.join('')}</section>`;
   };
   badgeList.innerHTML = renderSection('main', 'MAIN FLOOR')
+    + renderSection('cellar', 'THE CELLAR')
     + renderSection('garden', 'THE GARDEN')
     + renderSection('office', 'THE OFFICE')
     + renderSection('fun', 'FUN & RANDOM');
@@ -568,6 +580,22 @@ const storageDoor = {
   kind: 'storage-door'
 };
 
+const cellarStaircase = {
+  x: 520,
+  y: 430,
+  width: 110,
+  height: 130,
+  kind: 'cellar-staircase'
+};
+
+const cellarExit = {
+  x: 620,
+  y: 430,
+  width: 110,
+  height: 130,
+  kind: 'cellar-exit'
+};
+
 const officeMonster = {
   x: -140,
   y: 450,
@@ -648,7 +676,8 @@ function startRoom() {
   const isMainFloor = currentFloor === 'main';
   const isGardenFloor = currentFloor === 'garden';
   const isOfficeFloor = currentFloor === 'office';
-  const isSubFloor = isGardenFloor || isOfficeFloor;
+  const isCellarFloor = currentFloor === 'cellar';
+  const isSubFloor = isGardenFloor || isOfficeFloor || isCellarFloor;
   bossIsReturn = isMainFloor && currentDoor === bossReturnDoor;
   bossActive = isMainFloor && (currentDoor === bossDoor || bossIsReturn);
   monsterActive = isMainFloor && currentDoor >= monsterStartDoor && currentDoor <= monsterEndDoor;
@@ -662,12 +691,12 @@ function startRoom() {
     unlockedDoors.add(currentDoor);
   }
   const isUnlockedDoor = isSubFloor || unlockedDoors.has(currentDoor) || rareRoomActive;
-  roomIsDark = isMainFloor && currentDoor > rewardDoor
+  roomIsDark = (isCellarFloor || (isMainFloor && currentDoor > rewardDoor
     && currentDoor % 5 === 0
     && currentDoor !== bossDoor
     && currentDoor !== bossReturnDoor
     && currentDoor !== 95
-    && !rareRoomActive;
+    && !rareRoomActive));
   monster.x = -80;
   monster.speed = 135 + (currentDoor - monsterStartDoor) * 6;
   keyFound = isSubFloor || monsterActive || isRewardRoom || bossActive || isUnlockedDoor || rareRoomActive;
@@ -827,6 +856,20 @@ function startRoom() {
       : { type: 'beam', x: 650 + shift, y: 512, width: 120, height: 22 });
   }
 
+  if (isCellarFloor) {
+    const pattern = currentDoor % 3;
+    if (pattern === 1) {
+      obstacles.push({ type: 'crate', x: 260, y: 520, width: 40, height: 40 });
+      obstacles.push({ type: 'beam', x: 480, y: 512, width: 120, height: 22 });
+    } else if (pattern === 2) {
+      obstacles.push({ type: 'beam', x: 320, y: 512, width: 120, height: 22 });
+      obstacles.push({ type: 'crate', x: 580, y: 520, width: 40, height: 40 });
+    } else {
+      obstacles.push({ type: 'crate', x: 220, y: 520, width: 40, height: 40 });
+      obstacles.push({ type: 'crate', x: 620, y: 520, width: 40, height: 40 });
+    }
+  }
+
   if (bossIsReturn) {
     obstacles.push(
       { type: 'spike', x: 170, y: 530, width: 30, height: 30, originX: 170, moveRange: 70, moveSpeed: 120, moveDirection: 1 },
@@ -855,6 +898,10 @@ function startRoom() {
     showMessage(vineMonsterActive
       ? `THE GARDEN Â· giant vine flower! Door ${currentDoor}/${totalGardenDoors}`
       : `THE GARDEN Â· Door ${currentDoor}/${totalGardenDoors}`);
+  }
+
+  if (isCellarFloor) {
+    showMessage(`THE CELLAR · Dark room ${currentDoor}/${totalCellarDoors}`);
   }
 
   if (isMainFloor && isRewardRoom && !rewardClaimed) {
@@ -890,6 +937,14 @@ function startRoom() {
 }
 
 function updateHud() {
+  if (currentFloor === 'cellar') {
+    doorNumber.textContent = `THE CELLAR · ${currentDoor}/${totalCellarDoors}`;
+    modeText.textContent = currentDoor === totalCellarDoors
+      ? 'Cellar exit · climb the stairs'
+      : 'Dark cellar · use the flashlight';
+    return;
+  }
+
   if (currentFloor === 'office') {
     doorNumber.textContent = `THE OFFICE · ${currentDoor}/${totalOfficeDoors}`;
     modeText.textContent = officeSideRoomActive
@@ -1026,6 +1081,8 @@ function updateTarget() {
   } else {
     if (currentFloor === 'main' && currentDoor === 65) targets.push(gardenDoor);
     if (currentFloor === 'main' && currentDoor === 95) targets.push(officeDoor);
+    if (currentFloor === 'main' && currentDoor === cellarEntranceDoor) targets.push(cellarStaircase);
+    if (currentFloor === 'cellar' && currentDoor === totalCellarDoors) targets.push(cellarExit);
     if (currentFloor === 'office' && !officeSideRoomActive && currentDoor % 15 === 0) targets.push(storageDoor);
     if (rareRoomActive && !milkshake.taken) targets.push(milkshake);
     if (backpackActive && !backpack.taken) targets.push(backpack);
@@ -1073,6 +1130,10 @@ function updateTarget() {
     promptElement.textContent = 'E: Enter THE GARDEN';
   } else if (currentTarget === officeDoor) {
     promptElement.textContent = 'E: Enter THE OFFICE';
+  } else if (currentTarget === cellarStaircase) {
+    promptElement.textContent = 'E: Climb down to THE CELLAR';
+  } else if (currentTarget === cellarExit) {
+    promptElement.textContent = 'E: Climb up to the Main Floor';
   } else if (currentTarget === storageDoor) {
     promptElement.textContent = 'E: Enter storage sideroom';
   } else if (currentTarget === cabinet) {
@@ -1117,6 +1178,26 @@ function interact() {
     awardBadge('outside-person');
     startRoom();
     showMessage('Entering THE GARDEN! 50 doors ahead.');
+    return;
+  }
+
+  if (currentTarget === cellarStaircase) {
+    currentFloor = 'cellar';
+    currentDoor = 1;
+    currentFloorDamageFree = true;
+    awardBadge('cellar-explorer');
+    startRoom();
+    showMessage('Entering THE CELLAR! The stairs grow cold and dark.');
+    return;
+  }
+
+  if (currentTarget === cellarExit) {
+    currentFloor = 'main';
+    currentDoor = cellarEntranceDoor;
+    currentFloorDamageFree = true;
+    awardBadge('cellar-clear');
+    startRoom();
+    showMessage('You climbed back to the Main Floor.');
     return;
   }
 
@@ -1202,6 +1283,23 @@ function interact() {
 }
 
 function nextDoor() {
+  if (currentFloor === 'cellar') {
+    if (currentDoor >= totalCellarDoors) {
+      if (currentFloorDamageFree) awardBadge('no-hit-wonder');
+      currentFloor = 'main';
+      currentDoor = cellarEntranceDoor;
+      currentFloorDamageFree = true;
+      awardBadge('cellar-clear');
+      startRoom();
+      showMessage('You escaped THE CELLAR! Back at Main Door 40.');
+      return;
+    }
+
+    currentDoor++;
+    startRoom();
+    return;
+  }
+
   if (currentFloor === 'office') {
     if (officeSideRoomActive) {
       officeSideRoomActive = false;
@@ -1614,6 +1712,36 @@ function drawStorageDoor() {
   drawRect(storageDoor.x + 7, storageDoor.y + 36, 36, 3, '#5c4028');
   drawRect(storageDoor.x + 12, storageDoor.y + 54, 26, 14, '#8a6238');
   drawRect(storageDoor.x + 18, storageDoor.y + 60, 14, 4, '#ffd84d');
+}
+
+function drawCellarStaircase() {
+  const stairs = cellarStaircase;
+  drawRect(stairs.x - 8, stairs.y - 8, stairs.width + 16, stairs.height + 8, '#171d21');
+  drawOutlinedRect(stairs.x, stairs.y, stairs.width, stairs.height, '#242c31', '#0c1114');
+
+  for (let step = 0; step < 6; step++) {
+    const stepY = stairs.y + 18 + step * 18;
+    const stepX = stairs.x + 10 + step * 12;
+    drawOutlinedRect(stepX, stepY, stairs.width - 20 - step * 24, 14, step % 2 === 0 ? '#38454c' : '#2e3940', '#101619');
+  }
+
+  drawRect(stairs.x + stairs.width / 2 - 6, stairs.y + 4, 12, 10, '#7ee7ff');
+  drawRect(stairs.x + stairs.width / 2 - 2, stairs.y + 7, 4, 4, '#f6fbff');
+}
+
+function drawCellarExit() {
+  const stairs = cellarExit;
+  drawRect(stairs.x - 8, stairs.y - 8, stairs.width + 16, stairs.height + 8, '#171d21');
+  drawOutlinedRect(stairs.x, stairs.y, stairs.width, stairs.height, '#26333a', '#0c1114');
+
+  for (let step = 0; step < 6; step++) {
+    const stepY = stairs.y + 18 + step * 18;
+    const stepX = stairs.x + 10 + step * 12;
+    drawOutlinedRect(stepX, stepY, stairs.width - 20 - step * 24, 14, step % 2 === 0 ? '#42525a' : '#333f46', '#101619');
+  }
+
+  drawRect(stairs.x + stairs.width / 2 - 8, stairs.y + 2, 16, 12, '#ffd84d');
+  drawRect(stairs.x + stairs.width / 2 - 4, stairs.y + 6, 8, 5, '#fff6cf');
 }
 
 function drawPencil(x, y, color) {
@@ -2499,6 +2627,17 @@ function drawBoss() {
 }
 
 function currentRoomTheme() {
+  if (currentFloor === 'cellar') {
+    return {
+      wallTop: '#0d1114',
+      wallMiddle: '#182024',
+      wallLower: '#222a30',
+      floor: '#2c3438',
+      floorLine: '#48535a',
+      detail: 'cellar'
+    };
+  }
+
   if (currentFloor === 'office' && officeSideRoomActive) {
     return {
       wallTop: '#1b2530',
@@ -2745,6 +2884,13 @@ function drawRoomDetails(theme) {
     drawRect(160, 270, 50, 30, '#c8e0ff');
     drawRect(520, 250, 80, 60, '#8b5a2b');
     drawRect(535, 262, 50, 36, '#ffd9a0');
+  } else if (theme.detail === 'cellar') {
+    drawRect(80, 250, 180, 14, '#4a5a64');
+    drawRect(620, 290, 180, 14, '#4a5a64');
+    drawRect(150, 470, 60, 50, '#3b454c');
+    drawRect(680, 450, 70, 70, '#3b454c');
+    drawRect(280, 430, 16, 4, 'rgba(120,180,220,.18)');
+    drawRect(560, 470, 12, 4, 'rgba(120,180,220,.14)');
   } else if (theme.detail === 'plants') {
     drawRect(140, 480, 30, 50, '#3a5a34');
     drawRect(150, 450, 10, 40, '#487a41');
@@ -2815,6 +2961,8 @@ function drawRoom() {
   drawDoor();
   if (currentFloor === 'main' && currentDoor === 65) drawGardenDoor();
   if (currentFloor === 'main' && currentDoor === 95) drawOfficeDoor();
+  if (currentFloor === 'main' && currentDoor === cellarEntranceDoor) drawCellarStaircase();
+  if (currentFloor === 'cellar' && currentDoor === totalCellarDoors) drawCellarExit();
   if (currentFloor === 'office' && !officeSideRoomActive && currentDoor % 15 === 0) drawStorageDoor();
   drawMonster();
   drawBoss();

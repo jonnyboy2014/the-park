@@ -436,3 +436,29 @@
 
 **Next upgrade**
 - Show live floor progress inside each floor card.
+
+## 2026-11-17 - First playable Cellar
+
+**Milestone:** Added a hidden 10-room Cellar below the Main Floor.
+
+**What changed**
+- Added a staircase at Main Door 40 and a safe return staircase in Cellar Door 10.
+- Added dark Cellar rooms with flashlight lighting, crates, beams, and stone scenery.
+- Added Cellar Explorer and Cellar Clear badges.
+- Returning from the Cellar restores Main Door 40 without clearing badge progress.
+
+**Next upgrade**
+- Add a unique Cellar monster.
+
+## 2026-11-17 - Wooden Badge Wall
+
+**Milestone:** Turned the Badge Index into a coded wooden display wall.
+
+**What changed**
+- Added wooden shelves with four upright badge plaques per shelf.
+- Added section colors, bright earned medals, and gray locked plaques.
+- Added EARNED and LOCKED labels plus short hover descriptions.
+- Checked the wall at desktop and phone sizes with all 35 badges.
+
+**Next upgrade**
+- Give each badge its own CSS-drawn icon.
