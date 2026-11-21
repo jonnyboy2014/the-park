@@ -33,12 +33,23 @@ const unlockedDoorChance = .7;
 const rareRoomChance = .015;
 const backpackSpawnChance = .013;
 const teleporterSpawnChance = .015;
+const fantaJugSpawnChance = .005;
+const bossStompsStorageKey = '100-doors-boss-stomps';
+const fantaRushDuration = 8;
+const fantaRushSpeedMultiplier = 1.6;
+const riftCanSpawnChance = .008;
+const flowJuiceSpawnChance = .03;
+const flowJuiceDuration = 12;
+const flowJuiceGravityMultiplier = .45;
 const rushChance = .12;
 const riftStorageKey = '100-doors-rift-item';
 const riftItemNames = {
   milkshake: 'Milkshake',
   backpack: 'Rare Backpack',
-  teleporter: 'Teleporter'
+  teleporter: 'Teleporter',
+  'fanta-jug': 'Fanta Jug',
+  'rift-can': 'Rift-in-a-Can',
+  'flow-juice': 'Flow Juice'
 };
 let unlockedDoors = new Set();
 let rareRoomActive = false;
@@ -46,6 +57,21 @@ let backpackActive = false;
 let backpackOnTable = false;
 let teleporterActive = false;
 let teleporterOnDesk = false;
+let fantaJugActive = false;
+let fantaRushTimer = 0;
+let riftCanActive = false;
+let thrownRiftActive = false;
+let flowJuiceActive = false;
+let elevatorRideActive = false;
+let elevatorRideTimer = 0;
+let elevatorRideOrigin = 1;
+let elevatorRideDestination = 0;
+let elevatorRideArrived = false;
+let stairDescentActive = false;
+let encounterFlashTimer = 0;
+let encounterFlashColor = '255,77,94';
+let encounterShakeTimer = 0;
+let flowJuiceTimer = 0;
 let closetVisible = false;
 let rushActive = false;
 let rushWarningTimer = 0;
@@ -63,6 +89,7 @@ let cellarMonsterActive = false;
 const lobby = document.querySelector('#lobby');
 const startButton = document.querySelector('#start-button');
 const badgesButton = document.querySelector('#badges-button');
+const trailerButton = document.querySelector('#trailer-button');
 const badgeScreen = document.querySelector('#badge-screen');
 const backButton = document.querySelector('#back-button');
 const badgeIndexCount = document.querySelector('#badge-index-count');
@@ -82,16 +109,29 @@ const againButton = document.querySelector('#again-button');
 const doorNumber = document.querySelector('#door-number');
 const modeText = document.querySelector('#mode');
 const promptElement = document.querySelector('#prompt');
+const stairsDownButton = document.querySelector('#stairs-down-button');
 const messageElement = document.querySelector('#message');
 const badgeList = document.querySelector('#badge-list');
 const winBadgeList = document.querySelector('#win-badges');
 const badgeCount = document.querySelector('#badge-count');
 const badgeToast = document.querySelector('#badge-toast');
+const badgeDetailDialog = document.querySelector('#badge-detail-dialog');
+const badgeDetailClose = document.querySelector('#badge-detail-close');
+const badgeDetailArt = document.querySelector('#badge-detail-art');
+const badgeDetailKicker = document.querySelector('#badge-detail-kicker');
+const badgeDetailName = document.querySelector('#badge-detail-name');
+const badgeDetailDescription = document.querySelector('#badge-detail-description');
+const badgeDetailStatus = document.querySelector('#badge-detail-status');
+const badgeDetailProgress = document.querySelector('#badge-detail-progress');
+const badgeDescentScreen = document.querySelector('#badge-descent-screen');
+const badgeDescentSkip = document.querySelector('#badge-descent-skip');
 const hotbarElement = document.querySelector('#hotbar');
 const backpackStorageElement = document.querySelector('#backpack-storage');
 const healthNumber = document.querySelector('#health-number');
 const healthFill = document.querySelector('#health-fill');
-const bossBouncerProgress = document.querySelector('#boss-bouncer-progress');
+const fantaJugChanceElement = document.querySelector('#fanta-jug-chance');
+const flowJuiceChanceElement = document.querySelector('#flow-juice-chance');
+const riftCanChanceElement = document.querySelector('#rift-can-chance');
 
 const badges = [
   { id: 'game-starter', name: 'Game Starter', popup: 'You entered the game!', section: 'main', icon: 'door' },
@@ -101,6 +141,9 @@ const badges = [
   { id: 'demon-slayer', name: 'Demon Slayer', section: 'main', icon: 'sword', difficult: true },
   { id: 'monster-slayer', name: 'Monster Slayer', section: 'main', icon: 'skull', difficult: true },
   { id: 'restaurant-finder', name: 'Restaurant Finder', popup: 'You found the rare Restaurant Room!', section: 'main', icon: 'milkshake' },
+  { id: 'fanta-jug-finder', name: 'Fanta Jug Finder', popup: 'You found the rare yellow Fanta Jug!', section: 'main', icon: 'fantaJug' },
+  { id: 'flow-juice-finder', name: 'Flow Juice Finder', popup: 'You found the pink-blue Flow Juice!', section: 'main', icon: 'flowJuice' },
+  { id: 'rift-can-finder', name: 'Rift Can Finder', popup: 'You found Rift-in-a-Can!', section: 'main', icon: 'riftCan' },
   { id: 'rocket-survivor', name: 'Rocket Survivor', popup: 'You survived Rocket!', section: 'main', icon: 'rocket' },
   { id: 'maximum-ragebaiter', name: 'Maximum Ragebaiter', popup: 'You hid from Rocket at the last second!', section: 'main', icon: 'clock', difficult: true },
   { id: 'all-doors', name: '100 Doors', section: 'main', icon: 'hundred', difficult: true },
@@ -132,6 +175,9 @@ const badges = [
 ];
 
 const badgeIcons = {
+  riftCan: '<rect x="14" y="10" width="20" height="31" rx="3"/><path d="M17 10V5h14v5M18 5V2h12v3M17 18h14"/><ellipse cx="24" cy="28" rx="7" ry="5"/><path d="m20 19 8 18"/>',
+  flowJuice: '<path d="M17 14h14v22a5 5 0 0 1-5 5h-4a5 5 0 0 1-5-5Z"/><path d="M20 14V8h8v6M18 8V4h12v4M17 23h14"/>',
+  fantaJug: '<path d="M14 12h20l3 7v17l-3 6H14l-3-6V19Z"/><path d="M13 5h22v7H13ZM12 19h24M11 34h26M16 24h16v9H16Z"/>',
   door: '<rect x="13" y="7" width="22" height="34" rx="2"/><circle cx="29" cy="25" r="1.5" fill="currentColor" stroke="none"/><path d="M9 41h30"/>',
   key: '<circle cx="16" cy="18" r="7"/><path d="m21 23 17 17m-6-6 4-4m-9 9 4-4"/>',
   run: '<g stroke="#171a20" stroke-width="1.2"><rect x="16" y="19" width="7" height="12" fill="#7a4a24"/><rect x="23" y="5" width="13" height="5" fill="#4a2f1d"/><rect x="23" y="8" width="5" height="8" fill="#4a2f1d"/><rect x="25" y="8" width="11" height="10" fill="#f3c68b"/><rect x="20" y="18" width="15" height="14" fill="#3b82f6"/><rect x="20" y="28" width="15" height="4" fill="#1f2937"/><rect x="32" y="19" width="5" height="11" fill="#2563eb" transform="rotate(-24 34 20)"/><rect x="17" y="22" width="5" height="10" fill="#2563eb" transform="rotate(28 19 24)"/><rect x="21" y="31" width="6" height="10" fill="#1e3a8a" transform="rotate(25 24 31)"/><rect x="28" y="31" width="6" height="9" fill="#1e3a8a" transform="rotate(-35 31 31)"/><rect x="15" y="39" width="10" height="5" fill="#5c4028"/><rect x="32" y="36" width="10" height="5" fill="#5c4028"/><rect x="32" y="11" width="2" height="3" fill="#171a20" stroke="none"/></g>',
@@ -139,7 +185,7 @@ const badgeIcons = {
   sword: '<path d="m12 36 24-24m-2-4 6-2-2 6M10 30l8 8m-11 3 5-5m-3 8 5-5"/>',
   skull: '<path d="M10 23a14 14 0 0 1 28 0c0 7-4 9-7 11v7H17v-7c-3-2-7-4-7-11Z"/><circle cx="18" cy="23" r="3"/><circle cx="30" cy="23" r="3"/><path d="m24 29-3 5h6ZM20 41v-5m8 5v-5"/>',
   milkshake: '<path d="M13 15h22l-3 27H16ZM11 15h26M19 10h14M29 10l5-7"/><path d="M17 24c4-3 10 3 15 0"/>',
-  rocket: '<path d="M24 5c9 6 12 16 8 27l-8 7-8-7c-4-11-1-21 8-27Z"/><circle cx="24" cy="20" r="4"/><path d="m16 26-8 5 8 3m16-8 8 5-8 3M20 39l-2 5m12-5 2 5m-8-6v7"/>',
+  rocket: '<path d="M14 8h20l4 8v14l-5 5v5h-4v5h-5v-4h-4v3h-4v-6l-5-5V16Z"/><path d="m13 19 10 2v8l-9 1-3-6Zm12 2 10-2 2 5-3 6-9-1ZM24 27l-3 6h6Z"/><path d="M15 33h18m-16 0v6m4-6v6m4-6v6m4-6v6m4-6v6M18 10l3 5-2 4m11-9-3 5 2 4"/>',
   clock: '<circle cx="24" cy="25" r="16"/><path d="M24 15v11l8 5M17 4h14m-7 0v5"/>',
   hundred: '<rect x="6" y="6" width="36" height="36" rx="4"/><text x="24" y="30" text-anchor="middle" font-size="15" font-weight="900" fill="currentColor" stroke="none">100</text>',
   tree: '<path d="M24 41V27m-7 14h14"/><path d="M24 5 12 20h7L9 31h30l-10-11h7Z"/>',
@@ -167,6 +213,9 @@ const badgeIcons = {
 };
 
 const badgeIconDetails = {
+  riftCan: '<rect x="14" y="10" width="20" height="31" rx="3" fill="#2456a6"/><path d="M17 5h14v5H17Zm1-3h12v3H18Z" fill="#d9e2e8"/><path d="M16 17h16v4H16Zm0 19h16v4H16Z" fill="#3b82f6"/><ellipse cx="24" cy="28" rx="7" ry="5" fill="#72e3ff"/><ellipse cx="24" cy="28" rx="4" ry="7" fill="#8750a5"/><ellipse cx="24" cy="28" rx="2" ry="3" fill="#d8f7ff"/>',
+  flowJuice: '<path d="M17 14h14v22a5 5 0 0 1-5 5h-4a5 5 0 0 1-5-5Z" fill="#e8f4ff"/><path d="M19 24h5v14h-2a3 3 0 0 1-3-3Z" fill="#ff8fd8"/><path d="M24 24h5v11a3 3 0 0 1-3 3h-2Z" fill="#79dfff"/><path d="M23 24h3v14h-3Z" fill="#b8a5ff"/><path d="M18 4h12v5H18Z" fill="#d9e2e8"/>',
+  fantaJug: '<path d="M14 12h20l3 7v17l-3 6H14l-3-6V19Z" fill="#ffd84d"/><path d="M13 5h22v7H13Z" fill="#d9e2e8"/><path d="M12 18h24v4H12Zm-1 14h26v4H11Z" fill="#7c8792"/><path d="M16 24h16v9H16Z" fill="#fff8dc"/><path d="m24 24 2 4 4 2-4 2-2 4-2-4-4-2 4-2Z" fill="#e88912"/>',
   door: '<rect x="13" y="7" width="22" height="34" rx="2" fill="#8f4e2c"/><rect x="17" y="11" width="14" height="10" rx="1" fill="#d99b52"/><rect x="17" y="25" width="14" height="11" rx="1" fill="#c47b3d"/>',
   key: '<circle cx="16" cy="18" r="6" fill="#ffe779"/><path d="M22 24 37 39" fill="none" stroke="#ffe779" stroke-width="5"/><circle cx="16" cy="18" r="2.5" fill="#fff7c2"/>',
   run: '<path d="M3 15h12v3H3Zm0 9h9v2H3Z" fill="#d8f7ff" opacity=".45"/><ellipse cx="26" cy="44" rx="18" ry="2" fill="#171a20" opacity=".25"/>',
@@ -174,7 +223,7 @@ const badgeIconDetails = {
   sword: '<path d="M13 34 35 12l3-5 1 1-4 6-22 22Z" fill="#d8f7ff"/><path d="m9 31 8 8-3 3-8-8Z" fill="#ffd84d"/>',
   skull: '<path d="M10 23a14 14 0 0 1 28 0c0 7-4 9-7 11v7H17v-7c-3-2-7-4-7-11Z" fill="#f1e6c8"/><circle cx="18" cy="23" r="3" fill="#37424b"/><circle cx="30" cy="23" r="3" fill="#37424b"/><path d="m24 29-3 5h6Z" fill="#67707a"/>',
   milkshake: '<path d="M13 15h22l-3 27H16Z" fill="#9be7ff"/><path d="M16 20h16l-2 18H18Z" fill="#f7a8c4"/><circle cx="19" cy="14" r="5" fill="#fff3d4"/><circle cx="27" cy="13" r="6" fill="#fff3d4"/>',
-  rocket: '<path d="M24 5c9 6 12 16 8 27l-8 7-8-7c-4-11-1-21 8-27Z" fill="#f4f0df"/><circle cx="24" cy="20" r="3.5" fill="#9be7ff"/><path d="m16 26-8 5 8 3Zm16 0 8 5-8 3Z" fill="#ef5b5b"/><path d="m20 39-2 6 6-5 6 5-2-6Z" fill="#ff9f43"/>',
+  rocket: '<path d="M14 8h20l4 8v14l-5 5v5h-4v5h-5v-4h-4v3h-4v-6l-5-5V16Z" fill="#eee2cf"/><path d="M14 10h20l2 5H12Z" fill="#fff8e8" opacity=".65"/><path d="m13 19 10 2v8l-9 1-3-6Zm12 2 10-2 2 5-3 6-9-1Z" fill="#150703"/><path d="M24 27l-3 6h6Z" fill="#150703"/><rect x="15" y="23" width="6" height="5" rx="1" fill="#ff4a00"/><rect x="28" y="23" width="6" height="5" rx="1" fill="#ff4a00"/><rect x="17" y="24" width="2" height="2" fill="#ffd166"/><rect x="30" y="24" width="2" height="2" fill="#ffd166"/><path d="M15 33h18v6H15Z" fill="#241b16"/><path d="M16 33h3v5h-3Zm5 0h3v6h-3Zm5 0h3v6h-3Zm5 0h2v5h-2Z" fill="#e5d7c1"/><path d="M25 40h4v5h-5Z" fill="#ff7a18"/><path d="M16 38h3v5h-3Z" fill="#d9c8ad"/>',
   clock: '<circle cx="24" cy="25" r="15" fill="#e3aa32"/><circle cx="24" cy="25" r="12" fill="#fffdf0"/><rect x="17" y="3" width="14" height="4" rx="2" fill="#9be7ff"/>',
   hundred: '<rect x="6" y="6" width="36" height="36" rx="4" fill="#343d78"/><rect x="10" y="10" width="28" height="28" rx="2" fill="#4f5ca3"/><path d="m11 7 2 3 3 1-3 2-1 3-1-3-3-2 3-1Zm26 26 2 3 3 1-3 2-1 3-1-3-3-2 3-1Z" fill="#ffe779"/>',
   tree: '<path d="M20 26h8v16h-8Z" fill="#8b5a2b"/><path d="M24 5 12 20h7L9 31h30l-10-11h7Z" fill="#4e9f50"/><path d="M24 8 16 19h6l-7 8h10Z" fill="#79c76a"/>',
@@ -201,6 +250,44 @@ const badgeIconDetails = {
   trophy: '<path d="M14 6h20v12c0 9-4 14-10 14s-10-5-10-14Z" fill="#ffd84d"/><path d="M18 9h6v13c0 3 2 5 4 6-7 1-10-4-10-10Z" fill="#fff0a6"/><path d="M15 39h18v4H15Z" fill="#9a6038"/>'
 };
 
+const badgeMicroDetails = {
+  riftCan: '<path d="M18 7h12m-11 2h10" stroke="#ffffff" stroke-width=".7" opacity=".8"/><path d="M17 14h14m-14 23h14" stroke="#9be7ff" stroke-width=".65"/><path d="M18 22v12m12-12v12" stroke="#d8f7ff" stroke-width=".55" opacity=".6"/><text x="24" y="18" text-anchor="middle" font-size="3.2" font-weight="900" fill="#fff8d0" stroke="none">RIFT</text><path d="m8 22 1 2 2 1-2 1-1 2-1-2-2-1 2-1Zm32 8 .8 1.6 1.7.8-1.7.8-.8 1.7-.8-1.7-1.7-.8 1.7-.8Z" fill="#d8f7ff" stroke="none"/>',
+  flowJuice: '<path d="M20 17v5m2-5v3" stroke="#ffffff" stroke-width="1" opacity=".85"/><circle cx="21" cy="29" r="1.2" fill="#fff0fa" stroke="none"/><circle cx="27" cy="33" r="1.5" fill="#d8f7ff" stroke="none"/><circle cx="22" cy="36" r=".8" fill="#ffffff" stroke="none"/><path d="M19 6h10m-9 2h8" stroke="#7c8792" stroke-width=".65"/><path d="m37 5 1 2 2 1-2 1-1 2-1-2-2-1 2-1Z" fill="#fff0fa" stroke="none"/>',
+  fantaJug: '<path d="M16 13v5m4-5v4m8-4v4m4-4v5M16 37v4m4-4v5m8-5v5m4-5v4" stroke="#b87516" stroke-width=".65"/><path d="M18 7h12" stroke="#ffffff" stroke-width="1" opacity=".75"/><g fill="#fff3a6" stroke="#6d541d" stroke-width=".35"><circle cx="14" cy="20" r="1"/><circle cx="34" cy="20" r="1"/><circle cx="13" cy="34" r="1"/><circle cx="35" cy="34" r="1"/></g><text x="24" y="31.5" text-anchor="middle" font-size="4" font-weight="900" fill="#b96b12" stroke="none">F</text>',
+  door: '<path d="M15 9v30m18-30v30M19 13c3 2 6-2 10 0m-10 6c4-2 7 2 10 0m-10 9c3 2 6-2 10 0m-10 5c4-2 7 2 10 0" stroke="#6f351f" stroke-width=".65" opacity=".8"/><path d="M12 13h3m-3 18h3" stroke="#e3aa32" stroke-width="1.4"/><circle cx="29" cy="25" r=".7" fill="#fff8d0" stroke="none"/><text x="24" y="18" text-anchor="middle" font-size="5" font-weight="900" fill="#6f351f" stroke="none">1</text>',
+  key: '<circle cx="16" cy="18" r="4.2" stroke="#d69a1c" stroke-width=".8"/><path d="m23 25 13 13m-9-9 3-3m-7 7 3-3" stroke="#fff3a6" stroke-width="1.1"/><path d="m33 35 4-4 3 3-4 4m-7-1 3-3" stroke="#d69a1c" stroke-width=".8"/><path d="m5 8 1 2 2 1-2 1-1 2-1-2-2-1 2-1Zm34 3 .7 1.5 1.5.7-1.5.7-.7 1.5-.7-1.5-1.5-.7 1.5-.7Z" fill="#fff8d0" stroke="none"/>',
+  run: '<path d="M22 20h9m-8 3h8m-7 9 3 2 3-2" stroke="#9be7ff" stroke-width=".7"/><path d="M17 40h7m9-2h7" stroke="#fff8df" stroke-width=".7"/><path d="M3 31h10m-8 4h7M4 9h9" stroke="#fff0a6" stroke-width=".8" opacity=".7"/><circle cx="8" cy="40" r="2" fill="#d8c49a" stroke="none" opacity=".45"/><circle cx="4" cy="43" r="1.2" fill="#d8c49a" stroke="none" opacity=".35"/>',
+  boot: '<path d="m17 20 7 4m-7 0 7 4m-7 0 6 4" stroke="#fff8df" stroke-width=".85"/><path d="M12 36h23m-21 3h19" stroke="#9be7ff" stroke-width=".65"/><path d="m29 11 7-4-2 6 7-1-8 7-6-1Z" fill="#fff0a6" stroke="#d69a1c" stroke-width=".65"/><path d="M3 29h10M1 33h9" stroke="#d8f7ff" stroke-width=".8" opacity=".7"/>',
+  sword: '<path d="m15 33 19-19" stroke="#ffffff" stroke-width=".8"/><path d="m20 27 2 2m2-6 2 2m2-6 2 2" stroke="#7ba7bd" stroke-width=".55"/><path d="m8 34 6 6m-4-8 6 6" stroke="#8b4a24" stroke-width="1"/><path d="m35 4 1 3 3 1-3 1-1 3-1-3-3-1 3-1Z" fill="#ffffff" stroke="none"/><path d="M7 12c3-5 7-5 10 0M5 16h12" stroke="#ff8d66" stroke-width=".7" opacity=".6"/>',
+  skull: '<path d="m23 9-2 6 3 3-2 5m7-13-3 4 2 3" stroke="#a99b83" stroke-width=".7"/><path d="M18 35v5m4-5v6m4-6v6m4-6v5" stroke="#a99b83" stroke-width=".65"/><circle cx="18" cy="23" r="1.2" fill="#b8a5ff" stroke="none"/><circle cx="30" cy="23" r="1.2" fill="#b8a5ff" stroke="none"/><path d="M4 32c4-4 6 2 9-2m23 4c3-4 5 1 8-3" stroke="#9b7bc4" stroke-width=".8" opacity=".65"/>',
+  milkshake: '<path d="M19 18v20" stroke="#ffffff" stroke-width="1.2" opacity=".7"/><path d="m30 9 4-6m-2 7 4-6" stroke="#ef5b6c" stroke-width="1"/><path d="M19 27c4-2 8 2 12 0m-12 5c4-2 8 2 12 0" stroke="#fff0fa" stroke-width=".7"/><circle cx="26" cy="7" r="2.4" fill="#ef5b6c" stroke="#9d3044" stroke-width=".6"/><path d="M26 5c0-2 2-3 3-3" stroke="#67a35b" stroke-width=".7"/><path d="M3 39h42M7 44h34" stroke="#d99b52" stroke-width=".65" opacity=".6"/>',
+  rocket: '<path d="m18 9 3 6-3 4m12-10-3 6 3 4M24 8v6l-2 3" stroke="#ff4a00" stroke-width="1.5"/><path d="m18 9 1 3m11-3-1 3" stroke="#ffd166" stroke-width=".65"/><path d="M16 34v4m5-4v5m5-5v5m5-5v4" stroke="#0e0705" stroke-width=".65"/><path d="M27 40v4" stroke="#ffd166" stroke-width="1.2"/><g fill="#ffd166" stroke="none"><circle cx="18" cy="25" r=".7"/><circle cx="31" cy="25" r=".7"/><circle cx="36" cy="13" r=".8"/></g>',
+  clock: '<circle cx="24" cy="25" r="10" stroke="#d3b76a" stroke-width=".6"/><path d="M24 14v3m0 16v3M13 25h3m16 0h3M16 17l2 2m12 12 2 2m0-16-2 2M18 31l-2 2" stroke="#7c5a20" stroke-width=".8"/><path d="M24 18v8l6 3" stroke="#4b3315" stroke-width="1.1"/><circle cx="24" cy="25" r="1.4" fill="#ef5b5b" stroke="none"/><path d="M20 5h8" stroke="#ffffff" stroke-width=".8"/>',
+  hundred: '<rect x="12" y="12" width="24" height="24" rx="1" stroke="#9ba8ff" stroke-width=".7"/><path d="M15 15h18v18H15Zm3 0v18m12-18v18" stroke="#252c61" stroke-width=".7"/><text x="24" y="29" text-anchor="middle" font-size="11" font-weight="900" fill="#fff0a6" stroke="#7c4d08" stroke-width=".35">100</text><g fill="#ffe779" stroke="none"><circle cx="9" cy="9" r="1"/><circle cx="39" cy="9" r="1"/><circle cx="9" cy="39" r="1"/><circle cx="39" cy="39" r="1"/></g>',
+  tree: '<path d="M22 28v13m4-13v13m-3-8-2 3m5 1 2 3" stroke="#5d361c" stroke-width=".75"/><path d="M13 20c4 1 7-2 10 0m-12 8c5 2 9-2 14 0m-5-15c3 2 6 0 9 2" stroke="#b8f7c1" stroke-width=".65" opacity=".7"/><g fill="#ffcf5a" stroke="#5b7c35" stroke-width=".4"><circle cx="15" cy="25" r="1.4"/><circle cx="30" cy="20" r="1.4"/><circle cx="28" cy="29" r="1.4"/></g><path d="M2 40c7-3 12 2 18 0m11 1c5-3 9 1 15-1" stroke="#79c76a" stroke-width=".8"/>',
+  submarine: '<path d="M11 21c7-4 20-4 27 1M12 33c7 3 18 3 25-1" stroke="#fff0a6" stroke-width=".65"/><path d="M23 10h4m-2 0V6h6" stroke="#e3aa32" stroke-width=".8"/><path d="M5 24v6m-3-3h6" stroke="#d8f7ff" stroke-width=".8"/><g fill="#fff0a6" stroke="#8b6d20" stroke-width=".35"><circle cx="12" cy="25" r=".8"/><circle cx="25" cy="18" r=".8"/><circle cx="36" cy="25" r=".8"/></g><circle cx="19" cy="26" r="1" fill="#ffffff" stroke="none"/><circle cx="31" cy="26" r="1" fill="#ffffff" stroke="none"/><path d="M38 12l6-5m-4 8 6-5" stroke="#9be7ff" stroke-width=".7" opacity=".55"/>',
+  mountain: '<path d="m7 37 11-18 8 11 6-8 10 15" stroke="#a9bdd0" stroke-width=".65"/><path d="M18 14v16m0-15 7 2-7 3" stroke="#ef5b6c" stroke-width=".8"/><path d="M10 36c6-5 11-3 15-8 3-4 5-2 9-6" stroke="#fff8df" stroke-width=".65" stroke-dasharray="1.5 1.5"/><path d="M4 13c2-2 4-2 6 0m-3-2c2-2 4-2 6 0" stroke="#d8f7ff" stroke-width=".6"/><path d="m5 40 3-6 3 6m27 0 3-7 3 7" fill="#315c3c" stroke="none"/>',
+  flower: '<path d="M24 5v10m14 5H29M24 35V25M10 20h9" stroke="#ffd0df" stroke-width=".7"/><path d="M24 36v8m0-5-7-5m7 7 7-5" stroke="#315c3c" stroke-width=".8"/><circle cx="22.5" cy="18.5" r="1.2" fill="#fff8d0" stroke="none"/><circle cx="26" cy="21" r="1" fill="#d69a1c" stroke="none"/><circle cx="31" cy="10" r="1.2" fill="#d8f7ff" stroke="#ffffff" stroke-width=".4"/><path d="M3 43c2-5 3-5 4 0m3 0c2-7 3-7 4 0m25 0c2-6 3-6 4 0" stroke="#79c76a" stroke-width=".7"/>',
+  stairsDown: '<path d="M5 12h9v9h9v9h9v9M8 15h3m3 9h4m4 9h4" stroke="#d8f7ff" stroke-width=".75"/><path d="M2 4h12m16 0h16M2 42h10m25 0h9" stroke="#7894a4" stroke-width=".6"/><path d="M40 4c-5 0-5 6-8 6m8-6c0 5-5 5-5 8" stroke="#d8f7ff" stroke-width=".5" opacity=".55"/><path d="m35 27 3 5 3-5" stroke="#d8f7ff" stroke-width=".8"/>',
+  stairsUp: '<path d="M5 36h9v-9h9v-9h9V8h9M8 33h3m3-9h4m4-9h4" stroke="#d8f7ff" stroke-width=".75"/><path d="M35 8h6v12h-6Z" fill="#fff0a6" stroke="#d69a1c" stroke-width=".65"/><path d="m34 12-7 3m7 1-9 5" stroke="#fff0a6" stroke-width=".65" opacity=".55"/><path d="M2 4h12m17 24h15M2 44h12" stroke="#7894a4" stroke-width=".6"/>',
+  desk: '<rect x="19" y="12" width="10" height="5" fill="#23445a" stroke="#d8f7ff" stroke-width=".45"/><path d="M20 13h6m-6 2h8m-8 1h5" stroke="#9be7ff" stroke-width=".45"/><path d="M20 23h8m-7 2h6m-6 1h6" stroke="#e3c69a" stroke-width=".55"/><rect x="33" y="14" width="5" height="6" rx="1" fill="#fff8df" stroke="#80502f" stroke-width=".6"/><path d="M38 15c3 0 3 4 0 4" stroke="#fff8df" stroke-width=".7"/><path d="m7 15 5-7 3 1-2 6" fill="#ffe779" stroke="#80502f" stroke-width=".6"/><path d="M11 28v12m26-12v12" stroke="#5f371f" stroke-width=".7"/>',
+  box: '<path d="m8 16 16 8 16-8M24 24v18" stroke="#8b5a2b" stroke-width=".7"/><path d="m18 11 6-3 8 4-6 3Z" fill="#f3d39a" stroke="#a67338" stroke-width=".5"/><rect x="27" y="26" width="8" height="6" fill="#fff8df" stroke="#8b5a2b" stroke-width=".5" transform="skewY(-22)"/><path d="M29 28h4m-4 2h3" stroke="#56717d" stroke-width=".5"/><path d="m12 27 2-3 2 3m-2-3v6" stroke="#6f451f" stroke-width=".7"/><path d="M6 35h8m21-18h7" stroke="#e4b873" stroke-width=".6"/>',
+  teleport: '<circle cx="24" cy="24" r="13" stroke="#79dfff" stroke-width=".6" stroke-dasharray="2 2"/><circle cx="24" cy="24" r="6" stroke="#fff0fa" stroke-width=".7"/><path d="m24 17 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" fill="#d8f7ff" stroke="#8750a5" stroke-width=".55"/><path d="M5 41h38M9 37l-4 4m14-4-2 4m22-4 4 4m-14-4 2 4" stroke="#8750a5" stroke-width=".6" opacity=".65"/><g fill="#fff8d0" stroke="none"><circle cx="14" cy="10" r="1"/><circle cx="36" cy="15" r="1.2"/><circle cx="9" cy="31" r=".8"/></g>',
+  printer: '<path d="M16 9h16m-16 3h12m-12 3h15" stroke="#68a9c7" stroke-width=".65"/><path d="M17 33h14m-14 3h10m-10 3h12" stroke="#68a9c7" stroke-width=".65"/><path d="M10 22h16m-16 3h12m-12 3h14" stroke="#7c8792" stroke-width=".6"/><circle cx="35" cy="23" r=".7" fill="#fff8d0" stroke="none"/><path d="M3 29h7m-5 3h7m24-18 4-4m-2 7 5-4" stroke="#fff8df" stroke-width=".65"/><path d="M4 43h40" stroke="#293d4c" stroke-width=".8"/>',
+  hundredFifty: '<rect x="10" y="12" width="28" height="24" rx="1" stroke="#9be7ff" stroke-width=".7"/><path d="M13 15h22v18H13Zm5 0v18m12-18v18" stroke="#183f56" stroke-width=".7"/><text x="24" y="29" text-anchor="middle" font-size="10.5" font-weight="900" fill="#d8f7ff" stroke="#17445c" stroke-width=".35">150</text><path d="M5 7h38M5 41h38" stroke="#9be7ff" stroke-width=".65"/><g fill="#fff0a6" stroke="none"><circle cx="8" cy="8" r="1"/><circle cx="40" cy="8" r="1"/><circle cx="8" cy="40" r="1"/><circle cx="40" cy="40" r="1"/></g>',
+  slide: '<path d="M17 24h13m-11 3h9m-12 7h8" stroke="#9be7ff" stroke-width=".7"/><path d="M8 38h8m10 2h8" stroke="#fff8df" stroke-width=".7"/><path d="M2 30h10m-8 4h7M3 10h10" stroke="#e0ccff" stroke-width=".8" opacity=".75"/><circle cx="39" cy="39" r="2.2" fill="#d8c49a" stroke="none" opacity=".45"/><circle cx="43" cy="42" r="1.4" fill="#d8c49a" stroke="none" opacity=".35"/>',
+  jump: '<path d="M20 20h12m-10 3h9m-8 9 3 2 3-2" stroke="#9be7ff" stroke-width=".7"/><path d="M14 39h8m9-1h8" stroke="#fff8df" stroke-width=".7"/><path d="M5 28c-3-14 7-23 16-25" stroke="#b8f7c1" stroke-width=".7" stroke-dasharray="2 2" opacity=".7"/><path d="m6 6 .8 1.7 1.7.8-1.7.8L6 11l-.8-1.7-1.7-.8 1.7-.8Zm36 23 .7 1.5 1.5.7-1.5.7-.7 1.5-.7-1.5-1.5-.7 1.5-.7Z" fill="#fff0a6" stroke="none"/>',
+  closet: '<path d="M24 6v35M14 11h7v9h-7Zm13 0h7v9h-7ZM14 28h7v8h-7Zm13 0h7v8h-7Z" stroke="#6f3d22" stroke-width=".7"/><path d="M16 13h3m-3 2h3m10-2h3m-3 2h3" stroke="#3a261c" stroke-width=".7"/><circle cx="21" cy="24" r="1" fill="#ffe779" stroke="#5b321c" stroke-width=".5"/><circle cx="27" cy="24" r="1" fill="#ffe779" stroke="#5b321c" stroke-width=".5"/><path d="M12 39h24M8 44h32" stroke="#e4b873" stroke-width=".65"/><path d="M4 11h4m-4 4h4" stroke="#fff0a6" stroke-width=".6" opacity=".55"/>',
+  lightning: '<path d="m28 7-12 19h9l-3 14 11-17h-9Z" stroke="#fff8d0" stroke-width=".8"/><path d="m10 7-3 6m6-3-3 6m28 17-3 6m6-10-3 6" stroke="#9be7ff" stroke-width=".8"/><circle cx="24" cy="24" r="20" stroke="#9be7ff" stroke-width=".5" stroke-dasharray="1 3" opacity=".55"/><path d="M4 43h12m17 0h11" stroke="#79dfff" stroke-width=".7"/>',
+  crown: '<path d="m9 17 8 7 7-12 7 12 8-7-3 17H12Z" stroke="#fff0a6" stroke-width=".75"/><path d="M13 34h22m-20 3h18" stroke="#fff0a6" stroke-width=".7"/><circle cx="24" cy="26" r="1.2" fill="#fff0fa" stroke="none"/><circle cx="15" cy="28" r=".8" fill="#ffffff" stroke="none"/><circle cx="33" cy="28" r=".8" fill="#ffffff" stroke="none"/><path d="M5 8c3-4 7-4 10 0m18 0c3-4 7-4 10 0" stroke="#ff8d66" stroke-width=".7"/><path d="m24 40 0 5m-3-2 3 2 3-2" stroke="#ffd84d" stroke-width=".75"/>',
+  heart: '<path d="M24 37S10 28 10 19c0-6 8-9 14-1 6-8 14-5 14 1 0 9-14 18-14 18Z" stroke="#ffb3c1" stroke-width=".75"/><path d="M11 25h7l4-9 5 16 4-7h9" stroke="#fff8df" stroke-width="1"/><path d="M14 15c2-3 5-3 7-1" stroke="#ffffff" stroke-width="1.1"/><path d="M4 39h9m22 0h9" stroke="#ef8ba0" stroke-width=".65"/><circle cx="39" cy="9" r="2" fill="#fff0fa" stroke="none" opacity=".65"/>',
+  paper: '<path d="M15 9h12m-12 3h9m-7 8h14m-14 4h11m-11 4h14m-14 4h9m-9 4h12" stroke="#9cb7bf" stroke-width=".55"/><path d="M29 5v9h8" stroke="#68a9c7" stroke-width=".75"/><rect x="19" y="17" width="13" height="4" fill="#ef8ba0" stroke="#9d3044" stroke-width=".45" opacity=".8"/><path d="M8 12c-4-4-7 1-3 4l4 4c3 3 7-1 4-4L9 12c-2-2-4 0-2 2l4 4" stroke="#d8f7ff" stroke-width=".7"/>',
+  rain: '<path d="M14 18c5-5 13-4 17 0m-15 5h16" stroke="#d8f7ff" stroke-width=".65"/><path d="m15 34-3 7m14-7-3 7m14-7-3 7" stroke="#d8f7ff" stroke-width=".8"/><ellipse cx="13" cy="43" rx="7" ry="1.5" stroke="#9be7ff" stroke-width=".65"/><ellipse cx="35" cy="42" rx="8" ry="1.7" stroke="#9be7ff" stroke-width=".65"/><path d="M5 12v6m-2-1h4m35 11v6m-2-1h4" stroke="#ffe779" stroke-width=".7"/><circle cx="8" cy="25" r="1" fill="#d8f7ff" stroke="none"/>',
+  medal: '<circle cx="24" cy="28" r="9" stroke="#d69a1c" stroke-width=".7"/><circle cx="24" cy="28" r="6" stroke="#fff8d0" stroke-width=".55"/><path d="m24 22 1.8 3.7 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.8 4-.6Z" fill="#e3aa32" stroke="#a96c12" stroke-width=".5"/><path d="m14 7 6 3m14-3-6 3M15 11l5 2m13-2-5 2" stroke="#d8f7ff" stroke-width=".75"/><text x="24" y="30" text-anchor="middle" font-size="4" font-weight="900" fill="#fff8d0" stroke="none">0</text>',
+  badges: '<circle cx="18" cy="20" r="6.5" stroke="#fff0a6" stroke-width=".65"/><circle cx="31" cy="28" r="6.5" stroke="#d8f7ff" stroke-width=".65"/><path d="m18 15 1.4 3 3.2.4-2.3 2.2.6 3.2-2.9-1.5-2.9 1.5.6-3.2-2.3-2.2 3.2-.4Zm13 8 1.4 3 3.2.4-2.3 2.2.6 3.2-2.9-1.5-2.9 1.5.6-3.2-2.3-2.2 3.2-.4Z" fill="#fff8d0" stroke="none"/><path d="M13 32l5 3 4-2m14 5 3 2 3-1" stroke="#fff0fa" stroke-width=".65"/><path d="M5 7h8m24 34h7" stroke="#ffe779" stroke-width=".7"/>',
+  trophy: '<path d="M17 9h14v9c0 6-3 10-7 10s-7-4-7-10Z" stroke="#fff0a6" stroke-width=".75"/><path d="M9 11H6v4c0 5 3 7 8 7m25-11h3v4c0 5-3 7-8 7" stroke="#d69a1c" stroke-width=".8"/><path d="m24 11 1.5 3 3.3.5-2.4 2.3.6 3.3-3-1.6-3 1.6.6-3.3-2.4-2.3 3.3-.5Z" fill="#e3aa32" stroke="#a96c12" stroke-width=".45"/><path d="M24 31v8m-7 2h14" stroke="#fff0a6" stroke-width=".75"/><rect x="18" y="39" width="12" height="3" fill="#4b2c08" stroke="#ffe779" stroke-width=".45"/><text x="24" y="41.4" text-anchor="middle" font-size="2.1" font-weight="900" fill="#fff0a6" stroke="none">ALL</text>'
+};
+
 const badgeScenePalettes = {
   main: ['#582c3f', '#d4784f'],
   cellar: ['#101a2d', '#35566b'],
@@ -210,6 +297,9 @@ const badgeScenePalettes = {
 };
 
 const badgeIconScenes = {
+  riftCan: '<rect x="0" y="34" width="48" height="14" fill="#081c46"/><circle cx="9" cy="10" r="2" fill="#d8f7ff"/><circle cx="39" cy="15" r="2" fill="#72e3ff"/><circle cx="35" cy="37" r="1.5" fill="#d8f7ff"/><path d="M0 36c12-7 30 6 48-3v15H0Z" fill="#175fd1" opacity=".45"/>',
+  flowJuice: '<rect x="0" y="34" width="48" height="14" fill="#263456"/><circle cx="8" cy="12" r="5" fill="#ff8fd8" opacity=".55"/><circle cx="39" cy="17" r="7" fill="#79dfff" opacity=".45"/><circle cx="36" cy="38" r="3" fill="#b8a5ff" opacity=".65"/><path d="M0 38c12-5 28 5 48-2v12H0Z" fill="#8750a5" opacity=".35"/>',
+  fantaJug: '<rect x="0" y="34" width="48" height="14" fill="#2d3338"/><path d="M0 12h48v3H0Zm0 12h48v3H0Z" fill="#293137"/><path d="M5 5h38v4H5Z" fill="#69747b"/><path d="M17 7h14v3H17Z" fill="#fff3a6"/>',
   door: '<rect x="3" y="34" width="42" height="12" fill="#4b2c28"/><rect x="5" y="5" width="38" height="4" fill="#f0b76b" opacity=".25"/><circle cx="38" cy="12" r="2" fill="#fff0a6"/>',
   key: '<rect x="3" y="32" width="42" height="14" fill="#6b4229"/><rect x="6" y="34" width="36" height="4" fill="#a1663f"/><circle cx="38" cy="10" r="2" fill="#fff0a6"/><circle cx="33" cy="7" r="1" fill="#fff0a6"/>',
   run: '<rect x="2" y="4" width="10" height="29" fill="#2a3340"/><rect x="36" y="4" width="10" height="29" fill="#2a3340"/><rect x="0" y="37" width="48" height="11" fill="#333d47"/><path d="M2 18h12v3H2Zm0 8h9v2H2Z" fill="#fff0a6" opacity=".45"/>',
@@ -217,7 +307,7 @@ const badgeIconScenes = {
   sword: '<circle cx="36" cy="15" r="10" fill="#361a2d"/><path d="M0 40h48v8H0Z" fill="#3c2732"/><path d="m35 7 2 4 4 1-3 3-1 4-2-3-4-1 3-3Z" fill="#ff8d66" opacity=".7"/>',
   skull: '<circle cx="9" cy="36" r="8" fill="#684a7f" opacity=".45"/><circle cx="39" cy="34" r="10" fill="#684a7f" opacity=".45"/><path d="M3 42h42v4H3Z" fill="#211a31"/>',
   milkshake: '<rect x="0" y="32" width="48" height="16" fill="#7d4936"/><path d="M0 32h48v4H0Z" fill="#f4f0df"/><path d="M4 38h8v8H4Zm16 0h8v8h-8Zm16 0h8v8h-8Z" fill="#f7a8c4" opacity=".5"/>',
-  rocket: '<circle cx="7" cy="8" r="1.5" fill="#fff8d0"/><circle cx="38" cy="7" r="1.2" fill="#fff8d0"/><circle cx="42" cy="22" r="1.5" fill="#fff8d0"/><path d="M0 40c10-8 17 2 26-3s15-1 22 2v9H0Z" fill="#d8f7ff" opacity=".6"/>',
+  rocket: '<circle cx="24" cy="24" r="22" fill="#ff4a00" opacity=".14"/><path d="M0 38c12-5 29 4 48-2v12H0Z" fill="#240b05"/><path d="M0 43c14-4 28 3 48-2v7H0Z" fill="#ff4a00" opacity=".25"/><path d="m3 36 4-8 3 8m28 1 4-9 3 8" fill="#100806" opacity=".8"/><g fill="#ff9f43"><circle cx="7" cy="9" r="1.2"/><circle cx="39" cy="7" r="1"/><circle cx="42" cy="23" r="1.3"/><circle cx="8" cy="29" r=".8"/></g><g fill="#ffd166"><circle cx="10" cy="15" r=".7"/><circle cx="37" cy="17" r=".8"/></g>',
   clock: '<rect x="4" y="5" width="14" height="17" fill="#24354b"/><circle cx="10" cy="10" r="4" fill="#fff3c4"/><path d="M11 5v17h2V5ZM4 13h14v2H4Z" fill="#8295a8"/>',
   hundred: '<path d="M2 5h8v12H2Zm12 0h8v12h-8Zm24 0h8v12h-8ZM2 32h8v12H2Zm36 0h8v12h-8Z" fill="#1d264e" opacity=".65"/>',
   tree: '<circle cx="38" cy="10" r="6" fill="#fff3c4" opacity=".7"/><path d="M0 35c12-4 30 3 48-2v15H0Z" fill="#315c3c"/>',
@@ -269,11 +359,13 @@ let backpackStorageSlots = new Array(4).fill(null);
 let hasBackpack = false;
 let riftItem = loadRiftItem();
 let earnedBadges = new Set(loadBadges());
+let badgeDescentActive = false;
+let badgeDescentTimer;
 const funStats = {
   jumps: 0,
   slides: 0,
   hides: 0,
-  stomps: 0,
+  stomps: loadBossStomps(),
   storageRooms: 0,
   gardenTime: 0
 };
@@ -303,6 +395,22 @@ const music = {
     drums: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0]
   }
 };
+
+function loadBossStomps() {
+  try {
+    const stomps = Number(localStorage.getItem(bossStompsStorageKey));
+    return Number.isFinite(stomps) ? Math.max(0, Math.floor(stomps)) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function saveBossStomps() {
+  try {
+    localStorage.setItem(bossStompsStorageKey, String(funStats.stomps));
+  } catch {
+  }
+}
 
 function loadBadges() {
   try {
@@ -341,34 +449,83 @@ function saveRiftItem() {
   }
 }
 
-function updateBadgeUi() {
-  const renderBadge = badge => {
-    const earned = earnedBadges.has(badge.id);
-    const state = `badge${earned ? ' earned' : ''}${badge.difficult ? ' difficult' : ''}`;
-    const status = earned ? 'EARNED' : 'LOCKED';
-    const description = `${badge.difficult ? 'Difficult badge: ' : ''}${badge.popup || badge.name}`;
-    const [sceneTop, sceneBottom] = badgeScenePalettes[badge.section];
-    const gradientId = `badge-scene-${badge.id}`;
-    const rainbow = badge.difficult ? '<span class="badge-rainbow" aria-hidden="true"></span>' : '';
-    return `<div class="${state}" data-section="${badge.section}" title="${description}"><span class="badge-ribbon" aria-hidden="true"></span><span class="badge-medal" aria-hidden="true">${rainbow}<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sceneTop}"/><stop offset="1" stop-color="${sceneBottom}"/></linearGradient></defs><rect width="48" height="48" fill="url(#${gradientId})" stroke="none"/><g stroke="none">${badgeIconScenes[badge.icon]}</g><path d="M2 3h44v8C30 7 18 8 2 18Z" fill="#fff" opacity=".08" stroke="none"/><g stroke="none">${badgeIconDetails[badge.icon]}</g>${badgeIcons[badge.icon]}<g fill="#fff8d0" stroke="none"><circle cx="7" cy="9" r="1.3"/><circle cx="41" cy="36" r="1.2"/><path d="m39 6 1.2 2.8L43 10l-2.8 1.2L39 14l-1.2-2.8L35 10l2.8-1.2Z"/></g></svg></span><span class="badge-name">${badge.name}</span><span class="badge-status">${status}</span></div>`;
-  };
+const badgeSectionNames = {
+  main: 'MAIN FLOOR',
+  cellar: 'THE CELLAR',
+  garden: 'THE GARDEN',
+  office: 'THE OFFICE',
+  fun: 'FUN & RANDOM'
+};
+
+const badgeExtraDescriptions = {
+  'first-key': 'Search the cabinet, collect the first golden key, and unlock the way forward.',
+  'speed-boots': 'Open the reward chest after the chase and claim the glowing Speed Boots.',
+  'demon-slayer': 'Defeat the Door 50 demon by bouncing on its head three times.',
+  'monster-slayer': 'Defeat the returning Door 75 monster and survive its faster attacks.',
+  'all-doors': 'Open every door on the Main Floor and escape through Door 100.'
+};
+
+function getBadgeDescription(badge) {
+  return badge.popup || badgeExtraDescriptions[badge.id] || `Earn the ${badge.name} collectible in THE PARK.`;
+}
+
+function renderBadgeArt(badge, instance) {
+  const [sceneTop, sceneBottom] = badgeScenePalettes[badge.section];
+  const artId = `badge-${instance}-${badge.id}`;
+  return `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><defs><linearGradient id="${artId}-scene" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${sceneTop}"/><stop offset=".58" stop-color="${sceneBottom}"/><stop offset="1" stop-color="#101522"/></linearGradient><linearGradient id="${artId}-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff8d0"/><stop offset=".22" stop-color="#d8a83e"/><stop offset=".48" stop-color="#fff0a6"/><stop offset=".72" stop-color="#8b5a16"/><stop offset="1" stop-color="#ffe779"/></linearGradient><radialGradient id="${artId}-light" cx=".25" cy=".15" r=".9"><stop offset="0" stop-color="#ffffff" stop-opacity=".34"/><stop offset=".45" stop-color="#ffffff" stop-opacity=".04"/><stop offset="1" stop-color="#050914" stop-opacity=".44"/></radialGradient><pattern id="${artId}-grain" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 4 4 0M-1 1 1-1M3 5l2-2" stroke="#ffffff" stroke-width=".35" opacity=".14"/></pattern><clipPath id="${artId}-clip"><rect x="1" y="1" width="46" height="46" rx="5"/></clipPath><filter id="${artId}-shadow" x="-40%" y="-40%" width="180%" height="190%" color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="1.2" stdDeviation=".75" flood-color="#050914" flood-opacity=".8"/></filter></defs><g clip-path="url(#${artId}-clip)"><rect width="48" height="48" fill="url(#${artId}-scene)" stroke="none"/><rect width="48" height="48" fill="url(#${artId}-grain)" stroke="none"/><path d="M24 24 2 0h9Zm0 0L18 0h7Zm0 0L37 0h8Zm0 0L48 9v8Zm0 0L48 32v11Zm0 0L36 48h-8Zm0 0L12 48H3Zm0 0L0 40v-9Zm0 0L0 19V8Z" fill="#fff8d0" opacity=".035" stroke="none"/><g stroke="none">${badgeIconScenes[badge.icon]}</g><ellipse cx="24" cy="43" rx="18" ry="2.6" fill="#050914" opacity=".38" stroke="none"/><g filter="url(#${artId}-shadow)"><g stroke="none">${badgeIconDetails[badge.icon]}</g>${badgeIcons[badge.icon]}<g>${badgeMicroDetails[badge.icon]}</g></g><rect width="48" height="48" fill="url(#${artId}-light)" stroke="none"/><path d="M3 4h20C13 8 7 16 3 29Z" fill="#ffffff" opacity=".1" stroke="none"/><path d="M4 41c12-3 26 4 40-1" stroke="#ffffff" stroke-width=".55" opacity=".2"/><g fill="#fff8d0" stroke="none"><circle cx="7" cy="9" r=".85"/><circle cx="41" cy="36" r=".8"/><path d="m39 5 .9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9Z"/></g></g><rect x=".7" y=".7" width="46.6" height="46.6" rx="5.4" stroke="url(#${artId}-rim)" stroke-width="1.4"/><rect x="2.4" y="2.4" width="43.2" height="43.2" rx="3.8" stroke="#fff8d0" stroke-width=".4" opacity=".55"/><path d="M3 10V3h7m28 0h7v7M3 38v7h7m28 0h7v-7" stroke="#fff3c4" stroke-width=".75" opacity=".8"/></svg>`;
+}
+
+function renderBadge(badge, instance) {
+  const earned = earnedBadges.has(badge.id);
+  const state = `badge${earned ? ' earned' : ''}${badge.difficult ? ' difficult' : ''}`;
+  const status = earned ? 'EARNED' : 'LOCKED';
+  const description = `${badge.difficult ? 'Ultra challenge: ' : ''}${getBadgeDescription(badge)}`;
+  const rainbow = badge.difficult ? '<span class="badge-rainbow" aria-hidden="true"></span>' : '';
+  const edition = String(badges.indexOf(badge) + 1).padStart(2, '0');
+  return `<div class="${state}" data-section="${badge.section}" data-badge-id="${badge.id}" role="button" tabindex="0" aria-label="${badge.name}. ${status}. Inspect badge." title="${description}"><span class="badge-ribbon" aria-hidden="true"></span><span class="badge-medal" aria-hidden="true">${rainbow}${renderBadgeArt(badge, instance)}</span><span class="badge-edition">NO. ${edition} / ${badge.difficult ? 'ULTRA' : badgeSectionNames[badge.section]}</span><span class="badge-name">${badge.name}</span><span class="badge-status">${status}</span></div>`;
+}
+
+function renderBadgeCollection(instance) {
   const renderSection = (sectionId, title) => {
     const sectionBadges = badges.filter(badge => badge.section === sectionId);
     const shelves = [];
     for (let index = 0; index < sectionBadges.length; index += 4) {
       const shelfBadges = sectionBadges.slice(index, index + 4);
-      shelves.push(`<div class="badge-shelf"><div class="badge-grid">${shelfBadges.map(renderBadge).join('')}</div></div>`);
+      shelves.push(`<div class="badge-shelf"><div class="badge-grid">${shelfBadges.map(badge => renderBadge(badge, instance)).join('')}</div></div>`);
     }
     return `<section class="badge-section"><h3>${title}</h3>${shelves.join('')}</section>`;
   };
-  badgeList.innerHTML = renderSection('main', 'MAIN FLOOR')
+  return renderSection('main', 'MAIN FLOOR')
     + renderSection('cellar', 'THE CELLAR')
     + renderSection('garden', 'THE GARDEN')
     + renderSection('office', 'THE OFFICE')
     + renderSection('fun', 'FUN & RANDOM');
-  winBadgeList.innerHTML = badgeList.innerHTML;
+}
+
+function updateBadgeUi() {
+  badgeList.innerHTML = renderBadgeCollection('wall');
+  winBadgeList.innerHTML = renderBadgeCollection('win');
   badgeCount.textContent = `${earnedBadges.size}/${badges.length} badges`;
   badgeIndexCount.textContent = `${earnedBadges.size}/${badges.length} badges`;
+}
+
+function showBadgeDetail(badgeId) {
+  const badge = badges.find(item => item.id === badgeId);
+  if (!badge) return;
+  const earned = earnedBadges.has(badge.id);
+  const edition = String(badges.indexOf(badge) + 1).padStart(2, '0');
+  badgeDetailDialog.dataset.badgeId = badge.id;
+  badgeDetailArt.className = `badge-detail-art${earned ? ' earned' : ''}`;
+  badgeDetailArt.innerHTML = `<div class="badge-detail-medal">${renderBadgeArt(badge, 'inspect')}</div>`;
+  badgeDetailKicker.textContent = `${badgeSectionNames[badge.section]} / COLLECTIBLE NO. ${edition}`;
+  badgeDetailName.textContent = badge.name;
+  badgeDetailDescription.textContent = getBadgeDescription(badge);
+  badgeDetailStatus.textContent = earned ? 'EARNED' : 'LOCKED';
+  badgeDetailStatus.className = `badge-detail-status${earned ? ' earned' : ''}`;
+  badgeDetailProgress.textContent = badge.id === 'boss-bouncer'
+    ? `Boss bounces: ${Math.min(funStats.stomps, 10)}/10`
+    : badge.difficult ? 'ULTRA RARE / CHALLENGE BADGE' : 'THE PARK / DETAILED COLLECTOR EDITION';
+  if (!badgeDetailDialog.open) badgeDetailDialog.showModal();
 }
 
 function awardBadge(id) {
@@ -382,13 +539,6 @@ function awardBadge(id) {
   badgeToast.classList.add('visible');
   badgeToastTimer = 3;
   checkMetaBadges();
-}
-
-function updateBossBouncerProgress() {
-  if (!bossBouncerProgress) return;
-  bossBouncerProgress.textContent = earnedBadges.has('boss-bouncer')
-    ? 'Boss Bouncer: DONE'
-    : `Boss Bouncer: ${Math.min(funStats.stomps, 10)}/10`;
 }
 
 function checkMetaBadges() {
@@ -561,23 +711,90 @@ function updateHotbarUi() {
 }
 
 function updateBackpackUi() {
-  backpackStorageElement.innerHTML = backpackStorageSlots.map(item => {
+  backpackStorageElement.innerHTML = backpackStorageSlots.map((item, index) => {
     const itemHtml = item
       ? `<div class="hotbar-item item-${item.id}"></div><span class="item-count">x${item.count}</span>`
       : '';
-    return `<div class="backpack-slot" title="${item ? item.name : 'Empty backpack slot'}">${itemHtml}</div>`;
+    return `<div class="backpack-slot" data-slot-index="${index}" title="${item ? `${item.name} - click to take out` : 'Empty backpack slot'}">${itemHtml}</div>`;
   }).join('');
 }
 
 function updateBackpackVisibility() {
-  const selectedItem = hotbarSlots[selectedHotbarSlot];
-  const showBackpack = hasBackpack && selectedItem && selectedItem.id === 'backpack';
-  backpackStorageElement.classList.toggle('hidden', !showBackpack);
+  backpackStorageElement.classList.toggle('hidden', !hasBackpack);
 }
 
 function selectHotbarSlot(index) {
   selectedHotbarSlot = index;
   updateHotbarUi();
+}
+
+function storeSelectedHotbarItem() {
+  if (!hasBackpack) {
+    showMessage('Find the rare Backpack first!');
+    return false;
+  }
+
+  const selectedItem = hotbarSlots[selectedHotbarSlot];
+  if (!selectedItem) {
+    showMessage('Select a hotbar item first, then press B to store it.');
+    return false;
+  }
+  if (selectedItem.id === 'backpack') {
+    showMessage('You cannot store the Backpack inside itself!');
+    return false;
+  }
+
+  const existingItem = backpackStorageSlots.find(item => item && item.id === selectedItem.id);
+  const emptySlot = backpackStorageSlots.findIndex(item => item === null);
+  if (!existingItem && emptySlot === -1) {
+    showMessage('Your Backpack is full! Take something out first.');
+    return false;
+  }
+
+  if (existingItem) existingItem.count += selectedItem.count;
+  else backpackStorageSlots[emptySlot] = { ...selectedItem };
+  hotbarSlots[selectedHotbarSlot] = null;
+  updateHotbarUi();
+  updateBackpackUi();
+  showMessage(`${selectedItem.name} stored in your Backpack.`);
+  return true;
+}
+
+function takeBackpackItem(index) {
+  const backpackItem = backpackStorageSlots[index];
+  if (!backpackItem) return false;
+
+  const existingItem = hotbarSlots.find(item => item && item.id === backpackItem.id);
+  const emptySlot = hotbarSlots.findIndex(item => item === null);
+  if (!existingItem && emptySlot === -1) {
+    showMessage('Your hotbar is full! Make room before taking that item out.');
+    return false;
+  }
+
+  if (existingItem) {
+    existingItem.count += backpackItem.count;
+    selectedHotbarSlot = hotbarSlots.indexOf(existingItem);
+  } else {
+    hotbarSlots[emptySlot] = { ...backpackItem };
+    selectedHotbarSlot = emptySlot;
+  }
+  backpackStorageSlots[index] = null;
+  updateHotbarUi();
+  updateBackpackUi();
+  showMessage(`${backpackItem.name} moved back to your hotbar.`);
+  return true;
+}
+
+function isPermanentRiftActive() {
+  return currentFloor === 'main' && (currentDoor === totalDoors || (currentDoor === 1 && Boolean(riftItem) && !thrownRiftActive));
+}
+
+function isRiftActive() {
+  return isPermanentRiftActive() || thrownRiftActive;
+}
+
+function getActiveRift() {
+  return thrownRiftActive ? thrownRift : rift;
 }
 
 function useRift() {
@@ -604,7 +821,8 @@ function useRift() {
       updateBackpackUi();
     }
     updateHotbarUi();
-    updateHud();
+    if (currentFloor === 'main' && currentDoor === 1) startRoom();
+    else updateHud();
     showMessage(`The blue RIFT tossed your ${returnedItem.name} back out!`);
     return;
   }
@@ -632,6 +850,44 @@ function useRift() {
 function useSelectedHotbarItem() {
   const item = hotbarSlots[selectedHotbarSlot];
   if (!item) return;
+
+  if (item.id === 'flow-juice') {
+    flowJuiceTimer = flowJuiceDuration;
+    item.count--;
+    if (item.count <= 0) hotbarSlots[selectedHotbarSlot] = null;
+    updateHotbarUi();
+    showMessage(`Flow Juice used! Low gravity for ${flowJuiceDuration} seconds.`);
+    return;
+  }
+
+  if (item.id === 'rift-can') {
+    if (isRiftActive()) {
+      showMessage('A RIFT is already open in this room.');
+      return;
+    }
+
+    const throwCenter = player.x + player.width / 2 + player.facing * 110;
+    thrownRift.x = Math.max(45, Math.min(door.x - thrownRift.width - 25, throwCenter - thrownRift.width / 2));
+    thrownRift.y = groundY - thrownRift.height;
+    thrownRiftActive = true;
+    item.count--;
+    if (item.count <= 0) hotbarSlots[selectedHotbarSlot] = null;
+    updateHotbarUi();
+    updateHud();
+    showMessage('Rift-in-a-Can thrown! A RIFT opened on the floor. Press E nearby to use it.');
+    return;
+  }
+
+  if (item.id === 'fanta-jug') {
+    player.health = player.maxHealth;
+    fantaRushTimer = fantaRushDuration;
+    item.count--;
+    if (item.count <= 0) hotbarSlots[selectedHotbarSlot] = null;
+    updateHotbarUi();
+    updateHealthUi();
+    showMessage(`Fanta Jug used! 100% HP and Fanta Rush for ${fantaRushDuration} seconds.`);
+    return;
+  }
 
   if (item.id === 'teleporter') {
     if (currentFloor !== 'office') {
@@ -673,16 +929,16 @@ function useSelectedHotbarItem() {
 }
 
 const roomThemes = [
-  { wallTop: '#3f4a5a', wallMiddle: '#2b3441', wallLower: '#1d2530', floor: '#4d3b28', floorLine: '#6b5237', detail: 'paintings' },
-  { wallTop: '#3f6f56', wallMiddle: '#26503c', wallLower: '#183527', floor: '#4a5b36', floorLine: '#687a47', detail: 'plants' },
-  { wallTop: '#4a5568', wallMiddle: '#303a49', wallLower: '#1f2632', floor: '#404b5c', floorLine: '#59667a', detail: 'pipes' },
-  { wallTop: '#72584a', wallMiddle: '#4e3b31', wallLower: '#2e211b', floor: '#5c4231', floorLine: '#7d5b42', detail: 'boxes' },
-  { wallTop: '#5c5f78', wallMiddle: '#3b3e52', wallLower: '#252736', floor: '#4a4e64', floorLine: '#666c86', detail: 'shelves' },
-  { wallTop: '#5a6f78', wallMiddle: '#354b54', wallLower: '#1e2e34', floor: '#3c5158', floorLine: '#587078', detail: 'gears' },
-  { wallTop: '#6d5f78', wallMiddle: '#473d52', wallLower: '#2a2332', floor: '#4a3f57', floorLine: '#6a5b7b', detail: 'crystals' },
-  { wallTop: '#62725c', wallMiddle: '#3d4b38', wallLower: '#222b1f', floor: '#41503a', floorLine: '#5c6e52', detail: 'vines' },
-  { wallTop: '#7b7259', wallMiddle: '#575040', wallLower: '#332e26', floor: '#5b5241', floorLine: '#7b7259', detail: 'sand' },
-  { wallTop: '#6f5a3d', wallMiddle: '#4a3b28', wallLower: '#2a2118', floor: '#57432d', floorLine: '#7a6140', detail: 'gold' }
+  { name: 'Grand Gallery', wallpaper: 'damask', wallTop: '#5b4a62', wallMiddle: '#403549', wallLower: '#292331', floor: '#4d3b28', floorLine: '#806044', detail: 'paintings' },
+  { name: 'Conservatory', wallpaper: 'botanical', wallTop: '#4f765e', wallMiddle: '#315540', wallLower: '#203a2b', floor: '#4a5b36', floorLine: '#708551', detail: 'plants' },
+  { name: 'Boiler Room', wallpaper: 'stripes', wallTop: '#4a5568', wallMiddle: '#303a49', wallLower: '#1f2632', floor: '#404b5c', floorLine: '#65748a', detail: 'pipes' },
+  { name: 'Library', wallpaper: 'lattice', wallTop: '#72584a', wallMiddle: '#4e3b31', wallLower: '#2e211b', floor: '#5c4231', floorLine: '#88644a', detail: 'shelves' },
+  { name: 'Bedroom', wallpaper: 'stars', wallTop: '#5c5f78', wallMiddle: '#3b3e52', wallLower: '#252736', floor: '#4a4e64', floorLine: '#707793', detail: 'bedroom' },
+  { name: 'Clockwork Study', wallpaper: 'deco', wallTop: '#5a6f78', wallMiddle: '#354b54', wallLower: '#1e2e34', floor: '#3c5158', floorLine: '#66818a', detail: 'gears' },
+  { name: 'Crystal Room', wallpaper: 'diamonds', wallTop: '#6d5f78', wallMiddle: '#473d52', wallLower: '#2a2332', floor: '#4a3f57', floorLine: '#776487', detail: 'crystals' },
+  { name: 'Overgrown Parlour', wallpaper: 'vines', wallTop: '#62725c', wallMiddle: '#3d4b38', wallLower: '#222b1f', floor: '#41503a', floorLine: '#698061', detail: 'vines' },
+  { name: 'Dusty Attic', wallpaper: 'dots', wallTop: '#7b7259', wallMiddle: '#575040', wallLower: '#332e26', floor: '#5b5241', floorLine: '#827862', detail: 'boxes' },
+  { name: 'Golden Reward Room', wallpaper: 'deco', wallTop: '#6f5a3d', wallMiddle: '#4a3b28', wallLower: '#2a2118', floor: '#57432d', floorLine: '#8a6b48', detail: 'gold' }
 ];
 
 const player = {
@@ -737,6 +993,7 @@ const boss = {
   height: 140,
   health: 3,
   maxHealth: 3,
+  phase: 1,
   speed: 130,
   chargeTimer: 0,
   attacking: false,
@@ -755,6 +1012,14 @@ const door = {
   height: 90,
   open: false,
   requiresKey: true
+};
+
+const mainFloorElevator = {
+  x: 650,
+  y: 390,
+  width: 100,
+  height: 170,
+  kind: 'main-elevator'
 };
 
 const gardenDoor = {
@@ -834,6 +1099,33 @@ const milkshake = {
   taken: false
 };
 
+const fantaJug = {
+  x: 480,
+  y: 484,
+  width: 44,
+  height: 54,
+  kind: 'fanta-jug',
+  taken: false
+};
+
+const riftCan = {
+  x: 540,
+  y: 500,
+  width: 34,
+  height: 40,
+  kind: 'rift-can',
+  taken: false
+};
+
+const flowJuice = {
+  x: 520,
+  y: 498,
+  width: 30,
+  height: 42,
+  kind: 'flow-juice',
+  taken: false
+};
+
 const backpack = {
   x: 420,
   y: 500,
@@ -859,6 +1151,14 @@ const rift = {
   kind: 'rift'
 };
 
+const thrownRift = {
+  x: 420,
+  y: 380,
+  width: 120,
+  height: 180,
+  kind: 'thrown-rift'
+};
+
 const closet = {
   x: 640,
   y: 440,
@@ -882,6 +1182,10 @@ const input = new Set();
 
 function startRoom() {
   const wasChaseActive = monsterActive || gardenChaseActive || officeChaseActive;
+  stairDescentActive = false;
+  encounterFlashTimer = 0;
+  encounterShakeTimer = 0;
+  thrownRiftActive = false;
   player.x = 80;
   player.y = groundY - player.height;
   player.velocityY = 0;
@@ -901,30 +1205,45 @@ function startRoom() {
   bossActive = isMainFloor && (currentDoor === bossDoor || bossIsReturn);
   monsterActive = isMainFloor && currentDoor >= monsterStartDoor && currentDoor <= monsterEndDoor;
   const isRewardRoom = isMainFloor && currentDoor === rewardDoor;
-  const isRiftRoom = isMainFloor && currentDoor === totalDoors;
+  const isRiftRoom = isPermanentRiftActive();
   const isSpecialRoom = isMainFloor && (currentDoor === 1 || monsterActive || isRewardRoom || bossActive || isRiftRoom);
   rareRoomActive = isMainFloor && !isSpecialRoom && Math.random() < rareRoomChance;
-  closetVisible = isMainFloor && currentDoor !== 1 && !rareRoomActive && currentDoor !== rewardDoor && !bossActive && !isRiftRoom;
-  rushActive = isMainFloor && currentDoor > rewardDoor && !isSpecialRoom && !rareRoomActive && Math.random() < rushChance;
+  fantaJugActive = isMainFloor && !isSpecialRoom && !rareRoomActive && Math.random() < fantaJugSpawnChance;
+  riftCanActive = isMainFloor && !isSpecialRoom && !rareRoomActive && !fantaJugActive && Math.random() < riftCanSpawnChance;
+  flowJuiceActive = isMainFloor && !isSpecialRoom && !rareRoomActive && !fantaJugActive && !riftCanActive && Math.random() < flowJuiceSpawnChance;
+  closetVisible = isMainFloor && currentDoor !== 1 && !rareRoomActive && !fantaJugActive && currentDoor !== rewardDoor && !bossActive && !isRiftRoom && !mainFloorHasStairs() && !mainFloorElevatorActive();
+  rushActive = isMainFloor && currentDoor > rewardDoor && !isSpecialRoom && !rareRoomActive && !fantaJugActive && !mainFloorHasStairs() && !mainFloorElevatorActive() && Math.random() < rushChance;
   rushWarningTimer = rushActive ? 5 : 0;
   if (isMainFloor && !isSpecialRoom && !unlockedDoors.has(currentDoor) && Math.random() < unlockedDoorChance) {
     unlockedDoors.add(currentDoor);
   }
-  const isUnlockedDoor = isSubFloor || isRiftRoom || unlockedDoors.has(currentDoor) || rareRoomActive;
+  const isUnlockedDoor = isSubFloor || isRiftRoom || unlockedDoors.has(currentDoor) || rareRoomActive || fantaJugActive;
   roomIsDark = (isCellarFloor || (isMainFloor && currentDoor > rewardDoor
     && currentDoor % 5 === 0
     && currentDoor !== bossDoor
     && currentDoor !== bossReturnDoor
     && currentDoor !== 95
     && !isRiftRoom
-    && !rareRoomActive));
+    && !rareRoomActive
+    && !fantaJugActive));
   monster.x = -80;
+  monster.y = mainFloorGroundAt(monster.x + monster.width / 2) - monster.height;
   monster.speed = 135 + (currentDoor - monsterStartDoor) * 6;
   keyFound = isSubFloor || monsterActive || isRewardRoom || bossActive || isUnlockedDoor || rareRoomActive;
   doorOpen = isSubFloor || monsterActive || isUnlockedDoor || rareRoomActive;
   cabinet.searched = isSubFloor || isRewardRoom || bossActive || isUnlockedDoor || rareRoomActive;
   cabinet.keyVisible = false;
-  cabinet.x = 120 + ((currentDoor * 37) % 480);
+  cabinet.x = mainFloorHasStairs() || mainFloorElevatorActive()
+    ? 150 + ((currentDoor * 37) % 220)
+    : 120 + ((currentDoor * 37) % 480);
+  cabinet.y = mainFloorHasStairs()
+    ? mainFloorGroundAt(cabinet.x + cabinet.width / 2) - cabinet.height
+    : 500;
+  if (mainFloorHasStairs()) {
+    player.height = 48;
+    player.y = mainFloorGroundAt(player.x + player.width / 2) - player.height;
+    player.onGround = true;
+  }
   closet.x = 620 + ((currentDoor * 29) % 80);
   closet.y = groundY - closet.height;
   rush.x = -100;
@@ -956,9 +1275,12 @@ function startRoom() {
   officeMonster.x = -140;
   officeMonster.speed = 190 + (currentDoor - officeChaseStartDoor) * 6;
   milkshake.taken = false;
+  fantaJug.taken = false;
+  riftCan.taken = false;
+  flowJuice.taken = false;
   backpack.taken = false;
   teleporter.taken = false;
-  backpackActive = isMainFloor && !isSpecialRoom && !hasBackpack && Math.random() < backpackSpawnChance;
+  backpackActive = isMainFloor && !isSpecialRoom && !fantaJugActive && !hasBackpack && !mainFloorHasStairs() && Math.random() < backpackSpawnChance;
   backpackOnTable = backpackActive && Math.random() < .5;
   backpack.x = backpackOnTable ? 410 : 420;
   backpack.y = backpackOnTable ? 450 : 500;
@@ -973,7 +1295,9 @@ function startRoom() {
   boss.health = bossIsReturn ? 4 : 3;
   boss.maxHealth = boss.health;
   boss.speed = bossIsReturn ? 165 : 130;
-  boss.chargeTimer = 0;
+  boss.phase = 1;
+  boss.attacking = false;
+  boss.chargeTimer = bossIsReturn ? 1.2 : 1.6;
   boss.invulnerableTimer = 0;
   boss.direction = -1;
 
@@ -1071,15 +1395,22 @@ function startRoom() {
   if (monsterActive) {
     const shift = (currentDoor - monsterStartDoor) * 25;
     const pattern = (currentDoor - monsterStartDoor) % 2;
-    obstacles.push(pattern === 0
+    const chaseObstacles = [pattern === 0
       ? { type: 'crate', x: 220 + shift, y: 520, width: 40, height: 40 }
-      : { type: 'beam', x: 220 + shift, y: 512, width: 120, height: 22 });
-    obstacles.push(pattern === 0
+      : { type: 'beam', x: 220 + shift, y: 512, width: 120, height: 22 },
+    pattern === 0
       ? { type: 'beam', x: 430 + shift, y: 512, width: 120, height: 22 }
-      : { type: 'crate', x: 430 + shift, y: 520, width: 40, height: 40 });
-    obstacles.push(pattern === 0
+      : { type: 'crate', x: 430 + shift, y: 520, width: 40, height: 40 },
+    pattern === 0
       ? { type: 'crate', x: 650 + shift, y: 520, width: 40, height: 40 }
-      : { type: 'beam', x: 650 + shift, y: 512, width: 120, height: 22 });
+      : { type: 'beam', x: 650 + shift, y: 512, width: 120, height: 22 }];
+    for (const obstacle of chaseObstacles) {
+      if (mainFloorHasStairs()) {
+        const obstacleGround = mainFloorGroundAt(obstacle.x + obstacle.width / 2);
+        obstacle.y = obstacle.type === 'beam' ? obstacleGround - 48 : obstacleGround - obstacle.height;
+      }
+      obstacles.push(obstacle);
+    }
   }
 
   if (isCellarFloor) {
@@ -1132,6 +1463,12 @@ function startRoom() {
       : `THE CELLAR · Dark room ${currentDoor}/${totalCellarDoors}`);
   }
 
+  if (isMainFloor && monsterActive) {
+    showMessage(mainFloorHasStairs()
+      ? 'Monster chase in the stairwell! Jump or slide past obstacles and keep moving right.'
+      : 'Monster chase! Jump over crates, slide under beams, and keep moving right.');
+  }
+
   if (isMainFloor && isRewardRoom && !rewardClaimed) {
     showMessage('You escaped the monster! Open your reward chest.');
     awardBadge('chase-survivor');
@@ -1146,6 +1483,14 @@ function startRoom() {
   if (isMainFloor && rareRoomActive) {
     awardBadge('restaurant-finder');
     showMessage('Rare Restaurant Room! Grab the milkshake.');
+  } else if (isMainFloor && fantaJugActive) {
+    showMessage('Rare basement! Grab the yellow Fanta Jug with E.');
+  } else if (isMainFloor && riftCanActive) {
+    showMessage('Rift-in-a-Can spotted! Grab it with E, then press Q to throw it.');
+  } else if (isMainFloor && flowJuiceActive) {
+    showMessage('Flow Juice spotted! Grab it with E, then press Q for low gravity.');
+  } else if (isMainFloor && mainFloorElevatorActive()) {
+    showMessage(`Elevator found! Press E nearby to ride down to Door ${mainFloorElevatorDestination()}.`);
   } else if (isMainFloor && isUnlockedDoor && !isRiftRoom) {
     showMessage('This door is already unlocked. Walk right.');
   }
@@ -1222,18 +1567,29 @@ function updateHud() {
       : `Boss fight · ${boss.health} hits left`;
   } else if (currentDoor === rewardDoor) {
     modeText.textContent = rewardClaimed ? 'Reward room · Speed Boots active' : 'Reward room · open the chest';
-  } else if (currentDoor === totalDoors) {
+  } else if (isRiftActive()) {
     modeText.textContent = riftItem ? `RIFT: ${riftItem.name}` : 'RIFT: empty';
   } else if (roomIsDark) {
     modeText.textContent = 'Dark room · flashlight on';
   } else if (rareRoomActive) {
     modeText.textContent = 'Rare Restaurant Room · 1.5% find';
+  } else if (fantaJugActive) {
+    modeText.textContent = 'Basement - Fanta Jug';
+  } else if (riftCanActive) {
+    modeText.textContent = 'Rare item - Rift-in-a-Can';
+  } else if (flowJuiceActive) {
+    modeText.textContent = 'Rare item - Flow Juice';
+  } else if (mainFloorElevatorActive()) {
+    modeText.textContent = `${currentRoomTheme().name} - elevator to Door ${mainFloorElevatorDestination()}`;
+  } else if (mainFloorHasStairs()) {
+    modeText.textContent = 'Grand Stairwell - steps to the exit';
   } else if (currentDoor === 1) {
     modeText.textContent = 'Calm room · find the key';
   } else {
+    const roomName = currentRoomTheme().name || 'Calm room';
     modeText.textContent = unlockedDoors.has(currentDoor)
-      ? 'Calm room - door already unlocked'
-      : 'Calm room';
+      ? `${roomName} - door already unlocked`
+      : roomName;
   }
 }
 
@@ -1288,6 +1644,9 @@ function damagePlayer(amount, text) {
   currentFloorDamageFree = false;
   player.health -= amount;
   player.invulnerableTimer = 1;
+  encounterFlashTimer = .22;
+  encounterFlashColor = '255,77,94';
+  encounterShakeTimer = .22;
 
   if (player.health <= 0) {
     player.health = 0;
@@ -1319,18 +1678,22 @@ function updateTarget() {
   } else {
     if (currentFloor === 'main' && currentDoor === 65) targets.push(gardenDoor);
     if (currentFloor === 'main' && currentDoor === 95) targets.push(officeDoor);
-    if (currentFloor === 'main' && currentDoor === totalDoors) targets.push(rift);
+    if (isRiftActive()) targets.push(getActiveRift());
     if (currentFloor === 'main' && currentDoor === cellarEntranceDoor) targets.push(cellarStaircase);
     if (currentFloor === 'cellar' && currentDoor === totalCellarDoors) targets.push(cellarExit);
     if (currentFloor === 'office' && !officeSideRoomActive && currentDoor % 15 === 0) targets.push(storageDoor);
     if (rareRoomActive && !milkshake.taken) targets.push(milkshake);
+    if (fantaJugActive && !fantaJug.taken) targets.push(fantaJug);
+    if (riftCanActive && !riftCan.taken) targets.push(riftCan);
+    if (flowJuiceActive && !flowJuice.taken) targets.push(flowJuice);
+    if (mainFloorElevatorActive()) targets.push(mainFloorElevator);
     if (backpackActive && !backpack.taken) targets.push(backpack);
     if (teleporterActive && !teleporter.taken) targets.push(teleporter);
     if (closetVisible) targets.push(closet);
     if (!cabinet.searched) targets.push(cabinet);
     if (cabinet.keyVisible) targets.push({ ...cabinet, y: cabinet.y + 4, height: 18, kind: 'key' });
   }
-  if (!doorOpen) targets.push(door);
+  if (!doorOpen && !mainFloorElevatorActive()) targets.push(door);
 
   for (const target of targets) {
     const centerX = target.x + target.width / 2;
@@ -1347,7 +1710,9 @@ function updateTarget() {
       ? 'Run right!'
       : bossActive && !bossIsReturn
         ? 'Climb the stairs, then S-drop on the boss!'
-        : '';
+        : mainFloorElevatorActive()
+          ? 'Ride the elevator to continue!'
+          : '';
     return;
   }
 
@@ -1359,6 +1724,14 @@ function updateTarget() {
     promptElement.textContent = 'E: Open reward chest';
   } else if (currentTarget === milkshake) {
     promptElement.textContent = 'E: Take milkshake';
+  } else if (currentTarget === fantaJug) {
+    promptElement.textContent = 'E: Take Fanta Jug';
+  } else if (currentTarget === riftCan) {
+    promptElement.textContent = 'E: Take Rift-in-a-Can';
+  } else if (currentTarget === flowJuice) {
+    promptElement.textContent = 'E: Take Flow Juice';
+  } else if (currentTarget === mainFloorElevator) {
+    promptElement.textContent = `E: Ride elevator to Door ${mainFloorElevatorDestination()}`;
   } else if (currentTarget === backpack) {
     promptElement.textContent = 'E: Take backpack';
   } else if (currentTarget === teleporter) {
@@ -1369,7 +1742,7 @@ function updateTarget() {
     promptElement.textContent = 'E: Enter THE GARDEN';
   } else if (currentTarget === officeDoor) {
     promptElement.textContent = 'E: Enter THE OFFICE';
-  } else if (currentTarget === rift) {
+  } else if (currentTarget === rift || currentTarget === thrownRift) {
     const selectedItem = hotbarSlots[selectedHotbarSlot];
     promptElement.textContent = riftItem
       ? `E: Take ${riftItem.name}`
@@ -1388,6 +1761,51 @@ function updateTarget() {
     promptElement.textContent = 'E: Take key';
   } else {
     promptElement.textContent = keyFound ? 'E: Open door' : 'Find the key first';
+  }
+}
+
+function startMainFloorElevatorRide() {
+  const destination = mainFloorElevatorDestination();
+  if (!destination) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    currentDoor = destination;
+    startRoom();
+    showMessage(`Elevator arrived at Door ${destination}: ${currentRoomTheme().name}.`);
+    return;
+  }
+
+  elevatorRideActive = true;
+  elevatorRideTimer = 0;
+  elevatorRideOrigin = currentDoor;
+  elevatorRideDestination = destination;
+  elevatorRideArrived = false;
+  paused = true;
+  input.clear();
+  player.moving = false;
+  player.sliding = false;
+  currentTarget = null;
+  promptElement.textContent = '';
+  showMessage(`Elevator descending from Door ${elevatorRideOrigin} to Door ${destination}.`);
+}
+
+function updateMainFloorElevatorRide(delta) {
+  elevatorRideTimer += delta;
+
+  if (!elevatorRideArrived && elevatorRideTimer >= 1.55) {
+    currentDoor = elevatorRideDestination;
+    startRoom();
+    elevatorRideArrived = true;
+    paused = true;
+  }
+
+  if (elevatorRideTimer >= 2.25) {
+    elevatorRideActive = false;
+    paused = false;
+    player.moving = false;
+    currentTarget = null;
+    updateHud();
+    showMessage(`Elevator arrived at Door ${currentDoor}: ${currentRoomTheme().name}.`);
   }
 }
 
@@ -1457,7 +1875,7 @@ function interact() {
     return;
   }
 
-  if (currentTarget === rift) {
+  if (currentTarget === rift || currentTarget === thrownRift) {
     useRift();
     return;
   }
@@ -1473,6 +1891,11 @@ function interact() {
     return;
   }
 
+  if (currentTarget === mainFloorElevator) {
+    startMainFloorElevatorRide();
+    return;
+  }
+
   if (currentTarget === cabinet) {
     cabinet.searched = true;
     cabinet.keyVisible = true;
@@ -1484,6 +1907,30 @@ function interact() {
     milkshake.taken = true;
     addItemToHotbar('milkshake', 'Milkshake');
     showMessage('Milkshake collected!');
+    return;
+  }
+
+  if (currentTarget === fantaJug) {
+    if (!addItemToHotbar('fanta-jug', 'Fanta Jug')) return;
+    fantaJug.taken = true;
+    awardBadge('fanta-jug-finder');
+    showMessage('Rare yellow Fanta Jug collected! Select it and press Q.');
+    return;
+  }
+
+  if (currentTarget === riftCan) {
+    if (!addItemToHotbar('rift-can', 'Rift-in-a-Can')) return;
+    riftCan.taken = true;
+    awardBadge('rift-can-finder');
+    showMessage('Rift-in-a-Can collected! Select it and press Q to throw it.');
+    return;
+  }
+
+  if (currentTarget === flowJuice) {
+    if (!addItemToHotbar('flow-juice', 'Flow Juice')) return;
+    flowJuice.taken = true;
+    awardBadge('flow-juice-finder');
+    showMessage('Flow Juice collected! Select it and press Q for low gravity.');
     return;
   }
 
@@ -1622,9 +2069,12 @@ function nextDoor() {
 function movePlayer(delta) {
   player.invulnerableTimer = Math.max(0, player.invulnerableTimer - delta);
   if (player.hidden) return;
+  if (stairDescentActive && (!mainFloorHasStairs() || player.x + player.width / 2 >= 805)) {
+    stairDescentActive = false;
+  }
 
   const left = input.has('KeyA') || input.has('ArrowLeft');
-  const right = input.has('KeyD') || input.has('ArrowRight');
+  const right = input.has('KeyD') || input.has('ArrowRight') || stairDescentActive;
   const slide = input.has('KeyS') || input.has('ArrowDown');
   const jump = input.has('KeyW') || input.has('Space') || input.has('ArrowUp');
 
@@ -1649,9 +2099,14 @@ function movePlayer(delta) {
   if (direction !== 0) player.facing = direction;
   player.moving = direction !== 0;
   player.animationTime += delta;
-  const speed = player.sliding ? 145 : player.speed;
+  const speed = player.sliding ? 145 : player.speed * (fantaRushTimer > 0 ? fantaRushSpeedMultiplier : 1);
   const nextX = player.x + direction * speed * delta;
   if (!collides(playerBox(nextX, player.y))) player.x = nextX;
+
+  if (mainFloorHasStairs() && player.onGround) {
+    player.y = mainFloorGroundAt(player.x + player.width / 2) - player.height;
+    player.velocityY = 0;
+  }
 
   if (jump && player.onGround && !player.sliding) {
     player.velocityY = -player.jumpSpeed;
@@ -1660,7 +2115,7 @@ function movePlayer(delta) {
     if (funStats.jumps >= 50) awardBadge('jump-machine');
   }
 
-  player.velocityY += 1300 * delta;
+  player.velocityY += 1300 * (flowJuiceTimer > 0 ? flowJuiceGravityMultiplier : 1) * delta;
   platformIgnoreTimer = Math.max(0, platformIgnoreTimer - delta);
   const previousBottom = player.y + player.height;
   const nextY = player.y + player.velocityY * delta;
@@ -1668,12 +2123,18 @@ function movePlayer(delta) {
   const platform = player.velocityY >= 0
     ? landingPlatform(previousBottom, nextBottom, playerBox(player.x, nextY))
     : null;
+  const stairGround = mainFloorGroundAt(player.x + player.width / 2);
 
   if (platform) {
     player.y = platform.y - player.height;
     player.velocityY = 0;
     player.onGround = true;
     player.onPlatform = true;
+  } else if (mainFloorHasStairs() && player.velocityY >= 0 && nextBottom >= stairGround) {
+    player.y = stairGround - player.height;
+    player.velocityY = 0;
+    player.onGround = true;
+    player.onPlatform = false;
   } else if (!collides(playerBox(player.x, nextY))) {
     player.y = nextY;
     player.onGround = false;
@@ -1685,12 +2146,13 @@ function movePlayer(delta) {
     player.y = Math.min(player.y, groundY - player.height);
   }
 
-  if (doorOpen && player.x + player.width > door.x + 20) nextDoor();
+  if (doorOpen && !mainFloorElevatorActive() && player.x + player.width > door.x + 20) nextDoor();
 }
 
 function updateMonster(delta) {
   if (!monsterActive) return;
   monster.x += monster.speed * delta;
+  monster.y = mainFloorGroundAt(monster.x + monster.width / 2) - monster.height;
 
   if (!player.hidden && rect(playerBox(), monster)) {
     damagePlayer(20, 'The monster hit you!');
@@ -1754,13 +2216,13 @@ function updateCellarMonster(delta) {
     if (monster.timer <= 0) {
       monster.state = 'warning';
       monster.timer = .65;
+      monster.direction = player.x + player.width / 2 < monster.x + monster.width / 2 ? -1 : 1;
       showMessage('Gloom Crawler is about to charge! Jump!');
     }
   } else if (monster.state === 'warning') {
     if (monster.timer <= 0) {
       monster.state = 'charge';
       monster.timer = .85;
-      monster.direction = player.x + player.width / 2 < monster.x + monster.width / 2 ? -1 : 1;
     }
   } else {
     monster.x += monster.direction * 310 * delta;
@@ -1818,16 +2280,19 @@ function updateBoss(delta) {
     boss.attacking = !boss.attacking;
     boss.chargeTimer = boss.attacking
       ? (bossIsReturn ? .24 : .32)
-      : (bossIsReturn ? 1 : 1.35);
+      : bossIsReturn
+        ? (boss.phase === 2 ? .75 : 1)
+        : (boss.phase === 2 ? 1.05 : 1.35);
   }
 
   const targetX = player.x + player.width / 2;
   const bossCenterX = boss.x + boss.width / 2;
   const direction = Math.sign(targetX - bossCenterX) || boss.direction;
   boss.direction = direction;
-  const speed = boss.attacking
+  const phaseSpeed = boss.phase === 2 ? 1.18 : 1;
+  const speed = (boss.attacking
     ? (bossIsReturn ? 330 : 275)
-    : boss.speed;
+    : boss.speed) * phaseSpeed;
   boss.x += direction * speed * delta;
   boss.x = Math.max(40, Math.min(canvas.width - boss.width - 40, boss.x));
 
@@ -1838,11 +2303,16 @@ function updateBoss(delta) {
   const stomp = player.velocityY > 0 && player.y + player.height < boss.y + 56;
   if (stomp) {
     funStats.stomps++;
-    updateBossBouncerProgress();
+    saveBossStomps();
     if (funStats.stomps >= 10) awardBadge('boss-bouncer');
     boss.health--;
     boss.invulnerableTimer = bossIsReturn ? .55 : .7;
     player.velocityY = -430;
+    encounterFlashTimer = .12;
+    encounterFlashColor = '255,216,77';
+    encounterShakeTimer = .16;
+    const enteredPhaseTwo = boss.phase === 1 && boss.health > 0 && boss.health <= boss.maxHealth / 2;
+    if (enteredPhaseTwo) boss.phase = 2;
     if (boss.health <= 0) {
       bossActive = false;
       doorOpen = true;
@@ -1852,7 +2322,9 @@ function updateBoss(delta) {
       showMessage('Boss defeated! The door is open.');
     } else {
       updateHud();
-      showMessage(`Boss hit! ${boss.health} left.`);
+      showMessage(enteredPhaseTwo
+        ? `PHASE 2! The boss is enraged. ${boss.health} stomps left.`
+        : `Boss hit! ${boss.health} left.`);
     }
     return;
   }
@@ -1870,6 +2342,18 @@ function drawRect(x, y, width, height, color) {
 function drawOutlinedRect(x, y, width, height, fillColor, outlineColor) {
   drawRect(x, y, width, height, outlineColor);
   drawRect(x + 2, y + 2, width - 4, height - 4, fillColor);
+}
+
+function drawPolyline(points, color, width = 2) {
+  if (points.length < 2) return;
+  context.strokeStyle = color;
+  context.lineWidth = width;
+  context.beginPath();
+  context.moveTo(points[0][0], points[0][1]);
+  for (let pointIndex = 1; pointIndex < points.length; pointIndex++) {
+    context.lineTo(points[pointIndex][0], points[pointIndex][1]);
+  }
+  context.stroke();
 }
 
 function drawKey(x, y) {
@@ -1904,7 +2388,158 @@ function drawRewardChest() {
   drawRect(rewardChest.x + 28, rewardChest.y + 18, 14, 14, '#ffd84d');
 }
 
+function drawMainFloorElevator() {
+  if (!mainFloorElevatorActive()) return;
+
+  const elevatorX = mainFloorElevator.x;
+  const destination = mainFloorElevatorDestination();
+  const lightOn = Math.floor(performance.now() / 450) % 2 === 0;
+
+  drawRect(elevatorX + 18, 210, 8, 130, '#202a35');
+  drawRect(elevatorX + 74, 210, 8, 130, '#202a35');
+  drawRect(elevatorX + 20, 210, 3, 130, '#71808e');
+  drawRect(elevatorX + 76, 210, 3, 130, '#71808e');
+  drawRect(elevatorX - 20, 330, 140, 230, '#18232e');
+  drawRect(elevatorX - 14, 336, 128, 216, '#4f606e');
+  drawRect(elevatorX - 8, 342, 116, 210, '#25333f');
+  drawRect(elevatorX - 20, 330, 140, 10, '#8595a1');
+  drawRect(elevatorX - 20, 550, 140, 10, '#111a23');
+  drawRect(elevatorX - 12, 344, 8, 204, '#71808e');
+  drawRect(elevatorX + 104, 344, 8, 204, '#34434f');
+
+  drawOutlinedRect(elevatorX + 9, 346, 82, 34, '#111a23', '#8295a4');
+  drawRect(elevatorX + 16, 352, 68, 22, '#071018');
+  context.save();
+  context.fillStyle = lightOn ? '#ffe779' : '#b89b43';
+  context.font = 'bold 15px monospace';
+  context.textAlign = 'center';
+  context.fillText(`DOWN ${destination}`, elevatorX + 50, 369);
+  context.restore();
+
+  drawOutlinedRect(elevatorX, 390, 100, 170, '#657682', '#15202a');
+  drawRect(elevatorX + 5, 395, 43, 160, '#526571');
+  drawRect(elevatorX + 52, 395, 43, 160, '#465965');
+  drawRect(elevatorX + 48, 390, 4, 170, '#17232c');
+  drawRect(elevatorX + 8, 400, 3, 145, '#91a1aa');
+  drawRect(elevatorX + 55, 400, 2, 145, '#71838e');
+  drawOutlinedRect(elevatorX + 13, 410, 28, 50, '#173448', '#9aabb5');
+  drawOutlinedRect(elevatorX + 59, 410, 28, 50, '#173448', '#9aabb5');
+  drawRect(elevatorX + 17, 414, 8, 38, 'rgba(155,231,255,.22)');
+  drawRect(elevatorX + 63, 414, 8, 38, 'rgba(155,231,255,.18)');
+  drawRect(elevatorX + 14, 474, 26, 4, '#354853');
+  drawRect(elevatorX + 60, 474, 26, 4, '#354853');
+  for (let rivetY = 402; rivetY < 550; rivetY += 28) {
+    drawRect(elevatorX + 3, rivetY, 3, 3, '#c1ccd2');
+    drawRect(elevatorX + 94, rivetY, 3, 3, '#71818b');
+  }
+
+  drawOutlinedRect(elevatorX + 112, 446, 18, 35, '#25333f', '#8595a1');
+  drawRect(elevatorX + 118, 452, 6, 9, lightOn ? '#ffe779' : '#8c7738');
+  drawRect(elevatorX + 118, 466, 6, 8, '#67d06b');
+  for (let stripe = 0; stripe < 8; stripe++) {
+    drawRect(elevatorX - 14 + stripe * 17, 552, 9, 6, stripe % 2 === 0 ? '#ffd84d' : '#20262e');
+  }
+}
+
+function drawMainFloorElevatorRide() {
+  if (!elevatorRideActive) return;
+
+  let closure = 1;
+  if (elevatorRideTimer < .45) closure = Math.min(1, elevatorRideTimer / .45);
+  else if (elevatorRideArrived) closure = Math.max(0, 1 - (elevatorRideTimer - 1.55) / .7);
+
+  const shaking = !elevatorRideArrived && closure > .95;
+  const shakeY = shaking ? Math.sin(elevatorRideTimer * 48) * 2 : 0;
+  const panelWidth = 480 * closure;
+  const rightPanelX = canvas.width - panelWidth;
+
+  context.save();
+  context.translate(0, shakeY);
+  drawRect(0, 0, panelWidth, canvas.height, '#536571');
+  drawRect(rightPanelX, 0, panelWidth, canvas.height, '#465965');
+  drawRect(0, 82, panelWidth, 8, '#84949e');
+  drawRect(rightPanelX, 82, panelWidth, 8, '#73858f');
+  drawRect(0, 554, panelWidth, 10, '#25343f');
+  drawRect(rightPanelX, 554, panelWidth, 10, '#202e38');
+
+  for (let panelX = 0; panelX < panelWidth; panelX += 38) {
+    drawRect(panelX, 90, 3, 460, 'rgba(255,255,255,.09)');
+    drawRect(panelX + 8, 90, 2, 460, 'rgba(0,0,0,.09)');
+    drawRect(rightPanelX + panelX, 90, 3, 460, 'rgba(255,255,255,.07)');
+    drawRect(rightPanelX + panelX + 8, 90, 2, 460, 'rgba(0,0,0,.1)');
+  }
+
+  for (let rivetY = 112; rivetY < 540; rivetY += 54) {
+    if (panelWidth > 18) {
+      drawRect(10, rivetY, 5, 5, '#b7c3ca');
+      drawRect(canvas.width - 15, rivetY, 5, 5, '#778891');
+      drawRect(panelWidth - 15, rivetY, 4, 4, '#c6d0d5');
+      drawRect(rightPanelX + 11, rivetY, 4, 4, '#87979f');
+    }
+  }
+
+  if (panelWidth > 0) {
+    drawRect(panelWidth - 7, 82, 7, 482, '#1b2831');
+    drawRect(rightPanelX, 82, 7, 482, '#17232c');
+    drawRect(panelWidth - 3, 90, 2, 460, '#a2b0b8');
+    drawRect(rightPanelX + 2, 90, 2, 460, '#8799a3');
+  }
+
+  if (shaking) {
+    for (let arrow = 0; arrow < 3; arrow++) {
+      const arrowY = 170 + ((elevatorRideTimer * 115 + arrow * 125) % 330);
+      drawRect(477, arrowY - 22, 6, 28, 'rgba(255,231,121,.5)');
+      drawPolyline([[466, arrowY], [480, arrowY + 14], [494, arrowY]], 'rgba(255,231,121,.65)', 5);
+    }
+  }
+
+  drawRect(0, 0, canvas.width, 82, '#1b2832');
+  drawRect(0, 0, canvas.width, 8, '#8798a3');
+  drawRect(0, 74, canvas.width, 8, '#0e171f');
+  drawRect(0, 0, 18, canvas.height, '#1b2832');
+  drawRect(canvas.width - 18, 0, 18, canvas.height, '#14212a');
+  drawRect(12, 82, 5, 478, '#74858f');
+  drawRect(canvas.width - 17, 82, 5, 478, '#52636e');
+  drawOutlinedRect(325, 12, 310, 56, '#071018', '#8295a4');
+  drawRect(337, 20, 286, 40, '#0d1c25');
+
+  context.fillStyle = elevatorRideArrived ? '#9be7ff' : '#ffe779';
+  context.font = 'bold 22px monospace';
+  context.textAlign = 'center';
+  const indicator = elevatorRideArrived
+    ? `DOOR ${elevatorRideDestination}`
+    : `${elevatorRideOrigin}  DOWN  ${elevatorRideDestination}`;
+  context.fillText(indicator, 480, 48);
+  context.font = 'bold 11px monospace';
+  context.fillStyle = '#b8c7d0';
+  context.fillText(elevatorRideArrived ? 'ARRIVED - DOORS OPENING' : 'MAIN FLOOR ELEVATOR', 480, 64);
+  context.restore();
+}
+
+function drawStairwellExitDoor() {
+  drawRect(door.x - 22, door.y - 20, door.width + 44, door.height + 20, '#171e2a');
+  drawRect(door.x - 16, door.y - 30, door.width + 32, 12, '#596577');
+  drawRect(door.x - 10, door.y - 38, door.width + 20, 10, '#6f7b8c');
+  drawRect(door.x - 14, door.y - 18, 8, door.height + 18, '#465366');
+  drawRect(door.x + door.width + 6, door.y - 18, 8, door.height + 18, '#2b3647');
+  drawOutlinedRect(door.x, door.y, door.width, door.height, doorOpen ? '#4f9c75' : '#72503a', '#241a17');
+  drawOutlinedRect(door.x + 8, door.y + 12, door.width - 16, 25, doorOpen ? '#75c79a' : '#956b48', '#3b2a20');
+  drawOutlinedRect(door.x + 8, door.y + 48, door.width - 16, 27, doorOpen ? '#65b889' : '#855d40', '#3b2a20');
+  drawRect(door.x + 35, door.y + 42, 8, 8, '#ffe779');
+  drawRect(door.x + 17, door.y - 31, 16, 4, '#ffe779');
+  drawRect(door.x + 22, door.y - 27, 6, 10, '#ffe779');
+  drawRect(door.x + 18, door.y - 20, 14, 4, '#ffe779');
+  if (doorOpen) drawRect(door.x + 5, door.y + 5, 4, door.height - 10, 'rgba(255,243,166,.55)');
+}
+
 function drawDoor() {
+  if (mainFloorElevatorActive()) return;
+
+  if (mainFloorHasStairs()) {
+    drawStairwellExitDoor();
+    return;
+  }
+
   if (currentFloor === 'garden' && currentDoor === totalGardenDoors) {
     drawGrandGardenDoor();
     return;
@@ -2109,6 +2744,13 @@ function drawOfficeMonster() {
   const y = officeMonster.y;
   const shake = Math.sin(performance.now() / 100) * 2;
 
+  for (let index = 0; index < 4; index++) {
+    const paperX = x - 18 - index * 20;
+    const paperY = y + 6 + (index % 3) * 22 + Math.sin(performance.now() / 130 + index) * 5;
+    drawOutlinedRect(paperX, paperY, 14, 10, '#f2f5f7', '#7c8792');
+    drawRect(paperX + 3, paperY + 3, 8, 2, '#c9d6de');
+  }
+
   drawRect(x + 8, y + 96, 118, 14, 'rgba(0,0,0,.28)');
   drawOutlinedRect(x + 8, y + 82, 112, 28, '#3b4756', '#121820');
   drawRect(x + 18, y + 90, 18, 12, '#20262e');
@@ -2287,6 +2929,86 @@ function drawMilkshake() {
   drawRect(milkshake.x + 7, milkshake.y - 10, 8, 8, '#e5344b');
 }
 
+function drawFantaJug() {
+  if (!fantaJugActive || fantaJug.taken) return;
+  const jugX = fantaJug.x;
+  const jugY = fantaJug.y + Math.sin(performance.now() / 260) * 2;
+
+  context.save();
+  context.globalAlpha = .14;
+  drawRect(jugX - 8, jugY - 10, fantaJug.width + 20, fantaJug.height + 18, '#ffe45c');
+  context.globalAlpha = 1;
+
+  drawOutlinedRect(jugX - 10, fantaJug.y + fantaJug.height, fantaJug.width + 24, 12, '#8a6238', '#3d240d');
+  drawOutlinedRect(jugX + 6, jugY - 2, 32, 8, '#d9e2e8', '#38424a');
+  drawRect(jugX + 10, jugY, 24, 3, '#f1f5f7');
+  drawOutlinedRect(jugX + 4, jugY + 5, 36, 11, '#f4b91f', '#6b4b00');
+  drawOutlinedRect(jugX, jugY + 13, 44, 34, '#ffd84d', '#6b4b00');
+  drawOutlinedRect(jugX + 4, jugY + 44, 36, 8, '#f2a91b', '#6b4b00');
+  drawRect(jugX + 4, jugY + 15, 6, 27, '#fff3a6');
+  drawRect(jugX + 35, jugY + 15, 5, 27, '#f2a91b');
+  drawRect(jugX, jugY + 18, 44, 6, '#7c8792');
+  drawRect(jugX + 2, jugY + 41, 40, 5, '#59646b');
+  drawOutlinedRect(jugX + 2, jugY + 49, 40, 5, '#59646b', '#293137');
+  drawRect(jugX + 7, jugY + 26, 30, 13, '#fff8dc');
+  drawRect(jugX + 20, jugY + 26, 4, 13, '#e88912');
+  drawRect(jugX + 15, jugY + 31, 14, 3, '#e88912');
+  drawRect(jugX + 17, jugY + 28, 10, 8, '#e88912');
+  drawRect(jugX - 4, jugY + 5, 4, 4, '#fff8cf');
+  drawRect(jugX + 43, jugY + 4, 3, 3, '#fff8cf');
+  context.restore();
+}
+
+function drawRiftCan() {
+  if (!riftCanActive || riftCan.taken) return;
+  const canX = riftCan.x;
+  const canY = riftCan.y + Math.sin(performance.now() / 300) * 2;
+
+  context.save();
+  context.globalAlpha = .16;
+  drawRect(canX - 7, canY - 7, riftCan.width + 14, riftCan.height + 14, '#53d8ff');
+  context.globalAlpha = 1;
+  drawOutlinedRect(canX + 3, canY, 28, 6, '#d9e2e8', '#38424a');
+  drawRect(canX + 12, canY + 1, 10, 3, '#7c8792');
+  drawOutlinedRect(canX, canY + 5, 34, 33, '#2456a6', '#081c46');
+  drawRect(canX + 4, canY + 9, 26, 5, '#3b82f6');
+  drawRect(canX + 4, canY + 31, 26, 4, '#172a63');
+  context.lineWidth = 3;
+  context.strokeStyle = '#72e3ff';
+  context.beginPath();
+  context.ellipse(canX + 17, canY + 22, 10, 7, .35, 0, Math.PI * 2);
+  context.stroke();
+  context.strokeStyle = '#8750a5';
+  context.beginPath();
+  context.ellipse(canX + 17, canY + 22, 6, 10, -.35, 0, Math.PI * 2);
+  context.stroke();
+  drawRect(canX - 4, canY + 4, 3, 3, '#d8f7ff');
+  context.restore();
+}
+
+function drawFlowJuice() {
+  if (!flowJuiceActive || flowJuice.taken) return;
+  const juiceX = flowJuice.x;
+  const juiceY = flowJuice.y + Math.sin(performance.now() / 280) * 2;
+
+  context.save();
+  context.globalAlpha = .15;
+  drawRect(juiceX - 7, juiceY - 6, flowJuice.width + 14, flowJuice.height + 12, '#c7a5ff');
+  context.globalAlpha = 1;
+  drawOutlinedRect(juiceX + 7, juiceY, 16, 6, '#d9e2e8', '#303a65');
+  drawOutlinedRect(juiceX + 6, juiceY + 6, 18, 7, '#e8f4ff', '#303a65');
+  drawOutlinedRect(juiceX + 1, juiceY + 12, 28, 28, '#e8f4ff', '#303a65');
+  drawRect(juiceX + 4, juiceY + 20, 10, 16, '#ff8fd8');
+  drawRect(juiceX + 14, juiceY + 20, 4, 16, '#b8a5ff');
+  drawRect(juiceX + 18, juiceY + 20, 8, 16, '#79dfff');
+  drawRect(juiceX + 4, juiceY + 15, 5, 15, 'rgba(255,255,255,.55)');
+  drawRect(juiceX + 7, juiceY + 23, 3, 3, '#ffd8ef');
+  drawRect(juiceX + 20, juiceY + 27, 3, 3, '#d8f7ff');
+  drawRect(juiceX - 4, juiceY + 7, 4, 4, '#ff8fd8');
+  drawRect(juiceX + 31, juiceY + 3, 4, 4, '#79dfff');
+  context.restore();
+}
+
 function drawBackpack() {
   if (!backpackActive || backpack.taken) return;
   if (backpackOnTable) {
@@ -2338,6 +3060,38 @@ function drawRiftItem(x, y) {
     drawRect(x - 9, y + 7, 18, 7, '#a1662f');
     drawRect(x - 5, y - 21, 10, 7, '#5c3a1d');
     drawRect(x - 3, y - 9, 6, 6, '#ffd84d');
+  } else if (riftItem.id === 'fanta-jug') {
+    drawOutlinedRect(x - 15, y - 31, 30, 7, '#d9e2e8', '#38424a');
+    drawOutlinedRect(x - 17, y - 25, 34, 10, '#f4b91f', '#6b4b00');
+    drawOutlinedRect(x - 20, y - 17, 40, 31, '#ffd84d', '#6b4b00');
+    drawOutlinedRect(x - 16, y + 12, 32, 7, '#f2a91b', '#6b4b00');
+    drawRect(x - 20, y - 12, 40, 5, '#7c8792');
+    drawRect(x - 18, y + 8, 36, 5, '#59646b');
+    drawRect(x - 12, y - 4, 24, 10, '#fff8dc');
+    drawRect(x - 2, y - 5, 4, 12, '#e88912');
+    drawRect(x - 7, y - 1, 14, 3, '#e88912');
+    drawRect(x - 5, y - 3, 10, 7, '#e88912');
+  } else if (riftItem.id === 'rift-can') {
+    drawOutlinedRect(x - 15, y - 25, 30, 42, '#2456a6', '#081c46');
+    drawOutlinedRect(x - 12, y - 31, 24, 7, '#d9e2e8', '#38424a');
+    drawRect(x - 11, y - 20, 22, 5, '#3b82f6');
+    drawRect(x - 11, y + 10, 22, 4, '#172a63');
+    context.lineWidth = 3;
+    context.strokeStyle = '#72e3ff';
+    context.beginPath();
+    context.ellipse(x, y - 2, 9, 6, .35, 0, Math.PI * 2);
+    context.stroke();
+    context.strokeStyle = '#8750a5';
+    context.beginPath();
+    context.ellipse(x, y - 2, 5, 9, -.35, 0, Math.PI * 2);
+    context.stroke();
+  } else if (riftItem.id === 'flow-juice') {
+    drawOutlinedRect(x - 12, y - 24, 24, 38, '#e8f4ff', '#303a65');
+    drawOutlinedRect(x - 8, y - 32, 16, 8, '#d9e2e8', '#303a65');
+    drawRect(x - 9, y - 11, 8, 21, '#ff8fd8');
+    drawRect(x - 1, y - 11, 4, 21, '#b8a5ff');
+    drawRect(x + 3, y - 11, 6, 21, '#79dfff');
+    drawRect(x - 7, y - 20, 4, 23, 'rgba(255,255,255,.55)');
   } else if (riftItem.id === 'teleporter') {
     drawOutlinedRect(x - 17, y - 13, 34, 28, '#7c8792', '#20262e');
     drawRect(x - 12, y - 8, 24, 8, '#9fb6c6');
@@ -2348,7 +3102,10 @@ function drawRiftItem(x, y) {
 }
 
 function drawRift() {
-  if (currentFloor !== 'main' || currentDoor !== totalDoors) return;
+  if (!isRiftActive()) return;
+  const activeRift = getActiveRift();
+  context.save();
+  context.translate(activeRift.x - rift.x, activeRift.y - rift.y);
   const centerX = rift.x + rift.width / 2;
   const centerY = rift.y + 85;
   const time = performance.now() / 1000;
@@ -2408,6 +3165,7 @@ function drawRift() {
   context.fillStyle = '#d8f7ff';
   const itemLabel = riftItem ? `${riftItem.name}${riftItem.count > 1 ? ` x${riftItem.count}` : ''}` : 'EMPTY - READY FOR AN ITEM';
   context.fillText(itemLabel, centerX, groundY + 30);
+  context.restore();
   context.restore();
 }
 
@@ -2502,9 +3260,14 @@ function drawTreeMonster() {
   const x = vineMonster.x;
   const y = vineMonster.y;
 
+  for (let index = 0; index < 4; index++) {
+    drawRect(x - 20 - index * 18, y + 55 + index * 17, 12, 5, index % 2 === 0 ? 'rgba(103,208,107,.45)' : 'rgba(255,143,143,.35)');
+  }
   drawRect(x + 25, y + 130, 50, groundY - y - 130, '#4a382a');
   drawOutlinedRect(x + 10, y + 30, 100, 105, '#255238', '#123324');
   drawOutlinedRect(x + 25, y + 50, 70, 70, '#1d4129', '#10251a');
+  drawOutlinedRect(x - 12, y + 65, 28, 14, '#255238', '#123324');
+  drawOutlinedRect(x + 104, y + 65, 28, 14, '#255238', '#123324');
   drawRect(x + 32, y + 70, 12, 12, '#ff4d5e');
   drawRect(x + 72, y + 70, 12, 12, '#ff4d5e');
   drawRect(x + 44, y + 95, 32, 9, '#210508');
@@ -2512,19 +3275,53 @@ function drawTreeMonster() {
 
   for (let index = 0; index < 3; index++) {
     const legX = x + 16 + index * 34;
-    drawOutlinedRect(legX, groundY - 68, 20, 68, '#ff8f8f', '#5d1d1d');
-    drawRect(legX + 4, groundY - 58, 12, 28, '#ffb1b1');
+    const lift = Math.max(0, Math.sin(performance.now() / 100 + index * 2.1)) * 10;
+    drawOutlinedRect(legX, groundY - 68 + lift, 20, 68 - lift, '#ff8f8f', '#5d1d1d');
+    drawRect(legX + 4, groundY - 58 + lift, 12, 28, '#ffb1b1');
     drawOutlinedRect(legX - 2, groundY - 18, 26, 18, '#d94f4f', '#5d1d1d');
     drawRect(legX + 3, groundY - 12, 7, 8, '#ffb1b1');
     drawRect(legX + 14, groundY - 12, 7, 8, '#ffb1b1');
   }
 }
 
+function drawUnderwaterVineMonster() {
+  const bob = Math.sin(performance.now() / 220) * 6;
+  const x = vineMonster.x;
+  const y = vineMonster.y + bob;
+  const centerX = x + vineMonster.width / 2;
+  const centerY = y + 54;
+
+  for (let index = 0; index < 6; index++) {
+    const bubbleY = y + 20 + ((index * 31 - performance.now() / 35) % 110 + 110) % 110;
+    const bubbleSize = 5 + (index % 2) * 3;
+    drawRect(x - 18 - (index % 3) * 18, bubbleY, bubbleSize, bubbleSize, 'rgba(155,231,255,.5)');
+  }
+  for (let index = 0; index < 5; index++) {
+    const tentacleX = centerX - 42 + index * 21;
+    drawPolyline([
+      [tentacleX, y + 92],
+      [tentacleX + Math.sin(performance.now() / 180 + index) * 10, y + 122],
+      [tentacleX + Math.cos(performance.now() / 160 + index) * 13, y + 150]
+    ], index % 2 === 0 ? '#3f6f3a' : '#67d06b', 9);
+  }
+  for (let angle = 0; angle < 10; angle++) {
+    const petalX = centerX + Math.cos(angle * Math.PI / 5) * 52 - 17;
+    const petalY = centerY + Math.sin(angle * Math.PI / 5) * 43 - 17;
+    drawOutlinedRect(petalX, petalY, 34, 34, '#ff7aa8', '#6d2038');
+  }
+  drawOutlinedRect(centerX - 38, centerY - 31, 76, 62, '#ffd84d', '#6d4a00');
+  drawRect(centerX - 25, centerY - 15, 12, 12, '#ff4d5e');
+  drawRect(centerX + 13, centerY - 15, 12, 12, '#ff4d5e');
+  drawOutlinedRect(centerX - 28, centerY + 7, 56, 23, '#210508', '#000000');
+  for (let tooth = 0; tooth < 4; tooth++) drawRect(centerX - 22 + tooth * 14, centerY + 8, 7, 8, '#fff4d8');
+}
+
 function drawVineMonster() {
   if (!vineMonsterActive) return;
 
   if (gardenChaseActive) {
-    drawTreeMonster();
+    if (mountainChaseActive) drawTreeMonster();
+    else drawUnderwaterVineMonster();
     return;
   }
 
@@ -2561,9 +3358,10 @@ function drawVineMonster() {
 function drawFurniture() {
   if (currentFloor !== 'main') return;
   if (rareRoomActive) return;
-  if (monsterActive || bossActive || currentDoor === rewardDoor || currentDoor === totalDoors) return;
+  if (fantaJugActive) return;
+  if (monsterActive || bossActive || currentDoor === rewardDoor || isPermanentRiftActive() || mainFloorHasStairs()) return;
 
-  const variant = Math.floor((currentDoor - 1) / 10) % 5;
+  const variant = roomThemes.indexOf(currentRoomTheme());
   const offsetX = ((currentDoor * 17) % 3) * 35;
 
   if (variant === 0) {
@@ -2577,36 +3375,108 @@ function drawFurniture() {
     drawOutlinedRect(x, 510, 110, 12, '#8a6238', '#3d240d');
     drawRect(x + 8, 522, 10, 38, '#5c4028');
     drawRect(x + 92, 522, 10, 38, '#5c4028');
-    drawOutlinedRect(x + 130, 495, 45, 60, '#7c8792', '#2f3742');
-    drawRect(x + 139, 506, 27, 8, '#3b4650');
+    drawOutlinedRect(x + 132, 512, 46, 43, '#a56d42', '#3d2b1d');
+    drawRect(x + 139, 518, 32, 7, '#d69a62');
+    drawRect(x + 151, 458, 7, 56, '#3f6f3a');
+    drawOutlinedRect(x + 126, 456, 29, 17, '#5f9e58', '#274d2b');
+    drawOutlinedRect(x + 153, 439, 32, 20, '#79b96a', '#274d2b');
+    drawOutlinedRect(x + 142, 475, 28, 18, '#4f8b49', '#274d2b');
+    drawRect(x + 25, 500, 40, 10, '#fff0a6');
+    drawRect(x + 31, 493, 28, 7, '#d8c49a');
   } else if (variant === 2) {
     const x = 300 + offsetX;
-    drawOutlinedRect(x, 430, 95, 130, '#6b4229', '#28170b');
-    drawRect(x + 8, 450, 79, 8, '#4a2c18');
-    drawRect(x + 8, 490, 79, 8, '#4a2c18');
-    drawRect(x + 8, 530, 79, 8, '#4a2c18');
-    drawRect(x + 12, 436, 10, 12, '#d9534f');
-    drawRect(x + 30, 436, 10, 12, '#4fa3d9');
-    drawRect(x + 48, 436, 10, 12, '#f0c040');
-    drawRect(x + 66, 436, 10, 12, '#67d06b');
-    drawOutlinedRect(x + 130, 450, 34, 110, '#c9a24a', '#6a5420');
-    drawRect(x + 143, 410, 8, 44, '#7c8792');
-    drawRect(x + 134, 398, 26, 18, '#ffe58a');
+    drawOutlinedRect(x, 420, 100, 140, '#566673', '#202b34');
+    drawRect(x + 10, 430, 80, 14, '#7f8f9a');
+    drawRect(x + 14, 492, 72, 48, '#2c3740');
+    drawOutlinedRect(x + 27, 501, 46, 28, '#d87932', '#522c18');
+    drawRect(x + 35, 507, 30, 14, '#ffb347');
+    drawOutlinedRect(x + 30, 451, 38, 30, '#e3e8df', '#26343e');
+    drawRect(x + 47, 456, 4, 15, '#d9534f');
+    drawRect(x + 47, 468, 13, 4, '#d9534f');
+    for (let rivetY = 442; rivetY < 540; rivetY += 24) {
+      drawRect(x + 7, rivetY, 5, 5, '#b8c4cc');
+      drawRect(x + 88, rivetY, 5, 5, '#b8c4cc');
+    }
+    drawRect(x + 100, 445, 70, 14, '#7c8792');
+    drawRect(x + 156, 445, 14, 70, '#7c8792');
+    drawRect(x + 144, 505, 38, 10, '#596775');
   } else if (variant === 3) {
+    const x = 300 + offsetX;
+    drawOutlinedRect(x, 420, 110, 140, '#6b4229', '#28170b');
+    for (let shelfY = 454; shelfY < 550; shelfY += 38) {
+      drawRect(x + 7, shelfY, 96, 7, '#3d2414');
+      for (let book = 0; book < 7; book++) {
+        const bookColors = ['#d9534f', '#4fa3d9', '#f0c040', '#67d06b', '#9b6dc4'];
+        drawRect(x + 12 + book * 12, shelfY - 24, 9, 24, bookColors[(book + shelfY) % bookColors.length]);
+        drawRect(x + 14 + book * 12, shelfY - 19, 5, 2, '#fff0a6');
+      }
+    }
+    drawOutlinedRect(x + 140, 450, 34, 110, '#c9a24a', '#6a5420');
+    drawRect(x + 153, 410, 8, 44, '#7c8792');
+    drawRect(x + 144, 398, 26, 18, '#ffe58a');
+  } else if (variant === 4) {
     const x = 290 + offsetX;
-    drawOutlinedRect(x, 465, 135, 20, '#7a4a24', '#2e1a0d');
-    drawOutlinedRect(x, 485, 135, 65, '#d9e4ef', '#8fa5b5');
-    drawRect(x + 12, 497, 111, 18, '#8fa5b5');
-    drawRect(x + 20, 515, 36, 22, '#67d06b');
-    drawOutlinedRect(x + 78, 512, 44, 25, '#ffd84d', '#7a5f00');
-  } else {
+    drawOutlinedRect(x, 465, 150, 20, '#7a4a24', '#2e1a0d');
+    drawOutlinedRect(x, 485, 150, 65, '#d9e4ef', '#8fa5b5');
+    drawOutlinedRect(x + 10, 490, 45, 22, '#fff8df', '#a8b4c0');
+    drawRect(x + 60, 490, 80, 50, '#6c79b8');
+    for (let blanketX = x + 67; blanketX < x + 135; blanketX += 18) {
+      drawRect(blanketX, 496, 7, 7, '#b8c9ff');
+      drawRect(blanketX + 7, 514, 7, 7, '#b8c9ff');
+    }
+    drawOutlinedRect(x + 160, 510, 44, 40, '#7a4a24', '#2e1a0d');
+    drawRect(x + 178, 480, 6, 30, '#c9a24a');
+    drawRect(x + 166, 466, 30, 16, '#ffe58a');
+  } else if (variant === 5) {
     const x = 310 + offsetX;
     drawOutlinedRect(x, 495, 120, 18, '#8a6238', '#3d240d');
     drawRect(x + 8, 513, 10, 47, '#5c4028');
     drawRect(x + 102, 513, 10, 47, '#5c4028');
     drawOutlinedRect(x + 18, 450, 70, 45, '#20262e', '#0d1116');
     drawRect(x + 26, 458, 54, 28, '#7ee7ff');
+    drawRect(x + 31, 464, 30, 4, '#287c9b');
+    drawRect(x + 31, 473, 40, 3, '#d8f7ff');
+    drawRect(x + 35, 502, 62, 6, '#39434c');
+    for (let keyX = x + 39; keyX < x + 91; keyX += 10) drawRect(keyX, 503, 6, 3, '#9fb6c6');
     drawOutlinedRect(x + 105, 530, 45, 30, '#7c8792', '#2f3742');
+    drawOutlinedRect(x + 135, 448, 30, 30, '#c9a24a', '#5d491d');
+    drawRect(x + 147, 436, 6, 54, '#c9a24a');
+    drawRect(x + 123, 460, 54, 6, '#c9a24a');
+  } else if (variant === 6) {
+    const x = 320 + offsetX;
+    drawOutlinedRect(x, 510, 145, 40, '#51445f', '#211a2c');
+    drawRect(x + 10, 516, 125, 7, '#78658b');
+    drawOutlinedRect(x + 24, 448, 24, 62, '#7ee7ff', '#29445f');
+    drawRect(x + 30, 454, 7, 40, '#d8f7ff');
+    drawOutlinedRect(x + 52, 466, 34, 44, '#9b7bd0', '#38274e');
+    drawRect(x + 60, 472, 8, 27, '#d8bfff');
+    drawOutlinedRect(x + 91, 435, 29, 75, '#67c9e8', '#29445f');
+    drawRect(x + 98, 443, 7, 48, '#d8f7ff');
+    drawRect(x + 18, 548, 112, 4, 'rgba(155,231,255,.28)');
+  } else if (variant === 7) {
+    const x = 300 + offsetX;
+    drawOutlinedRect(x, 500, 135, 60, '#476644', '#1f3423');
+    drawRect(x + 10, 510, 50, 20, '#64835a');
+    drawRect(x + 70, 510, 50, 20, '#59794f');
+    drawRect(x + 12, 542, 110, 10, '#30472f');
+    drawRect(x + 20, 440, 7, 65, '#3f6f3a');
+    drawRect(x + 102, 430, 7, 75, '#3f6f3a');
+    for (let leafY = 448; leafY < 505; leafY += 18) {
+      drawRect(x + 7, leafY, 18, 8, '#6c9c58');
+      drawRect(x + 103, leafY - 8, 20, 8, '#79aa61');
+    }
+  } else if (variant === 8) {
+    const x = 315 + offsetX;
+    drawOutlinedRect(x, 485, 82, 70, '#8a6238', '#3d240d');
+    drawRect(x + 8, 494, 66, 8, '#b27b49');
+    drawRect(x + 36, 487, 8, 66, '#5f3d22');
+    drawOutlinedRect(x + 62, 520, 80, 35, '#725034', '#322216');
+    drawRect(x + 71, 527, 61, 5, '#a2744c');
+    drawOutlinedRect(x + 28, 438, 67, 47, '#9b7047', '#3d240d');
+    drawRect(x + 36, 447, 51, 6, '#c18c58');
+    drawRect(x + 55, 440, 7, 43, '#674429');
+    drawOutlinedRect(x + 150, 526, 65, 24, '#72526f', '#322438');
+    drawRect(x + 158, 532, 49, 5, '#a582a0');
   }
 }
 
@@ -2637,6 +3507,21 @@ function drawPlayer() {
     : 0;
   context.translate(player.x + player.width / 2, player.y + submarineBob);
   context.scale(player.facing, 1);
+  if (fantaRushTimer > 0) {
+    const sparkleFrame = Math.floor(performance.now() / 120) % 4;
+    drawRect(-20, 4 + sparkleFrame * 9, 4, 4, '#fff3a6');
+    drawRect(16, 36 - sparkleFrame * 8, 4, 4, '#ffd84d');
+    if (player.moving) {
+      drawRect(-28, 14, 11, 4, '#ffd84d');
+      drawRect(-34, 27, 15, 4, '#fff3a6');
+    }
+  }
+  if (flowJuiceTimer > 0) {
+    const bubbleFrame = Math.floor(performance.now() / 150) % 4;
+    drawRect(-18, 38 - bubbleFrame * 10, 4, 4, '#ff8fd8');
+    drawRect(16, 42 - bubbleFrame * 9, 4, 4, '#79dfff');
+    drawRect(-13, 5 + bubbleFrame * 7, 3, 3, '#b8a5ff');
+  }
   context.globalAlpha = player.invulnerableTimer > 0 && Math.floor(performance.now() / 100) % 2 === 0
     ? .45
     : 1;
@@ -2659,63 +3544,130 @@ function drawPlayer() {
     return;
   }
 
-  if (player.sliding) {
-    drawOutlinedRect(-12, 5, 8, 14, '#7a4a24', '#2e1a0d');
-    drawOutlinedRect(-10, 6, 20, 14, '#3b82f6', '#171a20');
-    drawOutlinedRect(-1, 0, 13, 13, '#f3c68b', '#171a20');
-    drawRect(0, 0, 13, 5, '#4a2f1d');
-    drawRect(7, 5, 2, 3, '#171a20');
-    drawOutlinedRect(-9, 18, 9, 8, '#5c4028', '#20140d');
-    drawOutlinedRect(1, 18, 9, 8, '#5c4028', '#20140d');
-    drawOutlinedRect(5, 10, 7, 9, '#2563eb', '#171a20');
-  } else if (!player.onGround) {
-    drawOutlinedRect(-7, 2, 15, 14, '#f3c68b', '#171a20');
-    drawRect(-8, 0, 17, 6, '#4a2f1d');
-    drawRect(4, 7, 2, 3, '#171a20');
-    drawOutlinedRect(-9, 16, 18, 16, '#3b82f6', '#171a20');
-    drawRect(-9, 27, 18, 4, '#1f2937');
-    drawOutlinedRect(-13, 17, 8, 13, '#7a4a24', '#2e1a0d');
-    drawOutlinedRect(-3, 7, 7, 12, '#2563eb', '#171a20');
-    drawOutlinedRect(5, 9, 7, 12, '#2563eb', '#171a20');
-    drawOutlinedRect(-8, 30, 8, 9, '#5c4028', '#20140d');
-    drawOutlinedRect(3, 32, 8, 9, '#5c4028', '#20140d');
-  } else if (player.moving) {
-    const walkFrame = Math.floor(player.animationTime * 10) % 4;
-    const legSwing = [4, 0, -4, 0][walkFrame];
-    const bodyBob = walkFrame === 1 || walkFrame === 3 ? 1 : 0;
-
-    drawOutlinedRect(-10 - legSwing, 40, 9, 8, '#5c4028', '#20140d');
-    drawOutlinedRect(1 + legSwing, 40, 9, 8, '#5c4028', '#20140d');
-    drawRect(-8 - legSwing, 31, 7, 10, '#1e3a8a');
-    drawRect(1 + legSwing, 31, 7, 10, '#1e3a8a');
-    drawOutlinedRect(-9, 15 + bodyBob, 18, 17, '#3b82f6', '#171a20');
-    drawRect(-9, 27 + bodyBob, 18, 4, '#1f2937');
-    drawOutlinedRect(-13, 17 + bodyBob, 8, 13, '#7a4a24', '#2e1a0d');
-    drawOutlinedRect(-6, 2 + bodyBob, 15, 14, '#f3c68b', '#171a20');
-    drawRect(-7, bodyBob, 17, 6, '#4a2f1d');
-    drawRect(-8, 2 + bodyBob, 5, 9, '#4a2f1d');
-    drawRect(3, 7 + bodyBob, 2, 3, '#171a20');
-    drawOutlinedRect(4 - legSwing, 17 + bodyBob, 6, 13, '#2563eb', '#171a20');
-    drawOutlinedRect(-12 + legSwing, 18 + bodyBob, 6, 12, '#2563eb', '#171a20');
-  } else {
-    const idleBob = Math.sin(player.animationTime * 3) > 0 ? 0 : 1;
-    const blink = Math.floor(player.animationTime * 1.5) % 4 === 3;
-
-    drawOutlinedRect(-10, 40, 9, 8, '#5c4028', '#20140d');
-    drawOutlinedRect(1, 40, 9, 8, '#5c4028', '#20140d');
-    drawRect(-8, 31, 7, 10, '#1e3a8a');
-    drawRect(1, 31, 7, 10, '#1e3a8a');
-    drawOutlinedRect(-9, 15 + idleBob, 18, 17, '#3b82f6', '#171a20');
-    drawRect(-9, 27 + idleBob, 18, 4, '#1f2937');
-    drawOutlinedRect(-13, 17 + idleBob, 8, 13, '#7a4a24', '#2e1a0d');
-    drawOutlinedRect(-6, 2 + idleBob, 15, 14, '#f3c68b', '#171a20');
-    drawRect(-7, idleBob, 17, 6, '#4a2f1d');
-    drawRect(-8, 2 + idleBob, 5, 9, '#4a2f1d');
-    drawRect(3, 7 + idleBob, 2, blink ? 1 : 3, '#171a20');
-    drawOutlinedRect(4, 18 + idleBob, 6, 13, '#2563eb', '#171a20');
-  }
+  drawAdventurer();
 
   context.restore();
+}
+
+function drawAdventurer() {
+  const outline = '#171a24';
+  const skin = '#d99b6c';
+  const skinLight = '#f0ba87';
+  const hair = '#292235';
+  const teal = '#159b9b';
+  const tealLight = '#42c9bb';
+  const tealDark = '#0d646f';
+  const scarf = '#ff9f43';
+  const scarfDark = '#c65e2a';
+  const trousers = '#29334c';
+  const boots = '#4b352c';
+  const backpack = '#b87536';
+  const walkFrame = Math.floor(player.animationTime * 10) % 4;
+  const legSwing = player.moving && player.onGround ? [4, 0, -4, 0][walkFrame] : 0;
+  const bodyBob = player.onGround
+    ? player.moving ? (walkFrame === 1 || walkFrame === 3 ? 1 : 0) : (Math.sin(player.animationTime * 3) > 0 ? 0 : 1)
+    : 0;
+  const blink = !player.moving && Math.floor(player.animationTime * 1.5) % 4 === 3;
+
+  if (player.sliding) {
+    drawRect(-22, 7, 14, 5, scarfDark);
+    drawRect(-20, 4, 10, 5, scarf);
+    drawOutlinedRect(-15, 8, 10, 14, backpack, '#4c2e1b');
+    drawRect(-13, 11, 3, 9, '#e0a34f');
+    drawOutlinedRect(-11, 8, 24, 13, teal, outline);
+    drawRect(-8, 10, 16, 3, tealLight);
+    drawRect(-8, 17, 20, 3, tealDark);
+    drawOutlinedRect(-1, 0, 15, 14, skin, outline);
+    drawRect(10, 6, 4, 5, skinLight);
+    drawRect(-2, -2, 16, 5, hair);
+    drawRect(-3, 1, 5, 8, hair);
+    drawRect(1, 0, 12, 2, '#6b4a2c');
+    drawOutlinedRect(2, -1, 5, 5, '#ffe779', '#493820');
+    drawOutlinedRect(8, -1, 5, 5, '#ffe779', '#493820');
+    drawRect(3, 0, 3, 2, '#9be7ff');
+    drawRect(9, 0, 3, 2, '#9be7ff');
+    drawRect(9, 6, 2, blink ? 1 : 3, outline);
+    drawRect(9, 12, 4, 1, '#8b4938');
+    drawRect(-2, 13, 17, 4, scarf);
+    drawRect(8, 16, 6, 5, scarfDark);
+    drawOutlinedRect(-9, 18, 11, 8, boots, '#261b18');
+    drawOutlinedRect(5, 18, 11, 8, boots, '#261b18');
+    drawRect(-7, 18, 7, 3, trousers);
+    drawRect(6, 18, 7, 3, trousers);
+    drawOutlinedRect(5, 11, 8, 8, tealDark, outline);
+    drawRect(10, 16, 5, 4, skinLight);
+    return;
+  }
+
+  const scarfReach = player.moving || !player.onGround ? 6 : 0;
+  drawRect(-18 - scarfReach, 16 + bodyBob, 12 + scarfReach, 5, scarfDark);
+  drawRect(-16 - scarfReach, 12 + bodyBob, 9 + scarfReach, 5, scarf);
+  drawOutlinedRect(-15, 17 + bodyBob, 9, 19, backpack, '#4c2e1b');
+  drawRect(-13, 20 + bodyBob, 3, 12, '#e0a34f');
+  drawRect(-15, 25 + bodyBob, 9, 3, '#7c4727');
+
+  if (!player.onGround) {
+    drawOutlinedRect(-9, 30, 8, 9, trousers, outline);
+    drawOutlinedRect(3, 31, 8, 8, trousers, outline);
+    drawOutlinedRect(-11, 36, 11, 8, boots, '#261b18');
+    drawOutlinedRect(4, 38, 11, 8, boots, '#261b18');
+    drawRect(-9, 41, 9, 3, '#8a6544');
+    drawRect(6, 43, 9, 3, '#8a6544');
+  } else {
+    drawRect(-8 - legSwing, 31, 7, 10, trousers);
+    drawRect(1 + legSwing, 31, 7, 10, trousers);
+    drawRect(-7 - legSwing, 32, 2, 8, '#3e4c6d');
+    drawRect(2 + legSwing, 32, 2, 8, '#3e4c6d');
+    drawOutlinedRect(-11 - legSwing, 40, 11, 8, boots, '#261b18');
+    drawOutlinedRect(1 + legSwing, 40, 11, 8, boots, '#261b18');
+    drawRect(-9 - legSwing, 44, 9, 2, '#8a6544');
+    drawRect(3 + legSwing, 44, 9, 2, '#8a6544');
+  }
+
+  if (!player.onGround) {
+    drawOutlinedRect(-14, 9 + bodyBob, 7, 15, tealDark, outline);
+    drawRect(-14, 7 + bodyBob, 6, 5, skinLight);
+  } else {
+    drawOutlinedRect(-13 + legSwing, 18 + bodyBob, 7, 13, tealDark, outline);
+    drawRect(-12 + legSwing, 28 + bodyBob, 6, 4, skinLight);
+  }
+
+  drawOutlinedRect(-10, 15 + bodyBob, 20, 17, teal, outline);
+  drawRect(-7, 17 + bodyBob, 4, 11, tealLight);
+  drawRect(6, 17 + bodyBob, 2, 11, tealDark);
+  drawRect(-10, 27 + bodyBob, 20, 4, trousers);
+  drawRect(-1, 17 + bodyBob, 2, 10, '#d8f3dc');
+  drawRect(2, 19 + bodyBob, 2, 2, '#ffe779');
+  drawRect(2, 23 + bodyBob, 2, 2, '#ffe779');
+
+  drawOutlinedRect(-7, 2 + bodyBob, 16, 14, skin, outline);
+  drawRect(-4, 5 + bodyBob, 4, 6, skinLight);
+  drawRect(8, 8 + bodyBob, 3, 4, skinLight);
+  drawRect(-8, bodyBob, 18, 5, hair);
+  drawRect(-9, 3 + bodyBob, 5, 9, hair);
+  drawRect(-6, -2 + bodyBob, 6, 4, hair);
+  drawRect(1, -3 + bodyBob, 6, 5, hair);
+  drawRect(6, -1 + bodyBob, 5, 4, hair);
+  drawRect(-7, 2 + bodyBob, 16, 2, '#6b4a2c');
+  drawOutlinedRect(-6, 1 + bodyBob, 7, 5, '#ffe779', '#493820');
+  drawOutlinedRect(2, 1 + bodyBob, 7, 5, '#ffe779', '#493820');
+  drawRect(-4, 2 + bodyBob, 4, 2, '#9be7ff');
+  drawRect(4, 2 + bodyBob, 4, 2, '#9be7ff');
+  drawRect(4, 8 + bodyBob, 2, blink ? 1 : 3, outline);
+  drawRect(3, 13 + bodyBob, 5, 1, '#8b4938');
+
+  if (!player.onGround) {
+    drawOutlinedRect(8, 8 + bodyBob, 7, 14, teal, outline);
+    drawRect(10, 5 + bodyBob, 6, 5, skinLight);
+  } else {
+    drawOutlinedRect(6 - legSwing, 17 + bodyBob, 7, 13, teal, outline);
+    drawRect(7 - legSwing, 27 + bodyBob, 6, 4, skinLight);
+  }
+
+  drawRect(-9, 14 + bodyBob, 20, 5, scarf);
+  drawRect(-7, 14 + bodyBob, 12, 2, '#ffc266');
+  drawRect(5, 18 + bodyBob, 7, 6, scarfDark);
+  drawRect(7, 18 + bodyBob, 4, 3, scarf);
 }
 
 function drawShadowPlayer() {
@@ -2983,9 +3935,36 @@ function drawRandomGroundFlowers() {
 
 function drawMonster() {
   if (!monsterActive) return;
-  drawOutlinedRect(monster.x, monster.y, monster.width, monster.height, '#8b2f3b', '#2a0d12');
-  drawRect(monster.x + 8, monster.y + 14, 8, 8, '#ffdc4a');
-  drawRect(monster.x + 20, monster.y + 14, 8, 8, '#ffdc4a');
+  const x = monster.x;
+  const y = monster.y;
+  const stride = Math.sin(performance.now() / 85) * 4;
+  const eyeColor = Math.floor(performance.now() / 170) % 2 === 0 ? '#ffdc4a' : '#ffb52e';
+
+  drawRect(x - 26, y + 20, 18, 4, 'rgba(255,77,94,.32)');
+  drawRect(x - 18, y + 38, 14, 3, 'rgba(255,216,77,.24)');
+  drawRect(x - 5, y + 60, 48, 6, 'rgba(0,0,0,.32)');
+  drawOutlinedRect(x + 4 + stride, y + 45, 10, 15, '#5b1d25', '#22070c');
+  drawOutlinedRect(x + 22 - stride, y + 45, 10, 15, '#5b1d25', '#22070c');
+  drawRect(x + 1 + stride, y + 57, 16, 7, '#2a0d12');
+  drawRect(x + 19 - stride, y + 57, 16, 7, '#2a0d12');
+  drawOutlinedRect(x + 1, y + 23, 34, 31, '#8b2f3b', '#22070c');
+  drawRect(x + 8, y + 31, 20, 14, '#a83c48');
+  drawOutlinedRect(x - 7, y + 28 + stride, 10, 23, '#742630', '#22070c');
+  drawOutlinedRect(x + 33, y + 28 - stride, 10, 23, '#742630', '#22070c');
+  drawRect(x - 9, y + 47 + stride, 5, 5, '#e5d7c1');
+  drawRect(x + 41, y + 47 - stride, 5, 5, '#e5d7c1');
+  drawOutlinedRect(x - 2, y + 3, 40, 29, '#963541', '#22070c');
+  drawRect(x + 1, y - 6, 8, 12, '#4a1218');
+  drawRect(x + 27, y - 6, 8, 12, '#4a1218');
+  drawRect(x + 3, y - 8, 4, 5, '#d9c8ad');
+  drawRect(x + 29, y - 8, 4, 5, '#d9c8ad');
+  drawRect(x + 6, y + 12, 8, 8, eyeColor);
+  drawRect(x + 22, y + 12, 8, 8, eyeColor);
+  drawRect(x + 9, y + 14, 3, 5, '#24100a');
+  drawRect(x + 22, y + 14, 3, 5, '#24100a');
+  drawRect(x + 7, y + 25, 23, 6, '#320b10');
+  drawRect(x + 10, y + 25, 4, 4, '#f4f0df');
+  drawRect(x + 21, y + 25, 4, 4, '#f4f0df');
 }
 
 function drawCellarMonster() {
@@ -3019,6 +3998,14 @@ function drawCellarMonster() {
     const blink = Math.floor(performance.now() / 120) % 2 === 0;
     drawRect(x + 28, monster.y - 22, 9, 17, blink ? '#ff4d5e' : '#ffd84d');
     drawRect(x + 28, monster.y - 1, 9, 7, blink ? '#ff4d5e' : '#ffd84d');
+    for (let arrow = 0; arrow < 4; arrow++) {
+      const arrowX = x + 32 + monster.direction * (52 + arrow * 28);
+      drawPolyline([
+        [arrowX - monster.direction * 8, groundY - 18],
+        [arrowX, groundY - 9],
+        [arrowX - monster.direction * 8, groundY]
+      ], blink ? '#ff4d5e' : '#ffd84d', 4);
+    }
   }
 
   if (monster.state === 'charge') {
@@ -3055,57 +4042,270 @@ function drawCellarMonsterGlow() {
 
 function drawBoss() {
   if (!bossActive) return;
+  drawBossTelegraph();
+  const x = boss.x;
+  const y = boss.y;
+  const width = boss.width;
+  const height = boss.height;
+  const phaseColor = boss.phase === 2 ? '#ff8c55' : '#ff4d5e';
+  const armSwing = boss.attacking ? 10 : Math.sin(performance.now() / 180) * 3;
 
-  if (bossIsReturn) {
-    drawOutlinedRect(boss.x, boss.y, boss.width, boss.height, '#8b2f3b', '#22070c');
-    drawRect(boss.x + 16, boss.y + 20, 18, 18, '#ffdc4a');
-    drawRect(boss.x + 62, boss.y + 20, 18, 18, '#ffdc4a');
-    drawRect(boss.x + 18, boss.y + 52, 60, 16, '#5b1d25');
-    drawRect(boss.x + 24, boss.y + 84, 48, 14, '#391218');
-    drawRect(boss.x + 10, boss.y - 14, 14, 18, '#4a1218');
-    drawRect(boss.x + boss.width - 24, boss.y - 14, 14, 18, '#4a1218');
+  drawRect(x - 12, groundY - 8, width + 24, 8, 'rgba(0,0,0,.35)');
+  drawOutlinedRect(x + 12, y + height - 22, 25, 24, '#4a1820', '#22070c');
+  drawOutlinedRect(x + width - 37, y + height - 22, 25, 24, '#4a1820', '#22070c');
+  drawRect(x + 6, groundY - 10, 34, 10, '#2a0d12');
+  drawRect(x + width - 40, groundY - 10, 34, 10, '#2a0d12');
+  drawOutlinedRect(x - 13, y + 48 + armSwing, 18, 48, '#742630', '#22070c');
+  drawOutlinedRect(x + width - 5, y + 48 - armSwing, 18, 48, '#742630', '#22070c');
+  drawRect(x - 16, y + 88 + armSwing, 8, 8, '#e5d7c1');
+  drawRect(x + width + 8, y + 88 - armSwing, 8, 8, '#e5d7c1');
 
-    const healthBarX = boss.x;
-    const healthBarY = boss.y - 28;
-    drawRect(healthBarX, healthBarY, boss.width, 14, '#22070c');
-    drawRect(healthBarX + 2, healthBarY + 2, (boss.width - 4) * (boss.health / boss.maxHealth), 10, '#ff4d5e');
-    return;
+  const useBossImage = !bossIsReturn && bossImage.complete && bossImage.naturalWidth > 0;
+  if (useBossImage) {
+    context.drawImage(bossImage, x, y, width, height);
+  } else {
+    drawOutlinedRect(x, y, width, height, '#8b2f3b', '#22070c');
+    drawRect(x + 10, y + 44, width - 20, height - 58, '#9f3542');
+    drawRect(x + 18, y + height - 30, width - 36, 12, '#5b1d25');
+    drawRect(x + 16, y + 22, 16, 18, '#ffdc4a');
+    drawRect(x + width - 32, y + 22, 16, 18, '#ffdc4a');
+    drawRect(x + 21, y + 27, 6, 9, '#351208');
+    drawRect(x + width - 27, y + 27, 6, 9, '#351208');
+    drawOutlinedRect(x + 18, y + 62, width - 36, 20, '#320b10', '#22070c');
+    for (let tooth = 0; tooth < 4; tooth++) {
+      drawRect(x + 24 + tooth * ((width - 48) / 3), y + 64, 7, 8, '#f4f0df');
+    }
   }
 
-  if (bossImage.complete && bossImage.naturalWidth > 0) {
-    context.drawImage(
-      bossImage,
-      boss.x,
-      boss.y,
-      boss.width,
-      boss.height
-    );
+  drawRect(x + 8, y - 14, 16, 22, '#4a1218');
+  drawRect(x + width - 24, y - 14, 16, 22, '#4a1218');
+  drawRect(x + 11, y - 20, 8, 10, '#d9c8ad');
+  drawRect(x + width - 19, y - 20, 8, 10, '#d9c8ad');
+  drawRect(x + 22, y + 48, width - 44, 5, phaseColor);
+  drawRect(x + 30, y + 54, width - 60, 4, phaseColor);
 
-    const healthBarX = boss.x;
-    const healthBarY = boss.y - 24;
-    drawRect(healthBarX, healthBarY, boss.width, 12, '#22070c');
-    drawRect(healthBarX + 2, healthBarY + 2, (boss.width - 4) * (boss.health / boss.maxHealth), 8, '#ff4d5e');
-    return;
+  const healthBarY = y - 34;
+  drawRect(x, healthBarY, width, 12, '#22070c');
+  drawRect(x + 2, healthBarY + 2, (width - 4) * (boss.health / boss.maxHealth), 8, phaseColor);
+}
+
+function drawBossTelegraph() {
+  if (boss.phase === 2) {
+    const pulse = Math.floor(performance.now() / 130) % 2 === 0;
+    drawRect(boss.x - 8, boss.y - 8, boss.width + 16, boss.height + 16, pulse ? 'rgba(255,77,94,.18)' : 'rgba(255,145,77,.12)');
   }
 
-  drawOutlinedRect(boss.x, boss.y, boss.width, boss.height, '#8b2f3b', '#22070c');
-  drawRect(boss.x + 16, boss.y + 24, 16, 18, '#ffdc4a');
-  drawRect(boss.x + 64, boss.y + 24, 16, 18, '#ffdc4a');
-  drawRect(boss.x + 18, boss.y + 68, 60, 16, '#5b1d25');
-  drawRect(boss.x + 26, boss.y + 104, 44, 14, '#391218');
-
-  const healthBarX = boss.x;
-  const healthBarY = boss.y - 24;
-  drawRect(healthBarX, healthBarY, boss.width, 12, '#22070c');
-  drawRect(healthBarX + 2, healthBarY + 2, (boss.width - 4) * (boss.health / boss.maxHealth), 8, '#ff4d5e');
+  const warning = !boss.attacking && boss.chargeTimer <= (boss.phase === 2 ? .55 : .45);
+  if (warning) {
+    const blink = Math.floor(performance.now() / 110) % 2 === 0;
+    const centerX = boss.x + boss.width / 2;
+    context.save();
+    context.textAlign = 'center';
+    context.font = 'bold 18px monospace';
+    context.fillStyle = blink ? '#ff4d5e' : '#ffd84d';
+    context.fillText('CHARGE!', centerX, boss.y - 42);
+    context.font = 'bold 34px monospace';
+    context.fillText('!', centerX, boss.y - 12);
+    context.restore();
+    for (let arrow = 0; arrow < 3; arrow++) {
+      const arrowX = centerX + boss.direction * (54 + arrow * 22);
+      drawPolyline([
+        [arrowX - boss.direction * 7, groundY - 14],
+        [arrowX, groundY - 7],
+        [arrowX - boss.direction * 7, groundY]
+      ], blink ? '#ff4d5e' : '#ffd84d', 4);
+    }
+  }
 
   if (boss.attacking) {
-    drawRect(boss.x - 10, boss.y + 60, 10, 8, '#ffd84d');
-    drawRect(boss.x + boss.width, boss.y + 60, 10, 8, '#ffd84d');
+    for (let trail = 0; trail < 4; trail++) {
+      const trailX = boss.x - boss.direction * (12 + trail * 15);
+      drawRect(trailX, boss.y + 28 + trail * 17, 18, 4, trail % 2 === 0 ? 'rgba(255,216,77,.55)' : 'rgba(255,77,94,.4)');
+    }
   }
 }
 
+function chaseEncounter(name, startDoor, endDoor, pursuerX, color) {
+  return {
+    name,
+    detail: `${endDoor - currentDoor + 1} DOORS LEFT`,
+    completed: currentDoor - startDoor,
+    total: endDoor - startDoor + 1,
+    pursuerX,
+    distance: player.x + player.width / 2 - pursuerX,
+    warning: pursuerX < 0,
+    color
+  };
+}
+
+function currentEncounter() {
+  if (bossActive) {
+    const warning = !boss.attacking && boss.chargeTimer <= (boss.phase === 2 ? .55 : .45);
+    return {
+      name: bossIsReturn ? 'THE RETURNING MONSTER' : 'THE PARK DEMON',
+      detail: boss.attacking ? 'CHARGING - DODGE!' : warning ? 'CHARGE INCOMING!' : `PHASE ${boss.phase} - ${boss.health} STOMPS LEFT`,
+      completed: boss.maxHealth - boss.health,
+      total: boss.maxHealth,
+      color: boss.phase === 2 ? '#ff8c55' : '#ff4d5e'
+    };
+  }
+  if (monsterActive) return chaseEncounter('THE PARK MONSTER', monsterStartDoor, monsterEndDoor, monster.x, '#ff6b62');
+  if (mountainChaseActive) return chaseEncounter('THREE-LEGGED TREE MONSTER', gardenGroundChaseStartDoor, gardenGroundChaseEndDoor, vineMonster.x, '#ff8f8f');
+  if (gardenChaseActive) return chaseEncounter('VINE FLOWER SUBMARINE CHASE', gardenChaseStartDoor, gardenChaseEndDoor, vineMonster.x, '#f7a8c4');
+  if (officeChaseActive) return chaseEncounter('RUNAWAY PRINTING MACHINE', officeChaseStartDoor, officeChaseEndDoor, officeMonster.x, '#ff8c55');
+  if (cellarMonsterActive) {
+    const encounter = chaseEncounter('GLOOM CRAWLER', 3, 8, cellarMonster.x, '#b89be0');
+    encounter.detail = `${8 - currentDoor + 1} DOORS - ${cellarMonster.state.toUpperCase()}`;
+    return encounter;
+  }
+  if (vineMonsterActive) {
+    return {
+      name: 'GIANT VINE FLOWER',
+      detail: vineMonster.mouthOpen ? 'MOUTH OPEN - STAND STILL!' : 'MOUTH CLOSED - RUN!',
+      completed: 0,
+      total: 0,
+      progress: 1 - Math.max(0, vineMonster.mouthTimer) / (vineMonster.mouthOpen ? 1.2 : 1.6),
+      color: vineMonster.mouthOpen ? '#ff4d5e' : '#67d06b'
+    };
+  }
+  if (rushActive) {
+    return {
+      name: 'ROCKET',
+      detail: rushWarningTimer > 0 ? `INCOMING IN ${Math.ceil(rushWarningTimer)} - HIDE!` : 'ROCKET IS HERE - HIDE!',
+      completed: 0,
+      total: 0,
+      progress: rushWarningTimer > 0 ? 1 - rushWarningTimer / 5 : 1,
+      pursuerX: rush.x,
+      distance: player.x - rush.x,
+      warning: rushWarningTimer > 0 || rush.x < 0,
+      color: '#ff8c55'
+    };
+  }
+  return null;
+}
+
+function drawEncounterHud() {
+  const encounter = currentEncounter();
+  if (!encounter) return;
+  const danger = encounter.distance > 0 && encounter.distance < 220;
+  drawOutlinedRect(230, 84, 500, 72, 'rgba(7,12,20,.88)', encounter.color);
+  drawRect(236, 90, 5, 60, encounter.color);
+
+  context.save();
+  context.textAlign = 'center';
+  context.font = 'bold 16px monospace';
+  context.fillStyle = encounter.color;
+  context.fillText(encounter.name, 480, 106);
+  context.font = 'bold 12px monospace';
+  context.fillStyle = danger ? '#ffd84d' : '#d8e5ed';
+  context.fillText(danger ? 'DANGER CLOSE - KEEP MOVING!' : encounter.detail, 480, 125);
+  context.restore();
+
+  if (encounter.total > 0) {
+    const gap = 4;
+    const pipWidth = Math.min(32, (420 - (encounter.total - 1) * gap) / encounter.total);
+    const totalWidth = encounter.total * pipWidth + (encounter.total - 1) * gap;
+    const startX = 480 - totalWidth / 2;
+    for (let index = 0; index < encounter.total; index++) {
+      const color = index < encounter.completed ? encounter.color : index === encounter.completed ? '#ffd84d' : '#26313c';
+      drawRect(startX + index * (pipWidth + gap), 136, pipWidth, 8, color);
+    }
+  } else {
+    drawRect(270, 136, 420, 8, '#26313c');
+    drawRect(270, 136, 420 * Math.max(0, Math.min(1, encounter.progress)), 8, encounter.color);
+  }
+}
+
+function drawEncounterEffects() {
+  const encounter = currentEncounter();
+  if (encounter && encounter.pursuerX !== undefined) {
+    const closeBehind = encounter.distance > 0 && encounter.distance < 260;
+    if ((encounter.warning || closeBehind) && Math.floor(performance.now() / 130) % 2 === 0) {
+      drawRect(8, 252, 7, 102, encounter.color);
+      context.save();
+      context.textAlign = 'center';
+      context.font = 'bold 48px monospace';
+      context.fillStyle = encounter.color;
+      context.fillText('!', 40, 318);
+      context.restore();
+    }
+  }
+
+  if (encounterFlashTimer > 0) {
+    const alpha = Math.min(.28, encounterFlashTimer * 1.1);
+    drawRect(0, 0, canvas.width, canvas.height, `rgba(${encounterFlashColor},${alpha})`);
+  }
+}
+
+function mainFloorHasStairs() {
+  if (currentFloor !== 'main' || currentDoor === 1) return false;
+  const stairDoor = ((currentDoor * 37 + 17) % 100) < 18;
+  const darkDoor = currentDoor > rewardDoor && currentDoor % 5 === 0;
+  return stairDoor && !darkDoor && !bossActive && currentDoor !== rewardDoor
+    && currentDoor !== cellarEntranceDoor && currentDoor !== 65 && currentDoor !== 95
+    && !rareRoomActive && !fantaJugActive && !riftCanActive && !flowJuiceActive && !isPermanentRiftActive();
+}
+
+function mainFloorGroundAt(xPosition) {
+  if (!mainFloorHasStairs()) return groundY;
+  if (xPosition < 500) return 424;
+  if (xPosition >= 800) return groundY;
+  const step = Math.max(0, Math.min(5, Math.floor((xPosition - 500) / 50)));
+  return 452 + step * 18;
+}
+
+function updateMainFloorStairButton() {
+  const visible = mainFloorHasStairs() && !player.hidden && player.onGround
+    && player.x + player.width / 2 < 800;
+  const label = stairDescentActive ? 'WALKING DOWN...' : 'GO DOWN THE STAIRS';
+  stairsDownButton.classList.toggle('hidden', !visible);
+  stairsDownButton.disabled = stairDescentActive;
+  if (stairsDownButton.textContent !== label) stairsDownButton.textContent = label;
+}
+
+function startMainFloorStairDescent() {
+  if (stairDescentActive || paused || won || player.hidden || !player.onGround || !mainFloorHasStairs()) return;
+  stairDescentActive = true;
+  input.clear();
+  const previousHeight = player.height;
+  player.height = 48;
+  player.y += previousHeight - player.height;
+  player.sliding = false;
+  player.facing = 1;
+  stairsDownButton.blur();
+  showMessage('Going down the stairs...');
+}
+
+function mainFloorElevatorDestination() {
+  if (currentFloor !== 'main') return 0;
+  const nextSection = Math.floor((currentDoor - 1) / 5) * 5 + 6;
+  const sectionStops = [monsterStartDoor, rewardDoor, cellarEntranceDoor, bossDoor, 65, bossReturnDoor, 95, totalDoors];
+  const nextStop = sectionStops.find(doorNumber => doorNumber > currentDoor) || totalDoors;
+  return nextSection <= nextStop && nextSection <= totalDoors ? nextSection : 0;
+}
+
+function mainFloorElevatorActive() {
+  if (currentFloor !== 'main' || currentDoor === 1 || !mainFloorElevatorDestination()) return false;
+  const appearsHere = ((currentDoor * 53 + 29) % 100) < 16;
+  const darkDoor = currentDoor > rewardDoor && currentDoor % 5 === 0;
+  return appearsHere && !darkDoor && !monsterActive && !bossActive && currentDoor !== rewardDoor
+    && currentDoor !== cellarEntranceDoor && currentDoor !== 65 && currentDoor !== 95
+    && !rareRoomActive && !fantaJugActive && !riftCanActive && !flowJuiceActive
+    && !mainFloorHasStairs() && !isPermanentRiftActive();
+}
+
 function currentRoomTheme() {
+  if (fantaJugActive) {
+    return {
+      wallTop: '#242a30',
+      wallMiddle: '#343d43',
+      wallLower: '#404a50',
+      floor: '#2d3338',
+      floorLine: '#59646b',
+      detail: 'basement'
+    };
+  }
+
   if (currentFloor === 'cellar') {
     return {
       wallTop: '#0d1114',
@@ -3203,9 +4403,9 @@ function currentRoomTheme() {
       detail: 'boss'
     };
   }
-  if (monsterActive) return roomThemes[2];
+  if (monsterActive && !mainFloorHasStairs()) return roomThemes[2];
   if (currentDoor === rewardDoor) return roomThemes[9];
-  if (currentDoor === totalDoors) {
+  if (isPermanentRiftActive()) {
     return {
       wallTop: '#05091c',
       wallMiddle: '#0b1838',
@@ -3215,10 +4415,74 @@ function currentRoomTheme() {
       detail: 'rift'
     };
   }
-  return roomThemes[Math.floor((currentDoor - 1) / 10) % roomThemes.length];
+  if (mainFloorHasStairs()) {
+    return {
+      name: 'Grand Stairwell',
+      wallpaper: 'deco',
+      wallTop: '#4b5268',
+      wallMiddle: '#30384c',
+      wallLower: '#1d2433',
+      floor: '#3b3540',
+      floorLine: '#6f6273',
+      detail: 'stairwell'
+    };
+  }
+  return roomThemes[Math.floor((currentDoor - 1) / 5) % roomThemes.length];
+}
+
+function drawMainFloorStaircase() {
+  const firstStepY = 452;
+  const stepHeight = 18;
+  const stepWidth = 50;
+  drawRect(0, 424, 500, groundY - 424, '#202938');
+  drawRect(0, 434, 494, groundY - 434, '#303b4b');
+  drawRect(0, 424, 500, 6, '#93a0ad');
+  drawRect(0, 424, 500, 2, '#c1c9cf');
+  drawRect(30, 424, 440, 5, '#633344');
+  drawRect(30, 424, 440, 1, '#b38a4d');
+  for (let panelX = 24; panelX < 470; panelX += 74) {
+    drawOutlinedRect(panelX, 458, 54, 70, '#283442', '#465464');
+    drawRect(panelX + 8, 466, 38, 3, '#3c4a59');
+  }
+
+  const railPoints = [[480, 394]];
+  for (let step = 0; step < 6; step++) {
+    const stepX = 500 + step * stepWidth;
+    const stepY = firstStepY + step * stepHeight;
+    const stoneColor = step % 2 === 0 ? '#4b5868' : '#435161';
+    drawRect(stepX, stepY, stepWidth, stepHeight, '#202936');
+    drawRect(stepX + 3, stepY + 5, stepWidth - 3, stepHeight - 5, stoneColor);
+    drawRect(stepX, stepY, stepWidth, 6, '#93a0ad');
+    drawRect(stepX + 5, stepY + 1, stepWidth - 10, 2, '#c1c9cf');
+    drawRect(stepX + 12, stepY + 6, 26, stepHeight - 6, '#633344');
+    drawRect(stepX + 10, stepY + 6, 3, stepHeight - 6, '#b38a4d');
+    drawRect(stepX + 37, stepY + 6, 3, stepHeight - 6, '#b38a4d');
+    drawRect(stepX + 14, stepY + 9, 22, 2, '#8e5060');
+    drawPolyline([[stepX + 10, stepY + 8], [stepX + 16, stepY + 11], [stepX + 12, stepY + 16]], '#2a3542', 2);
+    drawRect(stepX + 42, stepY + 11, 4, 4, '#73808d');
+
+    const postX = stepX + 10;
+    const postY = stepY - 30;
+    drawPolyline([[postX, stepY], [postX, postY]], '#171d27', 7);
+    drawPolyline([[postX, stepY], [postX, postY]], '#8d744c', 3);
+    drawRect(postX - 5, stepY - 4, 10, 4, '#4a3c2c');
+    drawRect(postX - 4, postY - 4, 8, 8, '#c0a068');
+    railPoints.push([postX, postY]);
+  }
+
+  drawPolyline(railPoints, '#171d27', 9);
+  drawPolyline(railPoints, '#725c3c', 5);
+  drawPolyline(railPoints.map(point => [point[0], point[1] - 2]), '#d0b37a', 1.5);
+  drawRect(794, 552, 38, 8, '#202936');
+  drawRect(800, 552, 32, 3, '#8c98a8');
 }
 
 function drawRoomDetails(theme) {
+  if (theme.detail === 'stairwell') {
+    drawMainFloorStaircase();
+    return;
+  }
+
   if (theme.detail === 'rift') {
     drawRiftRoomDetails();
     return;
@@ -3372,7 +4636,29 @@ function drawRoomDetails(theme) {
     return;
   }
 
-  if (theme.detail === 'paintings') {
+  if (theme.detail === 'basement') {
+    for (let wallY = 245; wallY < 430; wallY += 42) {
+      drawRect(0, wallY, canvas.width, 3, '#293137');
+      for (let wallX = (wallY / 42) % 2 ? 40 : 0; wallX < canvas.width; wallX += 120) {
+        drawRect(wallX, wallY - 39, 3, 39, '#293137');
+      }
+    }
+    drawRect(50, 205, 650, 16, '#69747b');
+    drawRect(84, 205, 14, 100, '#69747b');
+    drawRect(80, 288, 100, 14, '#69747b');
+    drawRect(655, 205, 14, 88, '#69747b');
+    drawRect(390, 178, 150, 12, '#151b1f');
+    drawRect(405, 190, 120, 8, '#fff3a6');
+    drawRect(420, 198, 90, 4, '#d6b937');
+    drawOutlinedRect(145, 478, 72, 70, '#6b4a2f', '#342316');
+    drawRect(153, 486, 56, 8, '#8a6238');
+    drawOutlinedRect(205, 505, 58, 43, '#7b5637', '#342316');
+    drawOutlinedRect(665, 435, 74, 113, '#59646b', '#293137');
+    drawRect(677, 449, 50, 8, '#8b989f');
+    drawRect(681, 470, 42, 42, '#414a50');
+    drawRect(692, 525, 8, 23, '#69747b');
+    drawRect(230, 551, 105, 4, 'rgba(120,180,220,.22)');
+  } else if (theme.detail === 'paintings') {
     drawRect(150, 260, 70, 50, '#8b5a2b');
     drawRect(160, 270, 50, 30, '#c8e0ff');
     drawRect(520, 250, 80, 60, '#8b5a2b');
@@ -3393,6 +4679,17 @@ function drawRoomDetails(theme) {
     drawRect(80, 240, 120, 16, '#7c8792');
     drawRect(500, 300, 180, 16, '#7c8792');
     drawRect(300, 360, 90, 12, '#66727d');
+  } else if (theme.detail === 'bedroom') {
+    drawOutlinedRect(650, 220, 130, 120, '#26354d', '#8f7c5c');
+    drawRect(660, 230, 110, 100, '#14213d');
+    drawRect(711, 230, 6, 100, '#8f7c5c');
+    drawRect(660, 275, 110, 6, '#8f7c5c');
+    drawRect(742, 244, 20, 20, '#fff3c4');
+    drawRect(734, 244, 10, 20, '#14213d');
+    drawRect(676, 251, 4, 4, '#d8f7ff');
+    drawRect(695, 305, 3, 3, '#d8f7ff');
+    drawRect(754, 296, 3, 3, '#d8f7ff');
+    drawRect(642, 340, 146, 10, '#5b4a42');
   } else if (theme.detail === 'boxes') {
     drawRect(160, 470, 50, 50, '#8a6238');
     drawRect(650, 470, 60, 50, '#8a6238');
@@ -3422,11 +4719,95 @@ function drawRoomDetails(theme) {
   }
 }
 
+function drawMainFloorWallpaper(theme) {
+  if (currentFloor !== 'main' || !theme.wallpaper) return;
+
+  const ink = 'rgba(255,240,210,.11)';
+  const shadowInk = 'rgba(5,10,18,.14)';
+
+  if (theme.wallpaper === 'stripes') {
+    for (let stripeX = 0; stripeX < canvas.width; stripeX += 48) {
+      drawRect(stripeX, 126, 5, 294, ink);
+      drawRect(stripeX + 10, 126, 2, 294, shadowInk);
+      drawRect(stripeX + 24, 126, 18, 294, 'rgba(255,255,255,.025)');
+    }
+  } else if (theme.wallpaper === 'dots') {
+    for (let dotY = 150; dotY < 410; dotY += 44) {
+      for (let dotX = Math.floor((dotY - 150) / 44) % 2 ? 22 : 46; dotX < canvas.width; dotX += 68) {
+        drawRect(dotX, dotY, 5, 5, ink);
+        drawRect(dotX + 2, dotY + 7, 2, 2, shadowInk);
+      }
+    }
+  } else {
+    for (let motifY = 154; motifY < 405; motifY += 66) {
+      for (let motifX = 30; motifX < canvas.width; motifX += 72) {
+        const offsetX = Math.floor((motifY - 154) / 66) % 2 ? 20 : 0;
+        const centerX = motifX + offsetX;
+        if (theme.wallpaper === 'damask') {
+          drawRect(centerX - 3, motifY - 13, 6, 26, ink);
+          drawRect(centerX - 12, motifY - 3, 24, 6, ink);
+          drawRect(centerX - 8, motifY - 8, 5, 5, ink);
+          drawRect(centerX + 4, motifY - 8, 5, 5, ink);
+          drawRect(centerX - 8, motifY + 5, 5, 5, ink);
+          drawRect(centerX + 4, motifY + 5, 5, 5, ink);
+          drawRect(centerX - 2, motifY - 2, 4, 4, shadowInk);
+        } else if (theme.wallpaper === 'botanical' || theme.wallpaper === 'vines') {
+          drawRect(centerX, motifY - 14, 3, 31, ink);
+          drawRect(centerX - 9, motifY - 9, 9, 5, ink);
+          drawRect(centerX + 3, motifY - 2, 10, 5, ink);
+          drawRect(centerX - 10, motifY + 7, 10, 5, ink);
+          drawRect(centerX - 7, motifY - 12, 5, 3, shadowInk);
+          drawRect(centerX + 5, motifY + 1, 5, 3, shadowInk);
+        } else if (theme.wallpaper === 'stars') {
+          drawRect(centerX - 2, motifY - 9, 4, 18, ink);
+          drawRect(centerX - 9, motifY - 2, 18, 4, ink);
+          drawRect(centerX + 18, motifY + 15, 4, 4, ink);
+          drawRect(centerX - 20, motifY + 20, 3, 3, shadowInk);
+        } else if (theme.wallpaper === 'lattice') {
+          drawPolyline([[centerX, motifY - 15], [centerX + 15, motifY], [centerX, motifY + 15], [centerX - 15, motifY], [centerX, motifY - 15]], ink, 2);
+          drawRect(centerX - 2, motifY - 2, 4, 4, shadowInk);
+        } else if (theme.wallpaper === 'diamonds') {
+          drawPolyline([[centerX, motifY - 13], [centerX + 10, motifY], [centerX, motifY + 13], [centerX - 10, motifY], [centerX, motifY - 13]], ink, 2);
+          drawPolyline([[centerX, motifY - 6], [centerX + 5, motifY], [centerX, motifY + 6], [centerX - 5, motifY], [centerX, motifY - 6]], shadowInk, 2);
+        } else if (theme.wallpaper === 'deco') {
+          drawPolyline([[centerX - 15, motifY + 12], [centerX, motifY - 12], [centerX + 15, motifY + 12]], ink, 3);
+          drawPolyline([[centerX - 9, motifY + 12], [centerX, motifY - 3], [centerX + 9, motifY + 12]], shadowInk, 2);
+          drawRect(centerX - 2, motifY + 7, 4, 6, ink);
+        }
+      }
+    }
+  }
+
+  drawRect(0, 108, canvas.width, 8, 'rgba(255,255,255,.12)');
+  drawRect(0, 116, canvas.width, 5, 'rgba(0,0,0,.18)');
+  drawRect(0, 124, canvas.width, 3, 'rgba(255,255,255,.07)');
+  drawRect(0, 420, canvas.width, 9, 'rgba(255,255,255,.1)');
+  drawRect(0, 429, canvas.width, 6, 'rgba(0,0,0,.2)');
+  drawRect(0, 541, canvas.width, 12, 'rgba(0,0,0,.18)');
+  drawRect(0, 541, canvas.width, 3, 'rgba(255,255,255,.1)');
+  for (let panelX = 20; panelX < canvas.width; panelX += 90) {
+    drawRect(panelX, 447, 3, 78, 'rgba(255,255,255,.055)');
+    drawRect(panelX + 4, 447, 2, 78, 'rgba(0,0,0,.1)');
+  }
+
+  for (let plankY = 584; plankY < canvas.height; plankY += 28) {
+    drawRect(0, plankY, canvas.width, 2, 'rgba(0,0,0,.16)');
+    for (let plankX = Math.floor((plankY - 584) / 28) % 2 ? 50 : 120; plankX < canvas.width; plankX += 170) {
+      drawRect(plankX, plankY - 26, 3, 26, 'rgba(0,0,0,.14)');
+      drawRect(plankX + 8, plankY - 20, 3, 3, 'rgba(255,255,255,.1)');
+    }
+  }
+}
+
 function drawRoom() {
   context.save();
   context.setTransform(1, 0, 0, 1, 0, 0);
   context.clearRect(0, 0, pixelCanvas.width, pixelCanvas.height);
   context.scale(1 / pixelScale, 1 / pixelScale);
+  if (encounterShakeTimer > 0 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const shakeTime = performance.now();
+    context.translate(Math.sin(shakeTime * .11) * 4, Math.cos(shakeTime * .13) * 3);
+  }
 
   drawRect(0, 0, canvas.width, canvas.height, '#101820');
   const theme = currentRoomTheme();
@@ -3440,17 +4821,22 @@ function drawRoom() {
     drawRect(x, groundY + 12, 30, 6, theme.floorLine);
   }
 
+  drawMainFloorWallpaper(theme);
   drawRoomDetails(theme);
   drawFurniture();
+  drawMainFloorElevator();
   drawCloset();
   drawPlatforms();
   drawMilkshake();
+  drawFantaJug();
+  drawRiftCan();
+  drawFlowJuice();
   drawBackpack();
   drawTeleporter();
   drawRift();
 
   if (currentFloor === 'main' && currentDoor === rewardDoor) drawRewardChest();
-  else if (currentFloor === 'main' && !rareRoomActive && currentDoor !== bossDoor && currentDoor !== bossReturnDoor && currentDoor !== totalDoors) drawCabinet();
+  else if (currentFloor === 'main' && !rareRoomActive && !fantaJugActive && currentDoor !== bossDoor && currentDoor !== bossReturnDoor && !isPermanentRiftActive()) drawCabinet();
   for (const obstacle of obstacles) drawObstacle(obstacle);
   drawDoor();
   if (currentFloor === 'main' && currentDoor === 65) drawGardenDoor();
@@ -3468,6 +4854,9 @@ function drawRoom() {
   drawFlashlight();
   drawCellarMonsterGlow();
   drawGardenRain();
+  drawMainFloorElevatorRide();
+  drawEncounterEffects();
+  drawEncounterHud();
 
   context.restore();
 }
@@ -3480,6 +4869,8 @@ function startGame() {
   officeSideRoomActive = false;
   officeSideRoomReturnDoor = 1;
   won = false;
+  fantaRushTimer = 0;
+  flowJuiceTimer = 0;
   unlockedDoors.clear();
   hotbarSlots.fill(null);
   backpackStorageSlots.fill(null);
@@ -3605,21 +4996,108 @@ function resumeMainFloor() {
 }
 
 startButton.addEventListener('click', startGame);
+trailerButton.addEventListener('click', () => {
+  window.location.href = '/doors/trailer/';
+});
+stairsDownButton.addEventListener('click', startMainFloorStairDescent);
 againButton.addEventListener('click', () => window.location.reload());
 
-badgesButton.addEventListener('click', () => {
+function finishBadgeDescent() {
+  if (!badgeDescentActive) return;
+  badgeDescentActive = false;
+  clearTimeout(badgeDescentTimer);
+  badgeDescentScreen.hidden = true;
+  badgeDescentScreen.classList.remove('active');
   lobby.classList.add('hidden');
-  badgeScreen.classList.remove('hidden');
+  badgeScreen.classList.remove('hidden', 'badge-arrival');
+  badgeScreen.querySelector('.badge-index-card').scrollTop = 0;
+  void badgeScreen.offsetWidth;
+  badgeScreen.classList.add('badge-arrival');
   badgesButton.setAttribute('aria-expanded', 'true');
-});
+  badgeList.querySelector('.badge')?.focus({ preventScroll: true });
+}
+
+function startBadgeDescent() {
+  if (badgeDescentActive) return;
+  badgeDescentActive = true;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    finishBadgeDescent();
+    return;
+  }
+  badgeDescentScreen.hidden = false;
+  badgeDescentScreen.classList.add('active');
+  badgeDescentSkip.focus({ preventScroll: true });
+  badgeDescentTimer = setTimeout(finishBadgeDescent, 2800);
+}
+
+badgesButton.addEventListener('click', startBadgeDescent);
+badgeDescentSkip.addEventListener('click', finishBadgeDescent);
 
 backButton.addEventListener('click', () => {
   badgeScreen.classList.add('hidden');
+  badgeScreen.classList.remove('badge-arrival');
   lobby.classList.remove('hidden');
   badgesButton.setAttribute('aria-expanded', 'false');
+  badgesButton.focus({ preventScroll: true });
 });
 
+for (const container of [badgeList, winBadgeList]) {
+  container.addEventListener('click', event => {
+    const badge = event.target.closest('[data-badge-id]');
+    if (badge) showBadgeDetail(badge.dataset.badgeId);
+  });
+  container.addEventListener('keydown', event => {
+    if (!['Enter', 'Space'].includes(event.code)) return;
+    const badge = event.target.closest('[data-badge-id]');
+    if (!badge) return;
+    event.preventDefault();
+    showBadgeDetail(badge.dataset.badgeId);
+  });
+}
+
+badgeDetailClose.addEventListener('click', () => badgeDetailDialog.close());
+badgeDetailDialog.addEventListener('click', event => {
+  const bounds = badgeDetailDialog.getBoundingClientRect();
+  const outside = event.clientX < bounds.left || event.clientX > bounds.right
+    || event.clientY < bounds.top || event.clientY > bounds.bottom;
+  if (outside) badgeDetailDialog.close();
+});
+
+function createReleaseConfetti() {
+  const container = document.querySelector('#release-confetti');
+  const colors = ['#ffd84d', '#75e6ff', '#ff8a70', '#e69bff', '#83ed96', '#ffffff'];
+  const fragment = document.createDocumentFragment();
+  let seed = 20261121;
+  const random = () => {
+    seed = seed * 16807 % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+
+  for (let index = 0; index < 56; index++) {
+    const drop = document.createElement('span');
+    const piece = document.createElement('span');
+    const width = 5 + Math.round(random() * 5);
+    drop.className = 'confetti-drop';
+    piece.className = 'confetti-piece';
+    drop.style.setProperty('--x', `${(random() * 100).toFixed(2)}%`);
+    drop.style.setProperty('--drift', `${Math.round((random() - .5) * 220)}px`);
+    drop.style.setProperty('--fall-time', `${(7 + random() * 7).toFixed(2)}s`);
+    drop.style.setProperty('--flutter-time', `${(.55 + random() * .8).toFixed(2)}s`);
+    drop.style.setProperty('--delay', `${(-random() * 14).toFixed(2)}s`);
+    drop.style.setProperty('--spin', `${540 + Math.round(random() * 720)}deg`);
+    drop.style.setProperty('--piece-opacity', (.65 + random() * .35).toFixed(2));
+    piece.style.setProperty('--piece-color', colors[Math.floor(random() * colors.length)]);
+    piece.style.setProperty('--piece-width', `${width}px`);
+    piece.style.setProperty('--piece-height', `${index % 7 === 0 ? width : 8 + Math.round(random() * 8)}px`);
+    piece.style.setProperty('--piece-radius', index % 7 === 0 ? '50%' : '2px');
+    drop.append(piece);
+    fragment.append(drop);
+  }
+  container.append(fragment);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  createReleaseConfetti();
   gardenCutscene = document.querySelector('#garden-cutscene');
   cutsceneCaption = document.querySelector('#cutscene-caption');
   cutsceneContinue = document.querySelector('#cutscene-continue');
@@ -3633,7 +5111,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const actionRow = document.createElement('div');
   actionRow.className = 'lobby-actions';
   badgesButton.after(actionRow);
-  actionRow.append(badgesButton, floorsButton);
+  actionRow.append(badgesButton, floorsButton, trailerButton);
 
   floorsButton.addEventListener('click', () => {
     lobby.classList.add('hidden');
@@ -3653,8 +5131,11 @@ document.addEventListener('DOMContentLoaded', () => {
   cutsceneContinue.addEventListener('click', finishCutscene);
 });
 
+if (funStats.stomps >= 10) awardBadge('boss-bouncer');
 updateBadgeUi();
-updateBossBouncerProgress();
+fantaJugChanceElement.textContent = `Rare yellow Fanta Jug: ${fantaJugSpawnChance * 100}% chance in its basement room.`;
+flowJuiceChanceElement.textContent = `Flow Juice: ${flowJuiceSpawnChance * 100}% chance in calm rooms.`;
+riftCanChanceElement.textContent = `Rift-in-a-Can: ${riftCanSpawnChance * 100}% chance in calm rooms.`;
 updateHotbarUi();
 updateBackpackUi();
 
@@ -3664,11 +5145,30 @@ hotbarElement.addEventListener('click', event => {
   selectHotbarSlot(Number(slot.dataset.slotIndex));
 });
 
+backpackStorageElement.addEventListener('click', event => {
+  const slot = event.target.closest('.backpack-slot');
+  if (!slot) return;
+  takeBackpackItem(Number(slot.dataset.slotIndex));
+});
+
 document.addEventListener('keydown', event => {
+  if (elevatorRideActive) {
+    event.preventDefault();
+    return;
+  }
+  if (badgeDescentActive) {
+    if (['Escape', 'Enter', 'Space'].includes(event.code)) finishBadgeDescent();
+    event.preventDefault();
+    return;
+  }
+  if (stairDescentActive && ['KeyA', 'KeyD', 'ArrowLeft', 'ArrowRight', 'KeyW', 'ArrowUp', 'Space', 'KeyS', 'ArrowDown'].includes(event.code)) {
+    stairDescentActive = false;
+  }
   input.add(event.code);
   if (/^[1-5]$/.test(event.key)) selectHotbarSlot(Number(event.key) - 1);
   if (event.code === 'KeyE') interact();
   if (event.code === 'KeyQ') useSelectedHotbarItem();
+  if (event.code === 'KeyB') storeSelectedHotbarItem();
   if (event.code === 'Escape' && !won) {
     if (!floorScreen.classList.contains('hidden')) {
       floorScreen.classList.add('hidden');
@@ -3677,6 +5177,7 @@ document.addEventListener('keydown', event => {
     }
 
     paused = true;
+    stairDescentActive = false;
     gameElement.classList.add('hidden');
     lobby.classList.remove('hidden');
     startButton.textContent = 'Resume';
@@ -3696,9 +5197,13 @@ function animate(now) {
   const delta = Math.min(.05, (now - lastTime) / 1000);
   lastTime = now;
 
-  if (cutsceneActive) {
+  if (elevatorRideActive) {
+    updateMainFloorElevatorRide(delta);
+  } else if (cutsceneActive) {
     updateCutscene(delta);
   } else if (!paused && !won) {
+    fantaRushTimer = Math.max(0, fantaRushTimer - delta);
+    flowJuiceTimer = Math.max(0, flowJuiceTimer - delta);
     movePlayer(delta);
     updateMonster(delta);
     updateVineMonster(delta);
@@ -3724,7 +5229,10 @@ function animate(now) {
     if (badgeToastTimer <= 0) badgeToast.classList.remove('visible');
   }
 
+  encounterFlashTimer = Math.max(0, encounterFlashTimer - delta);
+  encounterShakeTimer = Math.max(0, encounterShakeTimer - delta);
   updateMusic();
+  updateMainFloorStairButton();
 
   drawRoom();
   displayContext.imageSmoothingEnabled = false;

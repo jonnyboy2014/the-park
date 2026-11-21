@@ -633,3 +633,353 @@
 
 **Next upgrade**
 - Add a soft sound when the RIFT stores or returns an item.
+
+## 2026-11-21 - Rare yellow Fanta Jug
+
+**Milestone:** Added a full-heal rare item with a temporary speed reward.
+
+**What changed**
+- Added a yellow Chug-Jug-style Fanta Jug with a gray cap, handle, fruit label, glow, and hotbar icon.
+- Set a 0.005 (0.5%) chance to discover a peaceful basement containing the jug.
+- Gave the basement concrete blocks, exposed pipes, crates, a water heater, and a yellow utility light.
+- Pressing `Q` with the jug selected restores 100% HP and starts an 8-second Fanta Rush.
+- Fanta Rush increases movement speed to 1.6x and adds yellow sparkles and speed lines.
+- Added Fanta Jug support for hotbar stacking, Backpack storage, and the persistent RIFT.
+- Verified the rare spawn, basement, pickup, full heal, speed boost, and RIFT round-trip in Chrome.
+
+**Next upgrade**
+- Add a bubbly drink sound and a small Fanta Rush countdown.
+
+## 2026-11-21 - Manual Backpack storage
+
+**Milestone:** Made the Backpack a two-way storage option instead of overflow-only storage.
+
+**What changed**
+- Press `B` to move the selected hotbar item or stack into the Backpack.
+- Click a Backpack slot to move its item or stack back into the hotbar.
+- Matching items stack together, and the Backpack panel stays visible while owned.
+- Added full-inventory protections so items stay in place when a move cannot finish.
+- Added an on-screen control hint and updated the playing guide.
+
+**Next upgrade**
+- Add drag-and-drop between the hotbar and Backpack.
+
+## 2026-11-21 - Fanta Jug Finder badge
+
+**Milestone:** Added a collection reward and lobby information for the Fanta Jug.
+
+**What changed**
+- Added the Main Floor Fanta Jug Finder badge for collecting the jug.
+- Gave the badge yellow jug artwork and a basement background.
+- Added the live Fanta Jug find percentage to the lobby.
+- Linked the lobby percentage to `fantaJugSpawnChance` so it stays accurate.
+
+**Next upgrade**
+- Add a small sparkle burst when the Fanta Jug Finder badge unlocks.
+
+## 2026-11-21 - Barrel-shaped Fanta Jug
+
+**Milestone:** Refined the jug silhouette to match the requested Starlight Jug inspiration.
+
+**What changed**
+- Replaced the rectangular body and handle with a wide barrel shape.
+- Added a metal lid, metal bands, rounded yellow body, and glowing star label.
+- Updated the basement item, hotbar icon, RIFT picture, and Fanta Jug Finder badge together.
+
+**Next upgrade**
+- Add a soft yellow glow around the star label while Fanta Rush is active.
+
+## 2026-11-21 - Door 1 RIFT retrieval
+
+**Milestone:** Made stored RIFT items retrievable at the start of a run.
+
+**What changed**
+- Door 1 now becomes a starry RIFT room only when the RIFT contains an item.
+- The Door 1 RIFT opens the exit and lets the player retrieve the stored item or stack.
+- Taking the item out closes the Door 1 RIFT and restores the normal locked key-search room.
+- Door 100 keeps its RIFT whether it is empty or occupied.
+- Full-hotbar protection keeps the Door 1 RIFT and its item in place.
+
+**Next upgrade**
+- Add a small lobby hint when a RIFT item is waiting at Door 1.
+
+## 2026-11-21 - Rift-in-a-Can
+
+**Milestone:** Added a throwable item that opens a portable RIFT.
+
+**What changed**
+- Added Rift-in-a-Can with a 0.8% spawn chance in eligible Main Floor calm rooms.
+- Press `Q` with the can selected to throw it and open a RIFT on the floor ahead of the player.
+- Thrown RIFTS share the same persistent storage as the Door 1 and Door 100 RIFTS.
+- Portable RIFTS close when the room changes, while stored items remain safe.
+- Added pickup prompts, a glowing can, hotbar artwork, and a stored-can RIFT picture.
+- Prevented throwing a second can while any RIFT is already open in the room.
+
+**Next upgrade**
+- Add a short can-throwing arc before the portable RIFT opens.
+
+## 2026-11-21 - Flow Juice low-gravity item
+
+**Milestone:** Added a pink-blue drink that makes jumps float.
+
+**What changed**
+- Added Flow Juice with a 3% spawn chance in eligible Main Floor calm rooms.
+- Added a lobby find-chance label linked to `flowJuiceSpawnChance`.
+- Added a two-tone pink-blue bottle, hotbar icon, and RIFT storage artwork.
+- Press `Q` with Flow Juice selected to consume it and start 12 seconds of low gravity.
+- Reduced gravity to 45% while active for higher, longer jumps.
+- Added pink and blue bubbles around the player during the effect.
+
+**Next upgrade**
+- Add a small low-gravity countdown near the health bar.
+
+## 2026-11-21 - Flow Juice Finder badge
+
+**Milestone:** Added a collection reward for Flow Juice.
+
+**What changed**
+- Added the Main Floor Flow Juice Finder badge for collecting the bottle.
+- Gave the badge pink-blue bottle artwork and a bubbly background.
+- Added the Flow Juice find percentage to the lobby and linked it to the actual spawn setting.
+
+**Next upgrade**
+- Add a pink-blue sparkle burst when the Flow Juice Finder badge unlocks.
+
+## 2026-11-21 - Rift Can Finder badge and lobby chance
+
+**Milestone:** Added collection and discovery information for Rift-in-a-Can.
+
+**What changed**
+- Added the Main Floor Rift Can Finder badge for collecting the can.
+- Gave the badge blue can artwork with a glowing RIFT swirl.
+- Added the Rift-in-a-Can find percentage to the lobby.
+- Linked the lobby percentage to `riftCanSpawnChance` so it stays accurate.
+
+**Next upgrade**
+- Add a blue sparkle burst when the Rift Can Finder badge unlocks.
+
+## 2026-11-21 - Boss Bouncer progress fix
+
+**Milestone:** Made the 10-stomp badge possible across normal retries and repeated runs.
+
+**What changed**
+- Saved every boss-head stomp in local storage instead of losing the counter on reload.
+- Kept the lobby counter synchronized with saved progress.
+- Awarded the badge on startup if saved stomps already reach 10 but the badge is missing.
+- Preserved the existing Door 50 and Door 75 boss health and bounce collision rules.
+
+**Next upgrade**
+- Add a small `+1 BOSS BOUNCE` popup after each successful head stomp.
+
+## 2026-11-21 - Ultra-detailed badge collection
+
+**Milestone:** Turned all 38 badges into inspectable miniature collector medals.
+
+**What changed**
+- Added unique fine artwork to every badge, including rivets, labels, wood grain, glass highlights, stitches, jewels, scenery, and engraving.
+- Added layered SVG lighting, textured backgrounds, metallic borders, soft shadows, and corner ornaments.
+- Enlarged shelf medals and added collector numbers, detailed ribbons, and clearer locked artwork.
+- Added a large click-to-inspect dialog with badge descriptions, collection details, and earned or locked status.
+- Added keyboard inspection with `Enter` and `Space`, plus native `Esc` dialog closing.
+- Verified all 38 badges in Chrome with no missing artwork or browser exceptions.
+
+**Next upgrade**
+- Add a rotating shine across the large medal while its inspection window is open.
+
+## 2026-11-21 - Badge Vault stair animation
+
+**Milestone:** Added an animated entrance to the Badge Index.
+
+**What changed**
+- Pressing `BADGES` now opens a torch-lit stone stairwell cutscene.
+- Animated the pixel adventurer walking downstairs with bobbing movement, swinging arms, stepping legs, dust, and flickering torches.
+- Added a glowing Badge Vault doorway at the bottom of the stairs.
+- Made the Badge Index bounce into view after the descent.
+- Added `SKIP`, `Esc`, `Enter`, and `Space` controls for finishing the transition early.
+- Respected reduced-motion settings by opening the Badge Index immediately.
+- Verified walking movement, automatic opening, all skip controls, reduced motion, and badge inspection in Chrome.
+
+**Next upgrade**
+- Add soft footsteps that match each stair during the descent.
+
+## 2026-11-21 - Detailed Badge Vault stairs
+
+**Milestone:** Upgraded the stair animation with detailed masonry and metalwork.
+
+**What changed**
+- Added beveled and chipped stone treads with worn highlights and small pebbles.
+- Added brick joints, branching cracks, stone shading, and hanging moss to every step.
+- Added Roman-numeral stone carvings from `I` through `VII`.
+- Added a descending bronze handrail with seven posts, reflective trim, and round finials.
+- Varied the stone colors and damage placement between steps.
+- Re-tested the walking animation, automatic Badge Index opening, skip controls, and reduced-motion behavior in Chrome.
+
+**Next upgrade**
+- Add tiny dust puffs when the adventurer lands on each stone step.
+
+## 2026-11-21 - Main Floor rooms and adventurer refresh
+
+**Milestone:** Added named Main Floor room types, detailed wallpaper, occasional stairwell exits, and a new player design.
+
+**What changed**
+- Added Grand Gallery, Conservatory, Boiler Room, Library, Bedroom, Clockwork Study, Crystal Room, Overgrown Parlour, and Dusty Attic themes.
+- Changed normal room themes every five doors and displayed the room name in the HUD.
+- Added nine wallpaper treatments with matching trim, wainscoting, crown molding, and floorboard seams.
+- Reworked furniture to match each theme, including library books, a boiler, bedroom furniture, plants, study equipment, crystals, vines, and attic crates.
+- Added occasional Grand Stairwell rooms with six carpeted steps, a bronze handrail, and an arched exit door.
+- Made stairwell placement deterministic and excluded bosses, chases, dark rooms, rare rooms, and special floor entrances.
+- Redesigned the adventurer with a teal jacket, orange scarf, goggles, dark hair, backpack, navy trousers, and brown boots.
+- Preserved the original player collision size and all movement controls while redrawing idle, walking, jumping, and sliding poses.
+- Chrome checks found 13 occasional stairwell doors, confirmed Door 5 has stairs and Door 6 does not, rendered every sampled theme, and reported no browser exceptions.
+
+**Next upgrade**
+- Add a short playable descent when the player enters a Grand Stairwell exit.
+
+## 2026-11-21 - Main Floor section elevators
+
+**Milestone:** Added working elevators that connect Main Floor room sections.
+
+**What changed**
+- Added occasional detailed elevator cabs with cables, metal doors, windows, rivets, call buttons, warning stripes, and destination displays.
+- Stand near an elevator and press `E` to ride to the next five-door section.
+- Added animated closing doors, downward arrows, cab shaking, an origin-and-destination indicator, and opening doors at arrival.
+- Made elevator placement deterministic and excluded rare rooms, dark rooms, stairwells, chases, bosses, and special floor entrances.
+- Prevented rides from skipping required monster chases, reward rooms, bosses, or floor entrances.
+- Added immediate arrivals for players using reduced-motion settings.
+- Chrome testing found six elevator doors, verified Door 7 travels to Door 11, checked all mandatory-room protections, and completed the animated ride with no browser exceptions.
+
+**Next upgrade**
+- Add elevator buttons for revisiting previously unlocked Main Floor sections.
+
+## 2026-11-21 - Playable Main Floor stairwells
+
+**Milestone:** Turned Grand Stairwell artwork into a real split-level room with stairs leading down to the exit.
+
+**What changed**
+- Players and cabinets now start on the raised upstairs landing instead of underneath the staircase.
+- Added six walkable descending steps, with matching artwork and collision heights from the upper floor to the normal floor.
+- Allowed players to walk back upstairs and land correctly when jumping on a step.
+- Connected the staircase to a paneled upper landing with a carpet runner and bronze handrail.
+- Chrome testing verified every step height, upstairs spawning, climbing, jumping, and reaching Door 6 through the downstairs exit.
+- Re-ran the elevator browser test successfully and found no JavaScript exceptions.
+
+**Next upgrade**
+- Add soft footsteps and tiny dust puffs while the adventurer walks downstairs.
+
+## 2026-11-21 - Stairwell descent button
+
+**Milestone:** Added a visible stair-room button for automatically walking downstairs.
+
+**What changed**
+- Added a yellow `GO DOWN THE STAIRS` button that only appears while standing above the bottom floor in a Grand Stairwell.
+- Clicking it walks the adventurer down every real step and stops safely before the exit, even when the door is open.
+- The button shows `WALKING DOWN...` during the descent and disappears at the bottom.
+- Pressing a movement key cancels auto-walking immediately, and climbing back upstairs makes the button available again.
+- Chrome testing verified real mouse clicking, automatic descent, cancellation, normal-room hiding, and the existing manual stair controls with no browser exceptions.
+
+**Next upgrade**
+- Add a matching `GO BACK UP THE STAIRS` button at the bottom landing.
+
+## 2026-11-21 - Chase stairwells and elevator-only rooms
+
+**Milestone:** Added Main Floor chase stairwells and made elevators the only exit in elevator rooms.
+
+**What changed**
+- Added deterministic stairwell chases at Main Doors 27 and 32 without changing the other chase layouts.
+- Made the pursuing monster climb and descend using the same ground heights as the player.
+- Moved chase crates and low beams onto their correct local steps while preserving jump and slide clearance.
+- Removed both the artwork and progression trigger for normal doors in elevator rooms.
+- Added a clear `Ride the elevator to continue!` prompt while keeping ordinary doors working elsewhere.
+- Chrome tests verified stair chase alignment, elevator-only progression, normal exits, elevator rides, and reduced-motion arrivals.
+
+**Next upgrade**
+- Add a second staircase shape with a small middle landing.
+
+## 2026-11-21 - Complete boss and chase refresh
+
+**Milestone:** Upgraded every boss fight, chase, hunt, and special enemy warning with clearer feedback and new artwork.
+
+**What changed**
+- Added named encounter panels with boss health, chase progress, remaining doors, enemy states, and close-pursuer warnings.
+- Added charge telegraphs, impact flashes, and screen shake that is disabled for reduced-motion players.
+- Added Phase 2 to both Main Floor bosses at half health, with faster movement, shorter recovery, and a new warning palette.
+- Rebuilt the Main Floor monster and fallback boss artwork with horns, teeth, claws, animated limbs, and charge trails.
+- Added a separate bubbling underwater vine flower, animated tree-monster legs, printing-machine paper trails, and Gloom Crawler charge-lane arrows.
+- Added Rocket and stationary vine-flower status panels so no special encounter is left without feedback.
+- Chrome tests covered both boss phases, every chase group, stair chases, Rocket, elevator-only rooms, Boss Bouncer persistence, and all previous stair controls with no browser exceptions.
+
+**Next upgrade**
+- Give each enemy a distinct warning sound and footstep rhythm.
+
+## 2026-11-21 - Release Day trailer and original theme
+
+**Milestone:** Finished a complete video trailer and a Chrome theater page for THE PARK.
+
+**What changed**
+- Captured 24 scenes into an 87-second, 1280×800 trailer covering every floor, bosses, chases, items, badges, and the escape.
+- Composed and generated the original stereo cinematic chiptune theme **Last Door Rising**, synchronized to scene changes.
+- Added a final Release Day card reading **AVAILABLE ON GITHUB OR CHROME**, with both links.
+- Added a responsive trailer theater at `/doors/trailer/` with native video controls, replay, a poster, game and GitHub links, and an MP4 download.
+- Added MP4 streaming with byte-range support so Chrome can seek through the trailer.
+- Chrome tests passed metadata, audio-enabled playback, pause, seeking, ending, replay, mobile sizing, and JavaScript error checks. The soundtrack peaks at -2.6 dB without clipping.
+
+**Next upgrade**
+- Add a trailer premiere countdown to the lobby for the next major release.
+
+## 2026-11-21 - Lobby trailer button
+
+**Milestone:** Made the Release Day trailer easy to find from the game.
+
+**What changed**
+- Added a coral **TRAILER** button to the lobby action row.
+- The button opens the existing Chrome trailer theater.
+
+**Next upgrade**
+- Add a small **NEW** label when a new trailer premieres.
+
+## 2026-11-21 - Release Day lobby title
+
+**Milestone:** Updated the lobby for the release celebration.
+
+**What changed**
+- Replaced the large lobby heading **THE PARK** with **RELEASE DAY**.
+
+**Next upgrade**
+- Add a small Release Day decoration around the lobby title.
+
+## 2026-11-21 - Live Release Day confetti and lightshow
+
+**Milestone:** Turned the lobby into a live release celebration.
+
+**What changed**
+- Added 56 colorful confetti pieces with continuous falling, drifting, spinning, and fluttering animations.
+- Added sweeping cyan, pink, and gold spotlights, animated color washes, a pulsing floor glow, and a glowing title.
+- Kept the effects behind the buttons and made them ignore pointer input.
+- Disabled confetti and light animations for reduced-motion players.
+- Chrome tests verified real animation movement, reduced-motion behavior, the trailer button, and no JavaScript exceptions.
+
+**Next upgrade**
+- Add a short confetti burst when the player earns a badge.
+
+## 2026-11-21 - Cleaner Release Day lobby
+
+**Milestone:** Removed Boss Bouncer progress from the lobby.
+
+**What changed**
+- Removed the lobby progress text and its update helper.
+- Kept Boss Bouncer stomp tracking, persistence, and badge unlocking unchanged.
+
+**Next upgrade**
+- Let players inspect Boss Bouncer progress only inside its badge details.
+
+## 2026-11-21 - Rocket Survivor badge redesign
+
+**Milestone:** Made the Rocket Survivor badge match the real Rocket enemy.
+
+**What changed**
+- Replaced the spaceship artwork with Rocket's melted skull, dark eye sockets, glowing magma eyes, cracked bone, teeth, and fiery drips.
+- Added a scorched scene with embers behind the badge.
+- Kept the Rocket Survivor unlock condition unchanged.
+
+**Next upgrade**
+- Add a subtle animated ember glow to the inspected Rocket badge.

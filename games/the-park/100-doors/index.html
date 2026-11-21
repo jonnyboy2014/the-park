@@ -8,8 +8,13 @@
 </head>
 <body>
   <div id="lobby" class="screen">
-    <h1>THE PARK</h1>
-    <p id='boss-bouncer-progress'>Boss Bouncer: 0/10</p>
+    <div class="release-lightshow" aria-hidden="true">
+      <span class="light-beam beam-cyan"></span>
+      <span class="light-beam beam-pink"></span>
+      <span class="light-beam beam-gold"></span>
+    </div>
+    <div id="release-confetti" class="release-confetti" aria-hidden="true"></div>
+    <h1>RELEASE DAY</h1>
     <div class="card">
       <p>Door 1 is a normal room. Find the key in the drawer.</p>
       <p>A monster appears at Door 26 and chases you for 8 doors.</p>
@@ -21,9 +26,13 @@
   <p>Door 95 has an optional office door leading to THE OFFICE.</p>
       <button id='floors-button'>FLOORS</button>
       <p class="rare-note">Rare Restaurant Room: 1.5% chance in calm rooms.</p>
+      <p class="rare-note" id="fanta-jug-chance">Rare yellow Fanta Jug: 0.5% chance in its basement room.</p>
+      <p class="rare-note" id="flow-juice-chance">Flow Juice: 3% chance in calm rooms.</p>
+      <p class="rare-note" id="rift-can-chance">Rift-in-a-Can: 0.8% chance in calm rooms.</p>
       <p class="rare-note">Rare Backpack: 1.3% chance, on the ground or a table.</p>
       <button id="start-button">Open Door 1</button>
       <button id="badges-button" aria-expanded="false" aria-controls="badge-screen">BADGES</button>
+      <button id="trailer-button" type="button" aria-label="Watch the release trailer">TRAILER</button>
       <p class="controls">A/D run · W/Space jump · S slide · E interact</p>
     </div>
   </div>
@@ -33,9 +42,54 @@
       <p class="eyebrow">Collection</p>
       <h2>BADGE INDEX</h2>
       <p id="badge-index-count">0/11 badges</p>
+      <p class="badge-inspect-hint">Click any badge to inspect its ultra-detailed artwork.</p>
       <div id="badge-list" aria-label="Game badges"></div>
       <button id="back-button">BACK</button>
     </div>
+  </div>
+
+  <div id="badge-descent-screen" class="badge-descent-screen" hidden role="dialog" aria-modal="true" aria-labelledby="badge-descent-title">
+    <div class="badge-descent-stage" aria-hidden="true">
+      <div class="badge-descent-arch"><span>BADGES</span></div>
+      <div class="badge-descent-vault"><span>?</span></div>
+      <div class="badge-descent-torch torch-left"></div>
+      <div class="badge-descent-torch torch-right"></div>
+      <div class="badge-descent-stairs">
+        <span class="badge-descent-step" style="--step:0"><span class="stair-riser"></span><span class="stair-tread"></span><span class="stair-crack"></span><span class="stair-moss"></span><span class="stair-pebbles"></span><span class="stair-carving">I</span></span>
+        <span class="badge-descent-step" style="--step:1"><span class="stair-riser"></span><span class="stair-tread"></span><span class="stair-crack"></span><span class="stair-moss"></span><span class="stair-pebbles"></span><span class="stair-carving">II</span></span>
+        <span class="badge-descent-step" style="--step:2"><span class="stair-riser"></span><span class="stair-tread"></span><span class="stair-crack"></span><span class="stair-moss"></span><span class="stair-pebbles"></span><span class="stair-carving">III</span></span>
+        <span class="badge-descent-step" style="--step:3"><span class="stair-riser"></span><span class="stair-tread"></span><span class="stair-crack"></span><span class="stair-moss"></span><span class="stair-pebbles"></span><span class="stair-carving">IV</span></span>
+        <span class="badge-descent-step" style="--step:4"><span class="stair-riser"></span><span class="stair-tread"></span><span class="stair-crack"></span><span class="stair-moss"></span><span class="stair-pebbles"></span><span class="stair-carving">V</span></span>
+        <span class="badge-descent-step" style="--step:5"><span class="stair-riser"></span><span class="stair-tread"></span><span class="stair-crack"></span><span class="stair-moss"></span><span class="stair-pebbles"></span><span class="stair-carving">VI</span></span>
+        <span class="badge-descent-step" style="--step:6"><span class="stair-riser"></span><span class="stair-tread"></span><span class="stair-crack"></span><span class="stair-moss"></span><span class="stair-pebbles"></span><span class="stair-carving">VII</span></span>
+      </div>
+      <svg class="badge-descent-handrail" viewBox="0 0 880 450" preserveAspectRatio="none">
+        <g fill="none" stroke="#111820" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path d="M40 77V38M141 120V81M242 163V124M343 206V167M444 249V210M545 292V253M646 335V296"/><path d="M40 38 141 81 242 124 343 167 444 210 545 253 646 296"/></g>
+        <g fill="none" stroke="#725c3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M40 77V38M141 120V81M242 163V124M343 206V167M444 249V210M545 292V253M646 335V296"/><path d="M40 38 141 81 242 124 343 167 444 210 545 253 646 296"/></g>
+        <path d="M40 36 141 79 242 122 343 165 444 208 545 251 646 294" fill="none" stroke="#d0b37a" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
+        <g fill="#9b8155" stroke="#1b2028" stroke-width="2"><circle cx="40" cy="36" r="5"/><circle cx="141" cy="79" r="5"/><circle cx="242" cy="122" r="5"/><circle cx="343" cy="165" r="5"/><circle cx="444" cy="208" r="5"/><circle cx="545" cy="251" r="5"/><circle cx="646" cy="294" r="5"/></g>
+        <g fill="#d0b37a" opacity=".75"><circle cx="38.5" cy="34.5" r="1.3"/><circle cx="139.5" cy="77.5" r="1.3"/><circle cx="240.5" cy="120.5" r="1.3"/><circle cx="341.5" cy="163.5" r="1.3"/><circle cx="442.5" cy="206.5" r="1.3"/><circle cx="543.5" cy="249.5" r="1.3"/><circle cx="644.5" cy="292.5" r="1.3"/></g>
+      </svg>
+      <div class="badge-descent-player">
+        <div class="badge-descent-player-bob">
+          <span class="descent-backpack"></span>
+          <span class="descent-leg leg-back"></span>
+          <span class="descent-arm arm-back"></span>
+          <span class="descent-body"></span>
+          <span class="descent-head"></span>
+          <span class="descent-hair"></span>
+          <span class="descent-eye"></span>
+          <span class="descent-arm arm-front"></span>
+          <span class="descent-leg leg-front"></span>
+        </div>
+      </div>
+      <span class="descent-dust dust-one"></span>
+      <span class="descent-dust dust-two"></span>
+      <span class="descent-dust dust-three"></span>
+    </div>
+    <h2 id="badge-descent-title">DESCENDING TO THE BADGE VAULT</h2>
+    <p>Your detailed collection is waiting downstairs...</p>
+    <button id="badge-descent-skip">SKIP</button>
   </div>
 
   <div id="game" class="hidden">
@@ -50,10 +104,11 @@
       <span id="badge-count">0/8 badges</span>
     </div>
     <div id="prompt"></div>
+    <button id="stairs-down-button" class="hidden" type="button">GO DOWN THE STAIRS</button>
     <div id="message"></div>
     <div id="badge-toast"></div>
     <div id="hotbar" aria-label="Item hotbar"></div>
-    <div id="backpack-storage" class="hidden" aria-label="Backpack storage"></div>
+    <div id="backpack-storage" class="hidden" aria-label="Backpack storage. Press B to store the selected item. Click a backpack slot to take an item out."></div>
   </div>
 
   <div id="win-screen" class="hidden">
@@ -62,6 +117,17 @@
     <div id="win-badges" aria-label="Earned badges"></div>
     <button id="again-button">Play again</button>
   </div>
+
+  <dialog id="badge-detail-dialog" class="badge-detail-dialog" aria-labelledby="badge-detail-name">
+    <button id="badge-detail-close" class="badge-detail-close" aria-label="Close badge details">&times;</button>
+    <p id="badge-detail-kicker" class="eyebrow">COLLECTIBLE</p>
+    <div id="badge-detail-art" class="badge-detail-art"></div>
+    <h2 id="badge-detail-name">Badge</h2>
+    <p id="badge-detail-description"></p>
+    <span id="badge-detail-status" class="badge-detail-status">LOCKED</span>
+    <p id="badge-detail-progress" class="badge-detail-progress"></p>
+    <p class="badge-detail-hint">Press Esc or click outside to close</p>
+  </dialog>
 
   <script src="/doors/game.js"></script>
   <div id='floor-screen' class='screen hidden'>

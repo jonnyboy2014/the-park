@@ -12,14 +12,22 @@ const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
-  ".json": "application/json; charset=utf-8"
+  ".json": "application/json; charset=utf-8",
+  ".jpg": "image/jpeg",
+  ".png": "image/png",
+  ".mp4": "video/mp4"
 };
 
-function sendFile(filePath, response) {
+function sendFile(filePath, response, request) {
   const resolved = path.resolve(filePath);
   if (!resolved.startsWith(root)) {
     response.writeHead(403);
     response.end("Forbidden");
+    return;
+  }
+
+  if (path.extname(resolved) === ".mp4") {
+    sendVideo(resolved, request, response);
     return;
   }
 
@@ -35,14 +43,59 @@ function sendFile(filePath, response) {
   });
 }
 
-function serveFrom(baseDir, relativePath, response) {
+function sendVideo(filePath, request, response) {
+  fs.stat(filePath, (error, stat) => {
+    if (error) {
+      response.writeHead(404);
+      response.end("Not found");
+      return;
+    }
+
+    const range = request?.headers.range;
+    const match = range ? /^bytes=(\d*)-(\d*)$/.exec(range) : null;
+    let start = 0;
+    let end = stat.size - 1;
+    if (match && !match[1] && match[2]) {
+      start = Math.max(0, stat.size - Number(match[2]));
+    } else if (match) {
+      start = Number(match[1]);
+      end = match[2] ? Math.min(Number(match[2]), end) : end;
+    }
+
+    if ((range && !match) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || start >= stat.size || end < start) {
+      response.writeHead(416, { "Content-Range": `bytes */${stat.size}` });
+      response.end();
+      return;
+    }
+
+    const headers = {
+      "Content-Type": "video/mp4",
+      "Accept-Ranges": "bytes",
+      "Cache-Control": "no-store",
+      "Content-Length": end - start + 1
+    };
+    if (range) {
+      headers["Content-Range"] = `bytes ${start}-${end}/${stat.size}`;
+    }
+    response.writeHead(range ? 206 : 200, headers);
+    if (request?.method === "HEAD") {
+      response.end();
+      return;
+    }
+    const stream = fs.createReadStream(filePath, { start, end });
+    stream.on("error", () => response.destroy());
+    stream.pipe(response);
+  });
+}
+
+function serveFrom(baseDir, relativePath, response, request) {
   const relative = path.normalize(relativePath).replace(/^([.][.][\\/])+/, "");
   if (relative.startsWith("..")) {
     response.writeHead(403);
     response.end("Forbidden");
     return;
   }
-  sendFile(path.join(baseDir, relative), response);
+  sendFile(path.join(baseDir, relative), response, request);
 }
 
 const server = http.createServer((request, response) => {
@@ -69,8 +122,12 @@ const server = http.createServer((request, response) => {
     sendFile(path.join(doorsDir, "index.html"), response);
     return;
   }
+  if (requested === "/doors/trailer" || requested === "/doors/trailer/") {
+    sendFile(path.join(doorsDir, "trailer", "index.html"), response);
+    return;
+  }
   if (requested.startsWith("/doors/")) {
-    serveFrom(doorsDir, requested.slice(7), response);
+    serveFrom(doorsDir, requested.slice(7), response, request);
     return;
   }
   if (requested.startsWith("/node_modules/")) {
