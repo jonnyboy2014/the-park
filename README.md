@@ -8,6 +8,10 @@ The main game being worked on is **100 Doors**, located in `games/the-park/100-d
 
 ## Play 100 Doors
 
+Play online at **https://jonnyboy2014.github.io/the-park/**. No installation is needed.
+
+For local development:
+
 On Windows, double-click `Play-The-Park.bat`.
 
 Or run:

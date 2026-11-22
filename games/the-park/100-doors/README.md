@@ -2,11 +2,14 @@
 
 A side-view pixel-style door game.
 
+## Play online
+Open **https://jonnyboy2014.github.io/the-park/** in Chrome or another modern browser.
+
 ## Goal
 Open all 100 doors.
 
 ## Release trailer
-- Click **TRAILER** in the lobby or watch at `http://127.0.0.1:3000/doors/trailer/`.
+- Click **TRAILER** in the lobby or watch online at `https://jonnyboy2014.github.io/the-park/trailer/`.
 - The trailer showcases all four floors, bosses, chases, rare items, the Backpack, RIFT, badges, and the escape.
 - Its original cinematic chiptune theme is called **Last Door Rising**.
 - The finished video is `trailer/THE-PARK-Release-Trailer.mp4`; the recording and soundtrack generators are in `trailer/`.

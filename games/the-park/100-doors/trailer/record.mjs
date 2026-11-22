@@ -508,7 +508,7 @@ try {
   });
 
   await scene('Release card', 'RELEASE DAY', 'THE PARK', 'AVAILABLE ON GITHUB OR CHROME', 5.5,
-    () => titleCard('THE PARK - VERSION 1.0', 'RELEASE DAY', 'AVAILABLE ON GITHUB OR CHROME', 'github.com/jonnyboy2014/the-park\n127.0.0.1:3000/doors/'), true);
+    () => titleCard('THE PARK - VERSION 1.0', 'RELEASE DAY', 'AVAILABLE ON GITHUB OR CHROME', 'github.com/jonnyboy2014/the-park\njonnyboy2014.github.io/the-park/'), true);
 
   if (exceptions.length) throw new Error(exceptions.join('\n'));
   await writeFile(path.join(outputDirectory, 'capture.json'), JSON.stringify({ frameRate, frameCount: frameIndex, duration: frameIndex / frameRate, timeline }, null, 2));

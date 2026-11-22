@@ -4997,7 +4997,7 @@ function resumeMainFloor() {
 
 startButton.addEventListener('click', startGame);
 trailerButton.addEventListener('click', () => {
-  window.location.href = '/doors/trailer/';
+  window.location.href = 'trailer/';
 });
 stairsDownButton.addEventListener('click', startMainFloorStairDescent);
 againButton.addEventListener('click', () => window.location.reload());

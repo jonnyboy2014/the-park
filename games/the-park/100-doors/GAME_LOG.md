@@ -983,3 +983,18 @@
 
 **Next upgrade**
 - Add a subtle animated ember glow to the inspected Rocket badge.
+
+## 2026-11-22 - Public GitHub Pages edition
+
+**Milestone:** Prepared THE PARK for a public browser link with automatic deployment.
+
+**What changed**
+- Enabled GitHub Pages with GitHub Actions as the deployment source.
+- Added a workflow that publishes only `games/the-park/100-doors/` as a static site.
+- Changed game and trailer navigation to relative URLs so local development and GitHub Pages both work.
+- Added the public play link to the project documentation.
+- Updated the trailer ending with `jonnyboy2014.github.io/the-park/`.
+- Local Chrome tests passed lobby navigation, effects, reduced motion, video playback, seeking, replay, and mobile sizing.
+
+**Next upgrade**
+- Add a share button that copies the public game link.
